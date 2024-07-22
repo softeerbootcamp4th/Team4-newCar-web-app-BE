@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.2'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco'
 }
 
 group = 'newCar'
@@ -31,8 +32,41 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation 'mysql:mysql-connector-java:8.0.33'
+
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport  // 테스트가 완료된 후 보고서를 생성하도록 설정
 }
+
+jacoco {
+	toolVersion = "0.8.10"  // JaCoCo의 최신 버전 사용
+}
+
+jacocoTestReport {
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {//커버리지 범위와 퍼센테이지를 설정합니다
+		rule {
+			element = 'CLASS'
+
+			limit {
+				counter = 'LINE'
+				value = 'COVEREDRATIO'
+				minimum = 0.80
+			}
+		}
+	}
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
