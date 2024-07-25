@@ -94,7 +94,6 @@ public class AdminController {
                 10,0,0,0,0,0,0,5);
         list.add(temp1);
         list.add(temp2);
-
         return list;
     }
 
