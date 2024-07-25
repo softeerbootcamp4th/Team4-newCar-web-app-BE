@@ -24,8 +24,6 @@ public class PersonalityTestDTO {
     private int choice2_leisure_score;
 
 
-
-
     public PersonalityTestDTO(Long id, String question, String choice1, String choice2, int choice1_pet_score,
                               int choice1_travel_score, int choice1_space_score, int choice1_leisure_score, int choice2_pet_score,
                               int choice2_travel_score, int choice2_space_score, int choice2_leisure_score) {
