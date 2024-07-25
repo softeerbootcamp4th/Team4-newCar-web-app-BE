@@ -10,6 +10,8 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        validator:
+          apply_to_ddl: true
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
 
