@@ -28,7 +28,6 @@ public class AdminController {
                 LocalDateTime.of(2024,2,28,18,30));
     }
 
-
     @PostMapping("/common-event")
     @Operation (summary = "이벤트명, 상태, 담당자, 진행기간 수정", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886180035")
     @Parameters({
