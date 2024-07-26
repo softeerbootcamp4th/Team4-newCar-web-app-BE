@@ -1,10 +1,8 @@
 package newCar.event_page.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import newCar.event_page.entity.event.LoginType;
 
 @Entity
 @Getter
@@ -12,7 +10,8 @@ public class User {
 
     @Id
     @GeneratedValue
-    private Integer id;
+    @Column(name="USER_ID")
+    private Long id;
 
     @NotNull
     private String userName;
