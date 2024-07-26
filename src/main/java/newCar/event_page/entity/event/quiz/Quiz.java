@@ -1,7 +1,6 @@
 package newCar.event_page.entity.event.quiz;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
@@ -11,7 +10,13 @@ import java.time.LocalDate;
 @Getter
 public class Quiz {
     @Id
+    @GeneratedValue
+    @Column(name="QUIZ_ID")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EVENT_ID")
+    private QuizEvent quizEvent;
 
     @NotNull
     private Integer winnerCount;

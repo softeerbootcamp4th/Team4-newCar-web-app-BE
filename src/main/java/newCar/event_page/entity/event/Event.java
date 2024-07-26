@@ -5,14 +5,18 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name="etype")
+@Table(name = "event", indexes = @Index(name = "idx_event_id", columnList = "EVENT_ID"))
 public class Event {
     @Id
     @GeneratedValue
+    @Column(name="EVENT_ID")
     private Long id;
 
     @NotNull
@@ -29,4 +33,5 @@ public class Event {
 
     @NotNull
     private LocalDateTime endTime;
+
 }

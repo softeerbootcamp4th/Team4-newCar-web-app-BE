@@ -1,10 +1,9 @@
-package newCar.event_page.entity.event.personality_test;
+package newCar.event_page.entity.event.racing;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import newCar.event_page.entity.TeamScore;
-import newCar.event_page.entity.event.RacingEvent;
 
 @Entity
 @Getter
