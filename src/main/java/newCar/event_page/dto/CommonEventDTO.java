@@ -2,7 +2,7 @@ package newCar.event_page.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import newCar.event_page.eventstatus.EventStatus;
+import newCar.event_page.entity.event.EventStatus;
 
 import java.time.LocalDateTime;
 
