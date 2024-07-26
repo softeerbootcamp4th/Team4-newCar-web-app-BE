@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import newCar.event_page.dto.*;
 import newCar.event_page.entity.event.EventStatus;
 import newCar.event_page.service.EventService;
+import newCar.event_page.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,12 @@ import java.util.NoSuchElementException;
 public class AdminController {
 
     private final EventService eventService;
+    private final QuizService quizService;
 
     @Autowired
-    public AdminController(EventService eventService) {
+    public AdminController(EventService eventService,QuizService quizService) {
         this.eventService=eventService;
+        this.quizService=quizService;
     }
 
     @GetMapping("/common-event") //이벤트 관리 버튼(이벤트 공통, 선착순 퀴즈, 캐스퍼 레이싱 설정값 불러옴)
@@ -43,11 +46,10 @@ public class AdminController {
             @Parameter(name = "eventName", description = "이벤트명", example = "소프티어 이벤트"),
             @Parameter(name = "status", description = "상태", example = "IN_PROGRESS"),
             @Parameter(name = "eventManager", description = "담당자", example = "배진환"),
-            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31"),
-            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28")
+            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31T11:11:11"),
+            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28T11:11:11")
     })
     public CommonEventDTO updateCommonEvent(@ModelAttribute CommonEventDTO commonEventDTO){
-        System.out.println(commonEventDTO.toString());
         return eventService.updateEventInfo(commonEventDTO);
     }
 
@@ -55,14 +57,7 @@ public class AdminController {
     @GetMapping("/quiz")
     @Operation( summary = "선착순 퀴즈 이벤트 정보", description= "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887413777")
     public List<QuizDTO> getQuizList() {
-        List<QuizDTO> quizDTOList = new ArrayList<>();
-        QuizDTO temp1 = new QuizDTO(1L,100, LocalDate.of(2024,1,31),"첫번째 질문",
-                "보기1","보기2","보기3","보기4",4);
-        QuizDTO temp2 = new QuizDTO(2L,50, LocalDate.of(2024,3,31),"두번째 질문",
-                "보기1","보기2","보기3","보기4",1);
-        quizDTOList.add(temp1);
-        quizDTOList.add(temp2);
-        return quizDTOList;
+        return quizService.getQuizList();
     }
 
     @PostMapping ("/quiz") //선착순퀴즈 수정 버튼

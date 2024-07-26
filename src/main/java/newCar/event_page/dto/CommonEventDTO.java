@@ -30,13 +30,6 @@ public class CommonEventDTO {
 
 
 
-    public CommonEventDTO(String eventName, String eventManager, EventStatus status, LocalDateTime startTime, LocalDateTime endTime) {
-        this.eventName = eventName;
-        this.eventManager = eventManager;
-        this.status = status;
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
 
     public static CommonEventDTO toDTO(Event event){
         return CommonEventDTO.builder()

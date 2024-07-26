@@ -35,7 +35,7 @@ public class EventService {
         event.setManagerName(commonEventDTO.getEventManager());
         event.setStatus(commonEventDTO.getStatus());
         event.setStartTime(commonEventDTO.getStartTime());
-        event.setStartTime(commonEventDTO.getEndTime());
+        event.setEndTime(commonEventDTO.getEndTime());
         eventRepository.save(event);
         return CommonEventDTO.toDTO(event);
     }
