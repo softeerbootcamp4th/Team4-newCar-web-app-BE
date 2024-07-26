@@ -9,12 +9,14 @@ import newCar.event_page.dto.*;
 import newCar.event_page.entity.event.EventStatus;
 import newCar.event_page.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @Tag(name = "admin API" , description = "admin API 설계입니다")
@@ -41,18 +43,18 @@ public class AdminController {
             @Parameter(name = "eventName", description = "이벤트명", example = "소프티어 이벤트"),
             @Parameter(name = "status", description = "상태", example = "IN_PROGRESS"),
             @Parameter(name = "eventManager", description = "담당자", example = "배진환"),
-            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31T18:30:00"),
-            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28T18:30:00")
+            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31"),
+            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28")
     })
     public CommonEventDTO updateCommonEvent(@ModelAttribute CommonEventDTO commonEventDTO){
-        return commonEventDTO;
+        System.out.println(commonEventDTO.toString());
+        return eventService.updateEventInfo(commonEventDTO);
     }
 
 
     @GetMapping("/quiz")
     @Operation( summary = "선착순 퀴즈 이벤트 정보", description= "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887413777")
-    public List<QuizDTO> getQuizList()
-    {
+    public List<QuizDTO> getQuizList() {
         List<QuizDTO> quizDTOList = new ArrayList<>();
         QuizDTO temp1 = new QuizDTO(1L,100, LocalDate.of(2024,1,31),"첫번째 질문",
                 "보기1","보기2","보기3","보기4",4);
