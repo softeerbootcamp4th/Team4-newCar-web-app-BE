@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import newCar.event_page.dto.*;
-import newCar.event_page.eventstatus.EventStatus;
+import newCar.event_page.entity.event.EventStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
