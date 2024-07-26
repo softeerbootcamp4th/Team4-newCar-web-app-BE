@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import newCar.event_page.dto.*;
 import newCar.event_page.entity.event.EventStatus;
+import newCar.event_page.service.EventService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,12 +22,17 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final EventService eventService;
+
+    @Autowired
+    public AdminController(EventService eventService) {
+        this.eventService=eventService;
+    }
+
     @GetMapping("/common-event") //이벤트 관리 버튼(이벤트 공통, 선착순 퀴즈, 캐스퍼 레이싱 설정값 불러옴)
     @Operation (summary = "이벤트명, 상태, 담당자, 진행기간", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886120115")
     public CommonEventDTO getCommonEvent(){
-        return new CommonEventDTO("테스트입니다" , "배진환", EventStatus.IN_PROGRESS,
-                LocalDateTime.of(2024,1,31,18,30),
-                LocalDateTime.of(2024,2,28,18,30));
+        return eventService.getEventInfo();
     }
 
     @PostMapping("/common-event")
