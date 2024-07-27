@@ -14,10 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 
 @Tag(name = "admin API" , description = "admin API 설계입니다")
@@ -42,13 +40,6 @@ public class AdminController {
 
     @PostMapping("/common-event")
     @Operation (summary = "이벤트명, 상태, 담당자, 진행기간 수정", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886180035")
-    @Parameters({
-            @Parameter(name = "eventName", description = "이벤트명", example = "소프티어 이벤트"),
-            @Parameter(name = "status", description = "상태", example = "IN_PROGRESS"),
-            @Parameter(name = "eventManager", description = "담당자", example = "배진환"),
-            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31T11:11:11"),
-            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28T11:11:11")
-    })
     public CommonEventDTO updateCommonEvent(@ModelAttribute CommonEventDTO commonEventDTO){
         return eventService.updateEventInfo(commonEventDTO);
     }
@@ -62,23 +53,12 @@ public class AdminController {
 
     @PostMapping ("/quiz") //선착순퀴즈 수정 버튼
     @Operation (summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
-    @Parameters({
-            @Parameter(name = "id", description = "몇번 문제", example = "1"),
-            @Parameter(name = "winnerCount", description = "당첨자 수", example = "50"),
-            @Parameter(name = "postDate", description = "게시 날짜", example = "1998-06-01"),
-            @Parameter(name = "question", description = "질문", example = "가장 못생긴 사람은?"),
-            @Parameter(name = "choice1", description = "보기1", example = "준하"),
-            @Parameter(name = "choice2", description = "보기2", example = "보민"),
-            @Parameter(name = "choice3", description = "보기3", example = "진환"),
-            @Parameter(name = "choice4", description = "보기4", example = "락현"),
-            @Parameter(name = "correctAnswer", description = "정답", example = "4")
-    })
     public QuizDTO updateQuiz(@ModelAttribute QuizDTO quizDTO) {
         return quizService.updateQuiz(quizDTO);
     }
 
     @PostMapping("/winners")//당첨자 추첨하기 버튼
-    @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
+    @Operation (summary = "당첨자 추첨하기 API" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public void drawWinners(@RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
 
     }
