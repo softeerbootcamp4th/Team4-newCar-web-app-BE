@@ -62,8 +62,19 @@ public class AdminController {
 
     @PostMapping ("/quiz") //선착순퀴즈 수정 버튼
     @Operation (summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
+    @Parameters({
+            @Parameter(name = "id", description = "몇번 문제", example = "1"),
+            @Parameter(name = "winnerCount", description = "당첨자 수", example = "50"),
+            @Parameter(name = "postDate", description = "게시 날짜", example = "1998-06-01"),
+            @Parameter(name = "question", description = "질문", example = "가장 못생긴 사람은?"),
+            @Parameter(name = "choice1", description = "보기1", example = "준하"),
+            @Parameter(name = "choice2", description = "보기2", example = "보민"),
+            @Parameter(name = "choice3", description = "보기3", example = "진환"),
+            @Parameter(name = "choice4", description = "보기4", example = "락현"),
+            @Parameter(name = "correctAnswer", description = "정답", example = "4")
+    })
     public QuizDTO updateQuiz(@ModelAttribute QuizDTO quizDTO) {
-        return quizDTO;
+        return quizService.updateQuiz(quizDTO);
     }
 
     @PostMapping("/winners")//당첨자 추첨하기 버튼

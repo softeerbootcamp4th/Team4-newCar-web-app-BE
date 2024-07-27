@@ -3,11 +3,13 @@ package newCar.event_page.entity.event.quiz;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Getter
+@Setter
 public class Quiz {
     @Id
     @GeneratedValue
