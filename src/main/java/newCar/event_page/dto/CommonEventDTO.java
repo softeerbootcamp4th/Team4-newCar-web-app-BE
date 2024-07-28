@@ -19,7 +19,7 @@ public class CommonEventDTO {
     @Schema (description = "담당자" , example = "배진환")
     private String eventManager;
 
-    @Schema (description = "이벤트 상태" , example = "INPROGRESS")
+    @Schema (description = "이벤트 상태" , example = "IN_PROGRESS")
     private EventStatus status;
 
     @Schema (description = "이벤트 시작 시간" ,example = "2024-01-31T18:30:00")
