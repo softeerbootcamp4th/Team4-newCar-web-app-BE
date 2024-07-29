@@ -23,7 +23,7 @@ public class QuizDTO {
     @NotNull
     private LocalDate postDate;
 
-    @NotNull
+    @NotEmpty
     private String question;
 
     @NotEmpty
