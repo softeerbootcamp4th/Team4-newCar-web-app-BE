@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 @Schema (description = "common-event 정보")
-public class CommonEventDTO {
+public class EventCommonDTO {
 
     @Schema (description = "이벤트명" , example = "캐스퍼 이벤트!!")
     public String eventName;
@@ -30,7 +30,7 @@ public class CommonEventDTO {
 
 
 
-    public CommonEventDTO(String eventName, String eventManager, EventStatus status, LocalDateTime startTime, LocalDateTime endTime) {
+    public EventCommonDTO(String eventName, String eventManager, EventStatus status, LocalDateTime startTime, LocalDateTime endTime) {
         this.eventName = eventName;
         this.eventManager = eventManager;
         this.status = status;
@@ -38,8 +38,8 @@ public class CommonEventDTO {
         this.endTime = endTime;
     }
 
-    public static CommonEventDTO toDTO(EventCommon eventCommon){
-        return CommonEventDTO.builder()
+    public static EventCommonDTO toDTO(EventCommon eventCommon){
+        return EventCommonDTO.builder()
                 .eventName(eventCommon.getEventName())
                 .eventManager(eventCommon.getManagerName())
                 .status(eventCommon.getStatus())
