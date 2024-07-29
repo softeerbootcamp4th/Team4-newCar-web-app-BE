@@ -11,6 +11,5 @@ public class WinnerSettingDTO {
     public WinnerSettingDTO(Long id , int num) {
         this.id=id;
         this.num = num;
-
     }
 }
