@@ -32,8 +32,7 @@ public class EventCommon {
     @NotNull
     private LocalDateTime endTime;
 
-    public void update(EventCommonDTO eventCommonDTO)
-    {
+    public void update(EventCommonDTO eventCommonDTO) {
         this.eventName=eventCommonDTO.getEventName();
         this.managerName=eventCommonDTO.getEventManager();
         this.status = eventCommonDTO.getStatus();

@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Transactional
 @Service
@@ -18,13 +17,11 @@ public class RacingService {
     private final PersonalityTestRepository personalityTestRepository;
 
     @Autowired
-    public RacingService(PersonalityTestRepository personalityTestRepository)
-    {
+    public RacingService(PersonalityTestRepository personalityTestRepository) {
         this.personalityTestRepository=personalityTestRepository;
     }
 
-    public List<PersonalityTestDTO> getList()
-    {
+    public List<PersonalityTestDTO> getList() {
         List<PersonalityTest> list = personalityTestRepository.findAll();
         List<PersonalityTestDTO> personalityTestDTOList = new ArrayList<>();
         for(PersonalityTest temp : list)
@@ -34,11 +31,9 @@ public class RacingService {
         return personalityTestDTOList;
     }
 
-    public PersonalityTestDTO updatePersonalityTest(PersonalityTestDTO personalityTestDTO)
-    {
-        PersonalityTest personalityTest = personalityTestRepository.findById(personalityTestDTO.getId())
-                .orElseThrow(()->new NoSuchElementException("PersonalityTest Not Found"));
-        personalityTest.updatePersonality(personalityTestDTO);
+    public PersonalityTestDTO updatePersonalityTest(PersonalityTestDTO personalityTestDTO) {
+        PersonalityTest personalityTest = personalityTestRepository.findById(personalityTestDTO.getId()).get();
+        personalityTest.update(personalityTestDTO);
         personalityTestRepository.save(personalityTest);
         return PersonalityTestDTO.toDTO(personalityTest);
     }

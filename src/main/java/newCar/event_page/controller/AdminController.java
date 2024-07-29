@@ -59,7 +59,8 @@ public class AdminController {
 
     @GetMapping("/quiz")
     @Operation( summary = "선착순 퀴즈 이벤트 정보", description= "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887413777")
-    public List<QuizDTO> getQuizList() {
+    public List<QuizDTO> getQuizList()
+    {
         return quizService.getQuizList();
     }
 

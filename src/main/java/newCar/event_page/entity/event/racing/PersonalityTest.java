@@ -54,7 +54,7 @@ public class PersonalityTest {
     })
     private TeamScore choice2Scores;
 
-    public void updatePersonality(PersonalityTestDTO personalityTestDTO)
+    public void update(PersonalityTestDTO personalityTestDTO)
     {
         this.question = personalityTestDTO.getQuestion();
         this.choice1= personalityTestDTO.getChoice1();

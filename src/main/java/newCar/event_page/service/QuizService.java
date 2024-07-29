@@ -34,13 +34,10 @@ public class QuizService {
         return quizDTOList;
     }
 
-
     public QuizDTO updateQuiz(QuizDTO quizDTO)
     {
-        Quiz quiz= quizRepository.findById(quizDTO.getId()).orElseThrow(
-                ()->new NoSuchElementException("Event not found")
-        );//Spring Validation사용해라
-        quiz.updateQuiz(quizDTO);
+        Quiz quiz = quizRepository.findById(quizDTO.getId()).get();
+        quiz.update(quizDTO);
         quizRepository.save(quiz);
         return QuizDTO.toDTO(quiz);
     }

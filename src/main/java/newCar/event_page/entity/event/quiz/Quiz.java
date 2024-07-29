@@ -40,7 +40,7 @@ public class Quiz {
     @NotNull
     private Integer correctAnswer;
 
-    public void updateQuiz(QuizDTO quizDTO)
+    public void update(QuizDTO quizDTO)
     {
         this.winnerCount = quizDTO.getWinnerCount();
         this.postDate=quizDTO.getPostDate();
