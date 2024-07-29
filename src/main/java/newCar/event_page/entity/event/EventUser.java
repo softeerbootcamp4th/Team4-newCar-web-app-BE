@@ -19,6 +19,5 @@ public class EventUser {
     @ManyToOne
     @JoinColumn(name = "EVENT_ID", foreignKey = @ForeignKey(name = "FK_EVENT_ID"))
     private Event event;
-
 }
 
