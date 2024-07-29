@@ -48,9 +48,23 @@ public class RacingService {
 
     public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList) {
         List<EventUser> list = eventUserRepository.findByEventId();
-        for(EventUser temp : list) {
-                temp.getUser().getClickNumber();
-                temp.getUser().getId();
+        List<Participant> participantList = new ArrayList<>();
+        for(EventUser eventUser : list) {
+            participantList.add(new Participant(eventUser.getUser().getId(), eventUser.getUser().getClickNumber()));
         }
+    }
+
+    private double getWeight(int clickNumber)
+    {
+        return 1 + (Math.log(clickNumber+1)/Math.log(30));
+    }
+}
+class Participant
+{
+    public Long userId;
+    public double weight;
+    public Participant(Long userId, double weight) {
+        this.userId=userId;
+        this.weight-=weight;
     }
 }
