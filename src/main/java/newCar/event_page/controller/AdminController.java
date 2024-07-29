@@ -43,14 +43,7 @@ public class AdminController {
 
     @PostMapping("/common-event")
     @Operation (summary = "이벤트명, 상태, 담당자, 진행기간 수정", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886180035")
-    @Parameters({
-            @Parameter(name = "eventName", description = "이벤트명", example = "소프티어 이벤트"),
-            @Parameter(name = "status", description = "상태", example = "IN_PROGRESS"),
-            @Parameter(name = "eventManager", description = "담당자", example = "배진환"),
-            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31T18:30:00"),
-            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28T18:30:00")
-    })
-    public EventCommonDTO updateCommonEvent(@Validated @ModelAttribute EventCommonDTO eventCommonDTO){
+    public EventCommonDTO updateCommonEvent(@Validated @RequestBody EventCommonDTO eventCommonDTO){
         return eventService.updateEventInfo(eventCommonDTO);
     }
 
@@ -64,7 +57,7 @@ public class AdminController {
 
     @PostMapping ("/quiz") //선착순퀴즈 수정 버튼
     @Operation (summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
-    public QuizDTO updateQuiz(@Validated @ModelAttribute QuizDTO quizDTO) {
+    public QuizDTO updateQuiz(@Validated @RequestBody QuizDTO quizDTO) {
         return quizService.updateQuiz(quizDTO);
     }
 
@@ -93,7 +86,7 @@ public class AdminController {
     }
 
     @PostMapping("/personality") //유형 검사 질문박스 수정
-    public PersonalityTestDTO updatePersonality(@Validated @ModelAttribute PersonalityTestDTO personalityTestDTO){
+    public PersonalityTestDTO updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO){
         return racingService.updatePersonalityTest(personalityTestDTO);
     }
 
