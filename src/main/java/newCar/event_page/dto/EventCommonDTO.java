@@ -19,7 +19,7 @@ public class EventCommonDTO {
     @Schema (description = "담당자" , example = "배진환")
     public String eventManager;
 
-    @Schema (description = "이벤트 상태" , example = "INPROGRESS")
+    @Schema (description = "이벤트 상태" , example = "IN_PROGRESS")
     public EventStatus status;
 
     @Schema (description = "이벤트 시작 시간" ,example = "2024-01-31T18:30:00")
@@ -29,14 +29,6 @@ public class EventCommonDTO {
     public LocalDateTime endTime;
 
 
-
-    public EventCommonDTO(String eventName, String eventManager, EventStatus status, LocalDateTime startTime, LocalDateTime endTime) {
-        this.eventName = eventName;
-        this.eventManager = eventManager;
-        this.status = status;
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
 
     public static EventCommonDTO toDTO(EventCommon eventCommon){
         return EventCommonDTO.builder()

@@ -24,18 +24,6 @@ public class QuizDTO {
     private int correctAnswer;
 
 
-    public QuizDTO (Long id, int winnerCount, LocalDate postDate, String question, String choice1, String choice2, String choice3, String choice4, int correctAnswer) {
-        this.id = id;
-        this.winnerCount = winnerCount;
-        this.postDate = postDate;
-        this.question = question;
-        this.choice1 = choice1;
-        this.choice2 = choice2;
-        this.choice3 = choice3;
-        this.choice4 = choice4;
-        this.correctAnswer = correctAnswer;
-    }
-
     public static QuizDTO toDTO(Quiz quiz)
     {
         return QuizDTO.builder()
