@@ -6,16 +6,14 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import newCar.event_page.dto.*;
-import newCar.event_page.entity.event.Event;
-import newCar.event_page.entity.event.EventStatus;
 import newCar.event_page.service.EventService;
 import newCar.event_page.service.QuizService;
 import newCar.event_page.service.RacingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +50,7 @@ public class AdminController {
             @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31T18:30:00"),
             @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28T18:30:00")
     })
-    public EventCommonDTO updateCommonEvent(@ModelAttribute EventCommonDTO eventCommonDTO){
+    public EventCommonDTO updateCommonEvent(@Validated @ModelAttribute EventCommonDTO eventCommonDTO){
         return eventService.updateEventInfo(eventCommonDTO);
     }
 
@@ -66,7 +64,7 @@ public class AdminController {
 
     @PostMapping ("/quiz") //선착순퀴즈 수정 버튼
     @Operation (summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
-    public QuizDTO updateQuiz(@ModelAttribute QuizDTO quizDTO) {
+    public QuizDTO updateQuiz(@Validated @ModelAttribute QuizDTO quizDTO) {
         return quizService.updateQuiz(quizDTO);
     }
 
@@ -95,7 +93,7 @@ public class AdminController {
     }
 
     @PostMapping("/personality") //유형 검사 질문박스 수정
-    public PersonalityTestDTO updatePersonality(@ModelAttribute PersonalityTestDTO personalityTestDTO){
+    public PersonalityTestDTO updatePersonality(@Validated @ModelAttribute PersonalityTestDTO personalityTestDTO){
         return racingService.updatePersonalityTest(personalityTestDTO);
     }
 

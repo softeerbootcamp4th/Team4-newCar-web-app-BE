@@ -1,6 +1,8 @@
 package newCar.event_page.dto;
 
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import newCar.event_page.entity.event.quiz.Quiz;
@@ -11,16 +13,32 @@ import java.time.LocalDate;
 @Data
 public class QuizDTO {
 
+
+    @NotNull
     private Long id;
+
+    @NotNull
     private int winnerCount;
+
+    @NotNull
     private LocalDate postDate;
+
+    @NotNull
     private String question;
 
+    @NotEmpty
     private String choice1;
+
+    @NotEmpty
     private String choice2;
+
+    @NotEmpty
     private String choice3;
+
+    @NotEmpty
     private String choice4;
 
+    @NotNull
     private int correctAnswer;
 
 

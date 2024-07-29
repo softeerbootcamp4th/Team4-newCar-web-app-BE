@@ -1,5 +1,7 @@
 package newCar.event_page.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import newCar.event_page.entity.event.racing.PersonalityTest;
@@ -7,21 +9,41 @@ import newCar.event_page.entity.event.racing.PersonalityTest;
 @Builder
 @Data
 public class PersonalityTestDTO {
+
+    @NotNull
     private Long id;
 
+    @NotEmpty
     private String question;
 
+    @NotEmpty
     private String choice1;
+
+    @NotEmpty
     private String choice2;
 
+    @NotNull
     private int choice1_pet_score;
+
+    @NotNull
     private int choice1_travel_score;
+
+    @NotNull
     private int choice1_space_score;
+
+    @NotNull
     private int choice1_leisure_score;
 
+    @NotNull
     private int choice2_pet_score;
+
+    @NotNull
     private int choice2_travel_score;
+
+    @NotNull
     private int choice2_space_score;
+
+    @NotNull
     private int choice2_leisure_score;
 
 
