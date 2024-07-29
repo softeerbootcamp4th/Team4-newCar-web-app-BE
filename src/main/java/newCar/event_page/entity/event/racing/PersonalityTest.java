@@ -3,12 +3,10 @@ package newCar.event_page.entity.event.racing;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.Setter;
 import newCar.event_page.entity.TeamScore;
 
 @Entity
 @Getter
-@Setter
 public class PersonalityTest {
     @Id
     @GeneratedValue
@@ -53,14 +51,4 @@ public class PersonalityTest {
                     column = @Column(name = "choice2_leisure_score")),
     })
     private TeamScore choice2Scores;
-
-    public void setChoice1Scores(int pet,int travel,int space,int leisure)
-    {
-        this.choice1Scores = new TeamScore(pet,travel,space,leisure);
-    }
-
-    public void setChoice2Scores(int pet,int travel,int space,int leisure)
-    {
-        this.choice2Scores = new TeamScore(pet,travel,space,leisure);
-    }
 }

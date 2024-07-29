@@ -36,13 +36,7 @@ public class RacingService {
     {
         PersonalityTest personalityTest = personalityTestRepository.findById(personalityTestDTO.getId())
                 .orElseThrow(()->new NoSuchElementException("PersonalityTest Not Found"));
-        personalityTest.setQuestion(personalityTestDTO.getQuestion());
-        personalityTest.setChoice1(personalityTestDTO.getChoice1());
-        personalityTest.setChoice2(personalityTestDTO.getChoice2());
-        personalityTest.setChoice1Scores(personalityTestDTO.getChoice1_pet_score(),personalityTestDTO.getChoice1_travel_score(),
-                                        personalityTestDTO.getChoice1_space_score(),personalityTestDTO.getChoice1_leisure_score());
-        personalityTest.setChoice2Scores(personalityTestDTO.getChoice2_pet_score(),personalityTestDTO.getChoice2_travel_score(),
-                                        personalityTestDTO.getChoice2_space_score(),personalityTestDTO.getChoice2_leisure_score());
+        personalityTest.updatePersonality(personalityTestDTO);
         personalityTestRepository.save(personalityTest);
         return PersonalityTestDTO.toDTO(personalityTest);
     }
