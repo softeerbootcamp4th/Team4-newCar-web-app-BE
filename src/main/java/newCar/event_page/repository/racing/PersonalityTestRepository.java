@@ -1,4 +1,4 @@
-package newCar.event_page.repository;
+package newCar.event_page.repository.racing;
 
 import newCar.event_page.entity.event.racing.PersonalityTest;
 import org.springframework.data.jpa.repository.JpaRepository;

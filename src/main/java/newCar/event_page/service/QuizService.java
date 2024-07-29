@@ -2,14 +2,13 @@ package newCar.event_page.service;
 
 import newCar.event_page.dto.QuizDTO;
 import newCar.event_page.entity.event.quiz.Quiz;
-import newCar.event_page.repository.QuizRepository;
+import newCar.event_page.repository.quiz.QuizRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Transactional
 @Service
