@@ -14,6 +14,7 @@ import java.util.NoSuchElementException;
 @Service
 public class EventService {
 
+
     private final EventRepository eventRepository;
 
     @Autowired
