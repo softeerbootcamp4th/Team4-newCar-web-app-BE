@@ -6,6 +6,7 @@ import newCar.event_page.entity.event.EventUser;
 import newCar.event_page.entity.event.racing.PersonalityTest;
 import newCar.event_page.repository.EventUserRepository;
 import newCar.event_page.repository.racing.PersonalityTestRepository;
+import newCar.event_page.repository.racing.RacingWinnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,14 @@ public class RacingService {
 
     private final PersonalityTestRepository personalityTestRepository;
     private final EventUserRepository eventUserRepository;
+    private final RacingWinnerRepository racingWinnerRepository;
 
     @Autowired
-    public RacingService(PersonalityTestRepository personalityTestRepository, EventUserRepository eventUserRepository) {
+    public RacingService(PersonalityTestRepository personalityTestRepository, EventUserRepository eventUserRepository
+            ,RacingWinnerRepository racingWinnerRepository) {
         this.personalityTestRepository=personalityTestRepository;
         this.eventUserRepository=eventUserRepository;
+        this.racingWinnerRepository=racingWinnerRepository;
     }
 
     public List<PersonalityTestDTO> getList() {
@@ -44,6 +48,9 @@ public class RacingService {
 
     public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList) {
         List<EventUser> list = eventUserRepository.findByEventId();
-
+        for(EventUser temp : list) {
+                temp.getUser().getClickNumber();
+                temp.getUser().getId();
+        }
     }
 }
