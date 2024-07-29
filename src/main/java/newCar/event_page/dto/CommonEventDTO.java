@@ -1,11 +1,14 @@
 package newCar.event_page.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
+import newCar.event_page.entity.event.EventCommon;
 import newCar.event_page.entity.event.EventStatus;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Data
 @Schema (description = "common-event 정보")
 public class CommonEventDTO {
@@ -33,5 +36,15 @@ public class CommonEventDTO {
         this.status = status;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public static CommonEventDTO toDTO(EventCommon eventCommon){
+        return CommonEventDTO.builder()
+                .eventName(eventCommon.getEventName())
+                .eventManager(eventCommon.getManagerName())
+                .status(eventCommon.getStatus())
+                .startTime(eventCommon.getStartTime())
+                .endTime(eventCommon.getEndTime())
+                .build();
     }
 }

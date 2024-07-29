@@ -3,6 +3,7 @@ package newCar.event_page.entity.event.quiz;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import newCar.event_page.dto.QuizDTO;
 
 import java.time.LocalDate;
 
@@ -38,4 +39,17 @@ public class Quiz {
 
     @NotNull
     private Integer correctAnswer;
+
+    public void updateQuiz(QuizDTO quizDTO)
+    {
+        this.winnerCount = quizDTO.getWinnerCount();
+        this.postDate=quizDTO.getPostDate();
+        this.question=quizDTO.getQuestion();
+        this.choice1=quizDTO.getChoice1();
+        this.choice2=quizDTO.getChoice2();
+        this.choice3=quizDTO.getChoice3();
+        this.choice4=quizDTO.getChoice4();
+        this.correctAnswer=quizDTO.getCorrectAnswer();
+
+    }
 }
