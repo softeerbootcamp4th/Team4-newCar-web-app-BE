@@ -69,7 +69,6 @@ public class RacingService {
             int rank = winnerSettingDTO.getRank(); //이번 추첨은 어떤 랭크인지
             for (int i = 0; i < numberOfWinners; i++) {
                 int maxInt = (int) totalWeight; //totalWeight가 8.45일 경우 8이 저장됨
-
                 int randomInt = rand.nextInt((int) totalWeight) + 1; // 1~8이 저장됨
                 RacingWinner racingWinner = new RacingWinner(); // 당첨자 엔티티
                 if (randomInt == maxInt) { //만약 randomInt가 최대값으로 들어왔다면 마지막이 당첨자이다
@@ -93,12 +92,17 @@ public class RacingService {
                         racingWinner.setEventUser(eventUserRepository.findByUserIdAndEvendId(participant.userId, eventId));
                         racingWinner.setRacingEvent(racingEventRepository.getReferenceById(eventId));
                         racingWinnerRepository.save(racingWinner);
-
                         break;
                     }
                 }
             }
         }
+    }
+
+
+    public int getEventUserSize(Long eventId)
+    {
+        return eventUserRepository.findByEventId(eventId).size();
     }
 
     private double getWeight(int clickNumber) {
