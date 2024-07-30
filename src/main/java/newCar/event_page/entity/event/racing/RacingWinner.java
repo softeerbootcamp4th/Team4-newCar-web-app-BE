@@ -7,7 +7,6 @@ import newCar.event_page.entity.event.EventUser;
 
 @Entity
 @Getter
-@Setter
 public class RacingWinner {
     @Id
     @GeneratedValue
@@ -24,4 +23,9 @@ public class RacingWinner {
     @Column(name = "WINNER_RANK")
     private int rank;
 
+    public void update(RacingEvent racingEvent, EventUser eventUser, int rank) {
+        this.racingEvent = racingEvent;
+        this.eventUser = eventUser;
+        this.rank = rank;
+    }
 }

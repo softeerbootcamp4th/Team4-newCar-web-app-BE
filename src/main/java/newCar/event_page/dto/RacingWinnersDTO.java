@@ -5,7 +5,6 @@ import lombok.Data;
 import newCar.event_page.entity.Team;
 import newCar.event_page.entity.event.racing.RacingWinner;
 
-import java.time.LocalDate;
 
 @Data
 @Builder

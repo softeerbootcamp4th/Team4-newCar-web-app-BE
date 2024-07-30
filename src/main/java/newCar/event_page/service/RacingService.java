@@ -76,9 +76,8 @@ public class RacingService {
                     Participant winner = participantList.get(participantList.size() - 1);//참가자리스트의 마지막
                     participantList.remove(winner);//중복 제거를 위해 참가자 리스트에서 제외시킨다
                     totalWeight -= winner.weight; // 전체 가중치 감소
-                    racingWinner.setRank(rank);
-                    racingWinner.setEventUser(eventUserRepository.findByUserIdAndEvendId(winner.userId, eventId));
-                    racingWinner.setRacingEvent(racingEventRepository.getReferenceById(eventId));
+                    racingWinner.update(racingEventRepository.getReferenceById(eventId),
+                                        eventUserRepository.findByUserIdAndEvendId(winner.userId, eventId),rank);
                     racingWinnerRepository.save(racingWinner);
                     continue;
                 }
@@ -89,9 +88,8 @@ public class RacingService {
                     if (randomValue <= cumulativeWeight) {
                         participantList.remove(participant); // 중복 제거
                         totalWeight -= participant.weight; //전체 가중치 감소
-                        racingWinner.setRank(rank);
-                        racingWinner.setEventUser(eventUserRepository.findByUserIdAndEvendId(participant.userId, eventId));
-                        racingWinner.setRacingEvent(racingEventRepository.getReferenceById(eventId));
+                        racingWinner.update(racingEventRepository.getReferenceById(eventId),
+                                eventUserRepository.findByUserIdAndEvendId(participant.userId, eventId),rank);
                         racingWinnerRepository.save(racingWinner);
                         break;
                     }

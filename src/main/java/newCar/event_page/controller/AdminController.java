@@ -8,15 +8,12 @@ import newCar.event_page.entity.event.EventId;
 import newCar.event_page.service.EventService;
 import newCar.event_page.service.QuizService;
 import newCar.event_page.service.RacingService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -93,5 +90,4 @@ public class AdminController {
     public PersonalityTestDTO updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO){
         return racingService.updatePersonalityTest(personalityTestDTO);
     }
-
 }
