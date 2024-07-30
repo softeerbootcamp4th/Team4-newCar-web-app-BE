@@ -73,7 +73,7 @@ public class RacingService {
                     continue;
                 }
                 double cumulativeWeight = 0; // 누적 가중치
-                double randomValue = randomInt + rand.nextDouble();
+                double randomValue = randomInt + rand.nextDouble(); //랜덤 값
                 for(Participant participant : participantList) {
                     cumulativeWeight += participant.weight;
                     if(randomValue <=cumulativeWeight) {
