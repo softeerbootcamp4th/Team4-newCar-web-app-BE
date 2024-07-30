@@ -2,10 +2,9 @@ package newCar.event_page.controller;
 
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import newCar.event_page.dto.*;
+import newCar.event_page.entity.event.EventId;
 import newCar.event_page.service.EventService;
 import newCar.event_page.service.QuizService;
 import newCar.event_page.service.RacingService;
@@ -64,19 +63,13 @@ public class AdminController {
     @PostMapping("/winners")//당첨자 추첨하기 버튼
     @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public void drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
-        racingService.drawWinners(winnerSettingDTOList);
+        racingService.drawWinners(winnerSettingDTOList, (long)EventId.Racing.ordinal());
     }
 
     @GetMapping("/winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
-    public List<RacingWinnersDTO> getyWinnersList() {
-        RacingWinnersDTO temp1= new RacingWinnersDTO("배진환","010-5239-0966",LocalDate.of(2024,07,22));
-        RacingWinnersDTO temp2= new RacingWinnersDTO("장준하","010-1234-5678",LocalDate.of(2024,06,22));
-        List<RacingWinnersDTO> list = new ArrayList<>();
-        list.add(temp1);
-        list.add(temp2);
-        System.out.println(temp1.toString());
-        return list;
+    public void getWinnerList() {
+        ;
     }
 
     @GetMapping("/personality")
