@@ -63,7 +63,7 @@ public class AdminController {
 
     @PostMapping("/winners")//당첨자 추첨하기 버튼
     @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
-    public void drawWinners(@RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
+    public void drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
         racingService.drawWinners(winnerSettingDTOList);
     }
 
