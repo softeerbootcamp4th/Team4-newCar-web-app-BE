@@ -1,6 +1,7 @@
 package newCar.event_page.service;
 
 import newCar.event_page.dto.PersonalityTestDTO;
+import newCar.event_page.dto.RacingWinnersDTO;
 import newCar.event_page.dto.WinnerSettingDTO;
 import newCar.event_page.entity.event.EventUser;
 import newCar.event_page.entity.event.racing.PersonalityTest;
@@ -36,7 +37,7 @@ public class RacingService {
         this.racingEventRepository=racingEventRepository;
     }
 
-    public List<PersonalityTestDTO> getList() {
+    public List<PersonalityTestDTO> getPersonalityList() {
         List<PersonalityTest> list = personalityTestRepository.findAll();
         List<PersonalityTestDTO> personalityTestDTOList = new ArrayList<>();
         for(PersonalityTest temp : list) {
@@ -54,12 +55,12 @@ public class RacingService {
 
     public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId) {
         racingWinnerRepository.deleteByEventId(eventId);//deleteById
-        List<EventUser> list = eventUserRepository.findByEventId(eventId); //Racing게임을 참가한 사람들의 목록을 받아온다
+        List<EventUser> eventUserList = eventUserRepository.findByEventId(eventId); //Racing게임을 참가한 사람들의 목록을 받아온다
         List<Participant> participantList = new ArrayList<>();
         double totalWeight = 0;
         double weight = 0;
         Random rand = new Random();
-        for (EventUser eventUser : list) {
+        for (EventUser eventUser : eventUserList) {
             weight = getWeight(eventUser.getUser().getClickNumber());
             participantList.add(new Participant(eventUser.getUser().getId(), weight));
             totalWeight += weight;
@@ -103,6 +104,16 @@ public class RacingService {
     public int getEventUserSize(Long eventId)
     {
         return eventUserRepository.findByEventId(eventId).size();
+    }
+
+    public List<RacingWinnersDTO> getWinnerList(Long eventId)
+    {
+        List<RacingWinner> racingWinnerList = racingWinnerRepository.findByEventId(eventId);
+        List<RacingWinnersDTO> racingWinnersDTOList = new ArrayList<>();
+        for(RacingWinner racingWinner : racingWinnerList) {
+            racingWinnersDTOList.add(RacingWinnersDTO.toDTO(racingWinner));
+        }
+        return racingWinnersDTOList;
     }
 
     private double getWeight(int clickNumber) {

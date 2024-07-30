@@ -77,17 +77,16 @@ public class AdminController {
         racingService.drawWinners(winnerSettingDTOList, (long)EventId.Racing.ordinal());
         return new ResponseEntity<>("Http 200 OK",HttpStatus.OK);
     }
-
     @GetMapping("/winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
-    public void getWinnerList() {
-
+    public List<RacingWinnersDTO> getWinnerList() {
+        return racingService.getWinnerList((long)EventId.Racing.ordinal());
     }
 
     @GetMapping("/personality")
     @Operation(summary = "레이싱 게임 유형검사" ,description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-211#887801621")
     public List<PersonalityTestDTO> getPersonalities(){
-        return racingService.getList();
+        return racingService.getPersonalityList();
     }
 
     @PostMapping("/personality") //유형 검사 질문박스 수정
