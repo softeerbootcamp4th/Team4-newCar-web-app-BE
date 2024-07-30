@@ -53,6 +53,7 @@ public class RacingService {
     }
 
     public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId) {
+        racingWinnerRepository.deleteByEventId(eventId);//deleteById
         List<EventUser> list = eventUserRepository.findByEventId(eventId); //Racing게임을 참가한 사람들의 목록을 받아온다
         List<Participant> participantList = new ArrayList<>();
         double totalWeight = 0;
@@ -68,6 +69,7 @@ public class RacingService {
             int rank = winnerSettingDTO.getRank(); //이번 추첨은 어떤 랭크인지
             for (int i = 0; i < numberOfWinners; i++) {
                 int maxInt = (int) totalWeight; //totalWeight가 8.45일 경우 8이 저장됨
+
                 int randomInt = rand.nextInt((int) totalWeight) + 1; // 1~8이 저장됨
                 RacingWinner racingWinner = new RacingWinner(); // 당첨자 엔티티
                 if (randomInt == maxInt) { //만약 randomInt가 최대값으로 들어왔다면 마지막이 당첨자이다
@@ -88,9 +90,10 @@ public class RacingService {
                         participantList.remove(participant); // 중복 제거
                         totalWeight -= participant.weight; //전체 가중치 감소
                         racingWinner.setRank(rank);
-                        racingWinner.setEventUser(eventUserRepository.findByUserIdAndEvendId(participant.userId, 1L));
+                        racingWinner.setEventUser(eventUserRepository.findByUserIdAndEvendId(participant.userId, eventId));
                         racingWinner.setRacingEvent(racingEventRepository.getReferenceById(eventId));
                         racingWinnerRepository.save(racingWinner);
+
                         break;
                     }
                 }
@@ -99,7 +102,7 @@ public class RacingService {
     }
 
     private double getWeight(int clickNumber) {
-        return 1 + (Math.log(clickNumber+1)/Math.log(30));
+        return 1 + ((Math.log(clickNumber+1))/(Math.log(30)));
     }
 }
 
@@ -108,6 +111,6 @@ class Participant {
     public double weight;
     public Participant(Long userId, double weight) {
         this.userId=userId;
-        this.weight-=weight;
+        this.weight=weight;
     }
 }

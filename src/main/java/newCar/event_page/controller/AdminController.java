@@ -8,6 +8,7 @@ import newCar.event_page.entity.event.EventId;
 import newCar.event_page.service.EventService;
 import newCar.event_page.service.QuizService;
 import newCar.event_page.service.RacingService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +64,9 @@ public class AdminController {
     @PostMapping("/winners")//당첨자 추첨하기 버튼
     @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public void drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
+        //현재 레이싱 게임 참가자 숫자보다 뽑으려는 수가 더 많으면
+        //db잘 참조해서 숫자 비교해서
+        //
         racingService.drawWinners(winnerSettingDTOList, (long)EventId.Racing.ordinal());
     }
 
