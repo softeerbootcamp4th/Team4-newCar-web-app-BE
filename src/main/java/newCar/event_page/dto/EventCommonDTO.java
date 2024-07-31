@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 import newCar.event_page.entity.event.EventCommon;
-import newCar.event_page.entity.event.EventStatus;
 
 import java.time.LocalDateTime;
 

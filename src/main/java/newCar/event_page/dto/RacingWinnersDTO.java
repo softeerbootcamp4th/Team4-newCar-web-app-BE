@@ -11,11 +11,11 @@ import newCar.event_page.entity.event.racing.RacingWinner;
 @Builder
 public class RacingWinnersDTO {
 
-    private Integer rank;
-    private String name;
-    private String phoneNumber;
-    private Integer clickNumber;
-    private Team team;
+    private final Integer rank;
+    private final String name;
+    private final String phoneNumber;
+    private final Integer clickNumber;
+    private final Team team;
 
 
     public static RacingWinnersDTO toDTO(RacingWinner racingWinner) {

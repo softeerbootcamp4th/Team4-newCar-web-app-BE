@@ -52,19 +52,13 @@ public class AdminController {
         return quizService.updateQuiz(quizDTO);
     }
 
-    @PostMapping("/raincg-winners")//당첨자 추첨하기 버튼
+    @PostMapping("/racing-winners")//당첨자 추첨하기 버튼
     @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public ResponseEntity<String> drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
-        int size = racingService.getEventUserSize((long)EventId.Racing.ordinal());
-        int drawNum = 0;
-        for(WinnerSettingDTO winnerSettingDTO : winnerSettingDTOList) {
-            drawNum += winnerSettingDTO.getNum();
+        if(isDrawingAvailable(winnerSettingDTOList)){
+            return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
         }
-        if(size<drawNum) {
-            return new ResponseEntity<>("추첨하려는 총 인원이 참가자보다 많습니다",HttpStatus.INTERNAL_SERVER_ERROR);
-        }//만약 뽑으려는 숫자가 현재 참가자보다 많을시에는
-        racingService.drawWinners(winnerSettingDTOList, (long)EventId.Racing.ordinal());
-        return new ResponseEntity<>("Http 200 OK",HttpStatus.OK);
+        return new ResponseEntity<>("추첨하려는 총 인원이 참가자보다 많습니다" , HttpStatus.INTERNAL_SERVER_ERROR);
     }
     @GetMapping("/racing-winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
@@ -82,4 +76,13 @@ public class AdminController {
     public PersonalityTestDTO updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO){
         return racingService.updatePersonalityTest(personalityTestDTO);
     }
+
+    private boolean isDrawingAvailable(List<WinnerSettingDTO> winnerSettingDTOList){
+        int size = racingService.getEventUserSize(EventId.Racing.getValue());//현재 참가자 수
+        int drawNum = 0; // 추첨할 숫자
+        for(WinnerSettingDTO winnerSettingDTO : winnerSettingDTOList) {
+            drawNum += winnerSettingDTO.getNum();
+        }
+        return size >= drawNum;
+    }//추첨이 가능한지 확인하는 메소드
 }
