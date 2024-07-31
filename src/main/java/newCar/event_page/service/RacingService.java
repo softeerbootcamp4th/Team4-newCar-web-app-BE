@@ -1,5 +1,6 @@
 package newCar.event_page.service;
 
+import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.PersonalityTestDTO;
 import newCar.event_page.dto.RacingWinnersDTO;
 import newCar.event_page.dto.WinnerSettingDTO;
@@ -10,14 +11,15 @@ import newCar.event_page.repository.EventUserRepository;
 import newCar.event_page.repository.racing.PersonalityTestRepository;
 import newCar.event_page.repository.racing.RacingEventRepository;
 import newCar.event_page.repository.racing.RacingWinnerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+@RequiredArgsConstructor
 @Transactional
 @Service
 public class RacingService {
@@ -26,16 +28,6 @@ public class RacingService {
     private final EventUserRepository eventUserRepository;
     private final RacingWinnerRepository racingWinnerRepository;
     private final RacingEventRepository racingEventRepository;
-
-
-    @Autowired
-    public RacingService(PersonalityTestRepository personalityTestRepository, EventUserRepository eventUserRepository
-            ,RacingWinnerRepository racingWinnerRepository, RacingEventRepository racingEventRepository) {
-        this.personalityTestRepository=personalityTestRepository;
-        this.eventUserRepository=eventUserRepository;
-        this.racingWinnerRepository=racingWinnerRepository;
-        this.racingEventRepository=racingEventRepository;
-    }
 
     public List<PersonalityTestDTO> getPersonalityList() {
         List<PersonalityTest> list = personalityTestRepository.findAll();
@@ -98,14 +90,11 @@ public class RacingService {
         }
     }
 
-
-    public int getEventUserSize(Long eventId)
-    {
+    public int getEventUserSize(Long eventId) {
         return eventUserRepository.findByEventId(eventId).size();
     }
 
-    public List<RacingWinnersDTO> getWinnerList(Long eventId)
-    {
+    public List<RacingWinnersDTO> getWinnerList(Long eventId) {
         List<RacingWinner> racingWinnerList = racingWinnerRepository.findByEventId(eventId);
         List<RacingWinnersDTO> racingWinnersDTOList = new ArrayList<>();
         for(RacingWinner racingWinner : racingWinnerList) {

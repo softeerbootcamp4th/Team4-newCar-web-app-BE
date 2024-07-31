@@ -2,18 +2,16 @@ package newCar.event_page.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Data
 public class WinnerSettingDTO {
 
     @NotNull
-    private int rank;
+    private Integer rank;
 
     @NotNull
-    private int num;
+    private Integer num;
 
-    public WinnerSettingDTO(int rank , int num) {
-        this.rank = rank;
-        this.num = num;
-    }
 }

@@ -1,5 +1,6 @@
 package newCar.event_page.dto;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -23,32 +24,31 @@ public class PersonalityTestDTO {
     private String choice2;
 
     @NotNull
-    private int choice1_pet_score;
+    private Integer choice1_pet_score;
 
     @NotNull
-    private int choice1_travel_score;
+    private Integer choice1_travel_score;
 
     @NotNull
-    private int choice1_space_score;
+    private Integer choice1_space_score;
 
     @NotNull
-    private int choice1_leisure_score;
+    private Integer choice1_leisure_score;
 
     @NotNull
-    private int choice2_pet_score;
+    private Integer choice2_pet_score;
 
     @NotNull
-    private int choice2_travel_score;
+    private Integer choice2_travel_score;
 
     @NotNull
-    private int choice2_space_score;
+    private Integer choice2_space_score;
 
     @NotNull
-    private int choice2_leisure_score;
+    private Integer choice2_leisure_score;
 
 
-    public static PersonalityTestDTO toDTO(PersonalityTest personalityTest)
-    {
+    public static PersonalityTestDTO toDTO(PersonalityTest personalityTest) {
         return PersonalityTestDTO.builder()
                 .id(personalityTest.getId())
                 .question(personalityTest.getQuestion())

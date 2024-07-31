@@ -24,10 +24,6 @@ public class EventCommonDTO {
     public String eventManager;
 
     @NotNull
-    @Schema (description = "이벤트 상태" , example = "IN_PROGRESS")
-    public EventStatus status;
-
-    @NotNull
     @Schema (description = "이벤트 시작 시간" ,example = "2024-01-31T18:30:00")
     public LocalDateTime startTime;
 
@@ -41,7 +37,6 @@ public class EventCommonDTO {
         return EventCommonDTO.builder()
                 .eventName(eventCommon.getEventName())
                 .eventManager(eventCommon.getManagerName())
-                .status(eventCommon.getStatus())
                 .startTime(eventCommon.getStartTime())
                 .endTime(eventCommon.getEndTime())
                 .build();

@@ -23,9 +23,6 @@ public class EventCommon {
     @NotNull
     private String managerName;
 
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
-
     @NotNull
     private LocalDateTime startTime;
 
@@ -35,7 +32,6 @@ public class EventCommon {
     public void update(EventCommonDTO eventCommonDTO) {
         this.eventName=eventCommonDTO.getEventName();
         this.managerName=eventCommonDTO.getEventManager();
-        this.status = eventCommonDTO.getStatus();
         this.startTime=eventCommonDTO.getStartTime();
         this.endTime=eventCommonDTO.getEndTime();
     }

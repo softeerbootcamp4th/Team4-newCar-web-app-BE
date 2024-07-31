@@ -1,23 +1,20 @@
 package newCar.event_page.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.EventCommonDTO;
 import newCar.event_page.entity.event.EventCommon;
 import newCar.event_page.repository.EventCommonRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+@RequiredArgsConstructor
 @Transactional
 @Service
 public class EventService {
 
     private final EventCommonRepository eventCommonRepository;
 
-    @Autowired
-    public EventService(EventCommonRepository eventCommonRepository) {
-        this.eventCommonRepository = eventCommonRepository;
-    }
 
     public EventCommonDTO getEventInfo() {
         EventCommon eventCommon = eventCommonRepository.findById(1L).get();

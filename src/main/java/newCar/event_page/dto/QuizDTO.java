@@ -18,7 +18,7 @@ public class QuizDTO {
     private Long id;
 
     @NotNull
-    private int winnerCount;
+    private Integer winnerCount;
 
     @NotNull
     private LocalDate postDate;
@@ -39,7 +39,7 @@ public class QuizDTO {
     private String choice4;
 
     @NotNull
-    private int correctAnswer;
+    private Integer correctAnswer;
 
 
     public static QuizDTO toDTO(Quiz quiz)
