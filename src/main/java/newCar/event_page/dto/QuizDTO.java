@@ -9,6 +9,7 @@ import newCar.event_page.entity.event.quiz.Quiz;
 
 import java.time.LocalDate;
 
+
 @Builder
 @Data
 public class QuizDTO {

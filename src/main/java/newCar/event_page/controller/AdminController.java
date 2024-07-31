@@ -43,7 +43,7 @@ public class AdminController {
     @GetMapping("/quiz-list")
     @Operation( summary = "선착순 퀴즈 이벤트 정보", description= "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887413777")
     public List<QuizDTO> getQuizList() {
-        return quizService.getQuizList();
+        return quizService.getQuizList(EventId.Quiz.getValue());
     }
 
     @PostMapping ("/quiz-list") //선착순퀴즈 수정 버튼
