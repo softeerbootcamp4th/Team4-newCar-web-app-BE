@@ -28,28 +28,27 @@ public class QuizService {
     public List<QuizDTO> getQuizList(Long eventId) {
 
         EventCommon eventCommon = eventRepository.findById(eventId).get().getEventCommon();
-        LocalDate startTime = eventCommon.getStartTime().toLocalDate();
-        LocalDate endTime = eventCommon.getEndTime().toLocalDate();
+        LocalDate startTime = eventCommon.getStartTime().toLocalDate(); //이벤트 시작 날짜
+        LocalDate endTime = eventCommon.getEndTime().toLocalDate();//이벤트 종료 날짜
         List<Quiz> quizList = quizRepository.findAllByDuration(startTime, endTime);
-        long duration = duration(startTime,endTime);
         List<QuizDTO> quizDTOList = new ArrayList<>();
         for(Quiz temp : quizList) {
             quizDTOList.add(QuizDTO.toDTO(temp));
-        }
-        for(int i = 0 ; i < duration ; i++){
-            quizDTOList.add(new QuizDTO());
         }
         return quizDTOList;
     }
 
     public QuizDTO updateQuiz(QuizDTO quizDTO) {
-        Quiz quiz = quizRepository.findById(quizDTO.getId()).get();
+        Quiz quiz = new Quiz();
+        if(quizDTO.getId()==null) { //quizDTO에 id가 null이라면 새로운 quiz엔티티 생성
+            quiz.update(quizDTO);
+            return QuizDTO.toDTO(quizRepository.save(quiz));
+        }
+        quiz = quizRepository.findById(quizDTO.getId()).get();
         quiz.update(quizDTO);
         quizRepository.save(quiz);
         return QuizDTO.toDTO(quiz);
-    }
-
-    private long duration(LocalDate startTime,LocalDate endTime){
 
     }
+
 }

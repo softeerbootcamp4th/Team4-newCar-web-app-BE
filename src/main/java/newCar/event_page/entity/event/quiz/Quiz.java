@@ -49,6 +49,5 @@ public class Quiz {
         this.choice3=quizDTO.getChoice3();
         this.choice4=quizDTO.getChoice4();
         this.correctAnswer=quizDTO.getCorrectAnswer();
-
     }
 }
