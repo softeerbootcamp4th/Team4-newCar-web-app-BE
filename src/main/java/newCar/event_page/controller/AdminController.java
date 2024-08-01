@@ -2,103 +2,94 @@ package newCar.event_page.controller;
 
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.*;
-import newCar.event_page.entity.event.EventStatus;
+import newCar.event_page.entity.event.EventId;
+import newCar.event_page.service.EventService;
+import newCar.event_page.service.QuizService;
+import newCar.event_page.service.RacingService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
+@RequiredArgsConstructor
 @Tag(name = "admin API" , description = "admin API 설계입니다")
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final EventService eventService;
+    private final QuizService quizService;
+    private final RacingService racingService;
+
     @GetMapping("/common-event") //이벤트 관리 버튼(이벤트 공통, 선착순 퀴즈, 캐스퍼 레이싱 설정값 불러옴)
     @Operation (summary = "이벤트명, 상태, 담당자, 진행기간", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886120115")
-    public CommonEventDTO getCommonEvent(){
-        return new CommonEventDTO("테스트입니다" , "배진환", EventStatus.IN_PROGRESS,
-                LocalDateTime.of(2024,1,31,18,30),
-                LocalDateTime.of(2024,2,28,18,30));
+    public EventCommonDTO getCommonEvent(){
+        return eventService.getEventInfo();
     }
 
     @PostMapping("/common-event")
     @Operation (summary = "이벤트명, 상태, 담당자, 진행기간 수정", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886180035")
-    @Parameters({
-            @Parameter(name = "eventName", description = "이벤트명", example = "소프티어 이벤트"),
-            @Parameter(name = "status", description = "상태", example = "IN_PROGRESS"),
-            @Parameter(name = "eventManager", description = "담당자", example = "배진환"),
-            @Parameter(name = "startTime", description = "이벤트 시작 시간", example = "2024-01-31T18:30:00"),
-            @Parameter(name = "endTime", description = "이벤트 종료 시간", example = "2024-02-28T18:30:00")
-    })
-    public CommonEventDTO updateCommonEvent(@ModelAttribute CommonEventDTO commonEventDTO){
-        return commonEventDTO;
+    public EventCommonDTO updateCommonEvent(@Validated @RequestBody EventCommonDTO eventCommonDTO){
+        return eventService.updateEventInfo(eventCommonDTO);
     }
 
 
-    @GetMapping("/quiz")
+    @GetMapping("/quiz-list")
     @Operation( summary = "선착순 퀴즈 이벤트 정보", description= "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887413777")
-    public List<QuizDTO> getQuizList()
-    {
-        List<QuizDTO> quizDTOList = new ArrayList<>();
-        QuizDTO temp1 = new QuizDTO(1L,100, LocalDate.of(2024,1,31),"첫번째 질문",
-                "보기1","보기2","보기3","보기4",4);
-        QuizDTO temp2 = new QuizDTO(2L,50, LocalDate.of(2024,3,31),"두번째 질문",
-                "보기1","보기2","보기3","보기4",1);
-        quizDTOList.add(temp1);
-        quizDTOList.add(temp2);
-        return quizDTOList;
+    public List<QuizDTO> getQuizList() {
+        return quizService.getQuizList(EventId.Quiz.getValue());
     }
 
     @PostMapping ("/quiz") //선착순퀴즈 수정 버튼
     @Operation (summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
-    public QuizDTO updateQuiz(@ModelAttribute QuizDTO quizDTO) {
-        return quizDTO;
+    public QuizDTO updateQuiz(@Validated @RequestBody QuizDTO quizDTO) {
+        return quizService.updateQuiz(quizDTO);
     }
 
-    @PostMapping("/winners")//당첨자 추첨하기 버튼
+
+    @PostMapping("/racing-winners")//당첨자 추첨하기 버튼
     @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
-    public void drawWinners(@RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
-
+    public ResponseEntity<String> drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
+        if(isDrawingAvailable(winnerSettingDTOList)){
+            racingService.drawWinners(winnerSettingDTOList,EventId.Racing.getValue());
+            return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("추첨하려는 총 인원이 참가자보다 많습니다" , HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @GetMapping("/winners") //당첨자 목록 버튼
+    @GetMapping("/racing-winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
-    public List<RacingWinnersDTO> getyWinnersList() {
-        RacingWinnersDTO temp1= new RacingWinnersDTO("배진환","010-5239-0966",LocalDate.of(2024,07,22));
-        RacingWinnersDTO temp2= new RacingWinnersDTO("장준하","010-1234-5678",LocalDate.of(2024,06,22));
-        List<RacingWinnersDTO> list = new ArrayList<>();
-        list.add(temp1);
-        list.add(temp2);
-        System.out.println(temp1.toString());
-        return list;
+    public ResponseEntity<?> getWinnerList() {
+        List<RacingWinnersDTO> winnersDTOList = racingService.getWinnerList(EventId.Racing.getValue());
+        if(winnersDTOList.isEmpty()) {//당첨자 추첨이 이뤄지지 않았을 경우 당첨자 테이블이 비어있다
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("당첨자 추첨이 아직 이뤄지지 않았습니다");
+        }
+        return ResponseEntity.ok(winnersDTOList);
     }
 
-    @GetMapping("/personality")
+    @GetMapping("/personality-test-list")
     @Operation(summary = "레이싱 게임 유형검사" ,description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-211#887801621")
     public List<PersonalityTestDTO> getPersonalities(){
-
-        List<PersonalityTestDTO> list = new ArrayList<>();
-
-        PersonalityTestDTO temp1 = new PersonalityTestDTO(1L,"나의 드라이브 스타일은?","반려동물과","음악과",
-                7,0,0,0,0,0,1,0);
-
-        PersonalityTestDTO temp2 = new PersonalityTestDTO(2L,"캐스퍼의 장점은?","귀여움","가성비",
-                10,0,0,0,0,0,0,5);
-        list.add(temp1);
-        list.add(temp2);
-        return list;
+        return racingService.getPersonalityList();
     }
 
-    @PostMapping("/personality") //유형 검사 질문박스 수정
-    public void updatePersonality(@ModelAttribute PersonalityTestDTO personalityTestDTO){
-
+    @PostMapping("/personality-test") //유형 검사 질문박스 수정
+    public PersonalityTestDTO updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO){
+        return racingService.updatePersonalityTest(personalityTestDTO);
     }
 
+    private boolean isDrawingAvailable(List<WinnerSettingDTO> winnerSettingDTOList){
+        int size = racingService.getEventUserSize(EventId.Racing.getValue());//현재 참가자 수
+        int drawNum = 0; // 추첨할 숫자
+        for(WinnerSettingDTO winnerSettingDTO : winnerSettingDTOList) {
+            drawNum += winnerSettingDTO.getNum();
+        }
+        return size >= drawNum;
+    }//추첨이 가능한지 확인하는 메소드
 }
