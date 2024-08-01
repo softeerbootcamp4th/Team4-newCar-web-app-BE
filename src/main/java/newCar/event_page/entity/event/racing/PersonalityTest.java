@@ -57,11 +57,15 @@ public class PersonalityTest {
     public void update(PersonalityTestDTO personalityTestDTO)
     {
         this.question = personalityTestDTO.getQuestion();
-        this.choice1= personalityTestDTO.getChoice1();
-        this.choice2=personalityTestDTO.getChoice2();
-        this.choice1Scores = new TeamScore(personalityTestDTO.getChoice1_pet_score(), personalityTestDTO.getChoice1_travel_score(),
-                                            personalityTestDTO.getChoice1_space_score(), personalityTestDTO.getChoice1_leisure_score());
-        this.choice2Scores = new TeamScore(personalityTestDTO.getChoice2_pet_score(), personalityTestDTO.getChoice2_travel_score(),
-                                            personalityTestDTO.getChoice2_space_score(), personalityTestDTO.getChoice2_leisure_score());
+        this.choice1= personalityTestDTO.getChoices().get(0).getText();
+        this.choice2=personalityTestDTO.getChoices().get(1).getText();
+        this.choice1Scores = new TeamScore(personalityTestDTO.getChoices().get(0).getScores().get(0).getValue(),
+                                            personalityTestDTO.getChoices().get(0).getScores().get(1).getValue(),
+                                            personalityTestDTO.getChoices().get(0).getScores().get(2).getValue(),
+                                            personalityTestDTO.getChoices().get(0).getScores().get(3).getValue());
+        this.choice2Scores = new TeamScore(personalityTestDTO.getChoices().get(1).getScores().get(0).getValue(),
+                                           personalityTestDTO.getChoices().get(1).getScores().get(1).getValue(),
+                                           personalityTestDTO.getChoices().get(1).getScores().get(2).getValue(),
+                                           personalityTestDTO.getChoices().get(1).getScores().get(3).getValue());
     }
 }
