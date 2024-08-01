@@ -21,6 +21,7 @@ import java.util.List;
 @Tag(name = "admin API" , description = "admin API 설계입니다")
 @RestController
 @RequestMapping("/admin")
+@CrossOrigin(origins="*")
 public class AdminController {
 
     private final EventService eventService;
