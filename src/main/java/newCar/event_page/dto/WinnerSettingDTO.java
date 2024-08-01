@@ -9,9 +9,9 @@ import lombok.RequiredArgsConstructor;
 public class WinnerSettingDTO {
 
     @NotNull
-    private Integer rank;
+    private final Integer rank;
 
     @NotNull
-    private Integer num;
+    private final Integer num;
 
 }

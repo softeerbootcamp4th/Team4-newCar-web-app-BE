@@ -23,7 +23,7 @@ public class RacingWinner {
     @Column(name = "WINNER_RANK")
     private int rank;
 
-    public void update(RacingEvent racingEvent, EventUser eventUser, int rank) {
+    public RacingWinner(RacingEvent racingEvent,EventUser eventUser,int rank){
         this.racingEvent = racingEvent;
         this.eventUser = eventUser;
         this.rank = rank;

@@ -46,24 +46,31 @@ public class AdminController {
         return quizService.getQuizList(EventId.Quiz.getValue());
     }
 
-    @PostMapping ("/quiz-list") //선착순퀴즈 수정 버튼
+    @PostMapping ("/quiz") //선착순퀴즈 수정 버튼
     @Operation (summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
     public QuizDTO updateQuiz(@Validated @RequestBody QuizDTO quizDTO) {
         return quizService.updateQuiz(quizDTO);
     }
 
+
     @PostMapping("/racing-winners")//당첨자 추첨하기 버튼
     @Operation (summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public ResponseEntity<String> drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList){
         if(isDrawingAvailable(winnerSettingDTOList)){
+            racingService.drawWinners(winnerSettingDTOList,EventId.Racing.getValue());
             return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
         }
         return new ResponseEntity<>("추첨하려는 총 인원이 참가자보다 많습니다" , HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
     @GetMapping("/racing-winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록" , description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
-    public List<RacingWinnersDTO> getWinnerList() {
-        return racingService.getWinnerList(EventId.Racing.getValue());
+    public ResponseEntity<?> getWinnerList() {
+        List<RacingWinnersDTO> winnersDTOList = racingService.getWinnerList(EventId.Racing.getValue());
+        if(winnersDTOList.isEmpty()) {//당첨자 추첨이 이뤄지지 않았을 경우 당첨자 테이블이 비어있다
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("당첨자 추첨이 아직 이뤄지지 않았습니다");
+        }
+        return ResponseEntity.ok(winnersDTOList);
     }
 
     @GetMapping("/personality-test-list")
@@ -72,7 +79,7 @@ public class AdminController {
         return racingService.getPersonalityList();
     }
 
-    @PostMapping("/personality-test-list") //유형 검사 질문박스 수정
+    @PostMapping("/personality-test") //유형 검사 질문박스 수정
     public PersonalityTestDTO updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO){
         return racingService.updatePersonalityTest(personalityTestDTO);
     }

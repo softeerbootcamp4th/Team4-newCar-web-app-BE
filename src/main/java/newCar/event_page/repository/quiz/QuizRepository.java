@@ -10,6 +10,4 @@ import java.util.List;
 
 
 public interface QuizRepository extends JpaRepository<Quiz,Long> {
-    @Query(value = "select * from Quiz where post_date between :startTime AND :endTime order by post_date" , nativeQuery = true)
-    List<Quiz> findAllByDuration(@Param("startTime") LocalDate startTime, @Param("endTime") LocalDate endTime);
 }

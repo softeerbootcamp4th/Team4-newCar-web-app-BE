@@ -15,6 +15,7 @@ import java.time.LocalDate;
 public class QuizDTO {
 
 
+    @NotNull
     private Long id;
 
     @NotNull
