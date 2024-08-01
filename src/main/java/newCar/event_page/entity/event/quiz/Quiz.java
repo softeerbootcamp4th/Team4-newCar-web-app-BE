@@ -46,10 +46,10 @@ public class Quiz {
         this.winnerCount = quizDTO.getWinnerCount();
         this.postDate=quizDTO.getPostDate();
         this.question=quizDTO.getQuestion();
-        this.choice1=quizDTO.getChoice1();
-        this.choice2=quizDTO.getChoice2();
-        this.choice3=quizDTO.getChoice3();
-        this.choice4=quizDTO.getChoice4();
+        this.choice1=quizDTO.getChoices().get(0).getText();
+        this.choice2=quizDTO.getChoices().get(1).getText();
+        this.choice3=quizDTO.getChoices().get(2).getText();
+        this.choice4=quizDTO.getChoices().get(3).getText();
         this.correctAnswer=quizDTO.getCorrectAnswer();
     }
 }
