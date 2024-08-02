@@ -31,7 +31,7 @@ public class EventCommon {
 
     public void update(EventCommonDTO eventCommonDTO) {
         this.eventName=eventCommonDTO.getEventName();
-        this.managerName=eventCommonDTO.getEventManager();
+        this.managerName=eventCommonDTO.getManagerName();
         this.startTime=eventCommonDTO.getStartTime();
         this.endTime=eventCommonDTO.getEndTime();
     }

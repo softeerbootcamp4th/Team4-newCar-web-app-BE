@@ -20,7 +20,7 @@ public class EventCommonDTO {
 
     @NotEmpty
     @Schema (description = "담당자" , example = "배진환")
-    public String eventManager;
+    public String managerName;
 
     @NotNull
     @Schema (description = "이벤트 시작 시간" ,example = "2024-01-31T18:30:00")
@@ -35,7 +35,7 @@ public class EventCommonDTO {
     public static EventCommonDTO toDTO(EventCommon eventCommon){
         return EventCommonDTO.builder()
                 .eventName(eventCommon.getEventName())
-                .eventManager(eventCommon.getManagerName())
+                .managerName(eventCommon.getManagerName())
                 .startTime(eventCommon.getStartTime())
                 .endTime(eventCommon.getEndTime())
                 .build();
