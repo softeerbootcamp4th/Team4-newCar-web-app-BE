@@ -3,6 +3,7 @@ package newCar.event_page.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.*;
 import newCar.event_page.entity.event.EventId;
@@ -11,7 +12,6 @@ import newCar.event_page.service.QuizService;
 import newCar.event_page.service.RacingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class AdminController {
 
     @PostMapping("/common-event")
     @Operation(summary = "이벤트명, 상태, 담당자, 진행기간 수정", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886180035")
-    public ResponseEntity<EventCommonDTO> updateCommonEvent(@Validated @RequestBody EventCommonDTO eventCommonDTO) {
+    public ResponseEntity<EventCommonDTO> updateCommonEvent(@Valid @RequestBody EventCommonDTO eventCommonDTO) {
         return ResponseEntity.ok(eventService.updateEventInfo(eventCommonDTO));
     }
 
@@ -48,14 +48,14 @@ public class AdminController {
 
     @PostMapping("/quiz") //선착순퀴즈 수정 버튼
     @Operation(summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
-    public ResponseEntity<QuizDTO> updateQuiz(@Validated @RequestBody QuizDTO quizDTO) {
+    public ResponseEntity<QuizDTO> updateQuiz(@Valid @RequestBody QuizDTO quizDTO) {
         return ResponseEntity.ok(quizService.updateQuiz(quizDTO));
     }
 
 
     @PostMapping("/racing-winners")//당첨자 추첨하기 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
-    public ResponseEntity<String> drawWinners(@Validated @RequestBody List<WinnerSettingDTO> winnerSettingDTOList) {
+    public ResponseEntity<String> drawWinners(@Valid @RequestBody List<WinnerSettingDTO> winnerSettingDTOList) {
         if (isDrawingAvailable(winnerSettingDTOList)) {
             racingService.drawWinners(winnerSettingDTOList, EventId.Racing.getValue());
             return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
@@ -80,7 +80,7 @@ public class AdminController {
     }
 
     @PostMapping("/personality-test") //유형 검사 질문박스 수정
-    public ResponseEntity<PersonalityTestDTO> updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO) {
+    public ResponseEntity<PersonalityTestDTO> updatePersonality(@Valid @RequestBody PersonalityTestDTO personalityTestDTO) {
         return ResponseEntity.ok(racingService.updatePersonalityTest(personalityTestDTO));
     }
 
