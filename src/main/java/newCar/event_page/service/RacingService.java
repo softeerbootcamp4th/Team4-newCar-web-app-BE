@@ -60,7 +60,7 @@ public class RacingService {
     }
 
 
-
+    @Transactional(readOnly = true)
     public int getEventUserSize(Long eventId) {
         return eventUserRepository.findByEventId(eventId).size();
     }

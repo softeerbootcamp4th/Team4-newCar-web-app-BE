@@ -25,6 +25,7 @@ public class QuizService {
 
 
     //event기간에 맞게 선착순 퀴즈 리스트를 보내준다
+    @Transactional(readOnly = true)
     public List<QuizDTO> getQuizList(Long eventId) {
 
         EventCommon eventCommon = eventRepository.findById(eventId).get().getEventCommon();
@@ -39,7 +40,7 @@ public class QuizService {
     }
 
 
-    //
+
     public QuizDTO updateQuiz(QuizDTO quizDTO) {
         Quiz quiz = quizRepository.findById(quizDTO.getId()).get();
         quiz.update(quizDTO);
@@ -47,7 +48,8 @@ public class QuizService {
         return QuizDTO.toDTO(quiz);
     }
 
-    public long getDuration(LocalDate startDate, LocalDate endDate){
+
+    private long getDuration(LocalDate startDate, LocalDate endDate){
         return ChronoUnit.DAYS.between(startDate,endDate)+1;
     }
 }
