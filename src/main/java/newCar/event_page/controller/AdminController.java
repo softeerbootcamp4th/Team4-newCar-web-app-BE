@@ -52,7 +52,6 @@ public class AdminController {
         return ResponseEntity.ok(quizService.updateQuiz(quizDTO));
     }
 
-
     @PostMapping("/racing-winners")//당첨자 추첨하기 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public ResponseEntity<String> drawWinners(@Valid @RequestBody List<WinnerSettingDTO> winnerSettingDTOList) {
