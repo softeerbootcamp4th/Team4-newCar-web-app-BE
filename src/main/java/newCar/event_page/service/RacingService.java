@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.PersonalityTestDTO;
 import newCar.event_page.dto.RacingWinnersDTO;
 import newCar.event_page.dto.WinnerSettingDTO;
+import newCar.event_page.entity.event.EventId;
 import newCar.event_page.entity.event.EventUser;
 import newCar.event_page.entity.event.racing.PersonalityTest;
 import newCar.event_page.entity.event.racing.RacingWinner;
@@ -12,6 +13,8 @@ import newCar.event_page.repository.EventUserRepository;
 import newCar.event_page.repository.racing.PersonalityTestRepository;
 import newCar.event_page.repository.racing.RacingEventRepository;
 import newCar.event_page.repository.racing.RacingWinnerRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +48,10 @@ public class RacingService {
     }
 
 
-    public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId) {
+    public ResponseEntity<String> drawWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId) {
+        if(!isDrawingAvailable(winnerSettingDTOList,eventId)){
+            return new ResponseEntity<>("추첨하려는 총 인원이 참가자보다 많습니다" , HttpStatus.INTERNAL_SERVER_ERROR);
+        } // 추첨이 불가능하다면
         racingWinnerRepository.deleteByEventId(eventId);//deleteById
         List<EventUser> eventUserList = eventUserRepository.findByEventId(eventId); //Racing게임을 참가한 사람들의 목록을 받아온다
         Set<Participant> participantSet = new LinkedHashSet<>();
@@ -57,17 +63,13 @@ public class RacingService {
             totalWeight += weight;
         }//각 참가자의 가중치와 전체 가중치를 구해 준다
         setWinners(winnerSettingDTOList, eventId, participantSet);
+        return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
     }
 
-
-    @Transactional(readOnly = true)
-    public int getEventUserSize(Long eventId) {
-        return eventUserRepository.findByEventId(eventId).size();
-    }
 
     @Transactional(readOnly = true)
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
-        return racingWinnerRepository.findByEventId(eventId).stream()
+         return racingWinnerRepository.findByEventId(eventId).stream()
                 .map(RacingWinnersDTO::toDTO)
                 .collect(Collectors.toList());
     }
@@ -114,6 +116,15 @@ public class RacingService {
         return lastElement;
     }
 
+
+    private boolean isDrawingAvailable(List<WinnerSettingDTO> winnerSettingDTOList ,Long eventId){
+        int size = eventUserRepository.getSize(eventId); //이벤트 참가자 숫자
+        int drawNum = 0; // 추첨할 숫자
+        for(WinnerSettingDTO winnerSettingDTO : winnerSettingDTOList) {
+            drawNum += winnerSettingDTO.getNum();
+        }
+        return size >= drawNum;
+    }//추첨이 가능한지 확인하는 메소드
     private double getWeight(int clickNumber) {
         return 1 + ((Math.log(clickNumber+1))/(Math.log(30)));
     }
