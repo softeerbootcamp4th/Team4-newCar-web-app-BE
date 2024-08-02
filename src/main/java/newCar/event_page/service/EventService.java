@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 
 @RequiredArgsConstructor
@@ -22,20 +23,29 @@ public class EventService {
     private final QuizRepository quizRepository;
 
     public EventCommonDTO getEventInfo() {
-        EventCommon eventCommon = eventCommonRepository.findById(1L).get();
+        EventCommon eventCommon = eventCommonRepository.findById(1L)
+                .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않습니다."));
+
         return EventCommonDTO.toDTO(eventCommon);
     }//이벤트의 공통 정보를 받아옵니다. 이벤트명, 담당자, 시작시간 종료시간 등
 
     public EventCommonDTO updateEventInfo(EventCommonDTO eventCommonDTO){
-        EventCommon eventCommon = eventCommonRepository.findById(1L).get();
+        EventCommon eventCommon = eventCommonRepository.findById(1L)
+                .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않아 수정이 불가능합니다."));
+
         eventCommon.update(eventCommonDTO);
-        List<Quiz> quizList = quizRepository.findAll();
-        LocalDate startDate = eventCommonDTO.getStartTime().toLocalDate();
+        updateQuizPostDates(eventCommonDTO.getStartTime().toLocalDate());
+
+        return EventCommonDTO.toDTO(eventCommon);
+    }
+
+    private void updateQuizPostDates(LocalDate startDate) {
+        List<Quiz> quizList = quizRepository.findAllByOrderByPostDateAsc();
         for (Quiz quiz : quizList) {
             quiz.setPostDate(startDate);
             startDate = startDate.plusDays(1L);
         }
         quizRepository.saveAll(quizList);
-        return EventCommonDTO.toDTO(eventCommon);
     }
+
 }
