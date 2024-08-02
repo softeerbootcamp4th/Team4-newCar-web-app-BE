@@ -12,5 +12,7 @@ public interface EventUserRepository extends JpaRepository<EventUser,Long> {
     List<EventUser> findByEventId(@Param("eventId") Long eventId);
 
     @Query(value = "select * from event_user where user_id = :userId AND event_id = :eventId" , nativeQuery = true)
-    EventUser findByUserIdAndEvendId(@Param("userId") Long userId , @Param("eventId") Long eventId);
+    EventUser findByUserIdAndEventId(@Param("userId") Long userId , @Param("eventId") Long eventId);
+
+
 }

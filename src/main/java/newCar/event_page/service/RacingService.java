@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -29,13 +30,11 @@ public class RacingService {
 
     private double totalWeight;
 
+    @Transactional(readOnly = true)
     public List<PersonalityTestDTO> getPersonalityList() {
-        List<PersonalityTest> list = personalityTestRepository.findAll();
-        List<PersonalityTestDTO> personalityTestDTOList = new ArrayList<>();
-        for(PersonalityTest temp : list) {
-            personalityTestDTOList.add(PersonalityTestDTO.toDTO(temp));
-        }
-        return personalityTestDTOList;
+        return personalityTestRepository.findAll().stream()
+                .map(PersonalityTestDTO::toDTO)
+                .collect(Collectors.toList());
     }
 
     public PersonalityTestDTO updatePersonalityTest(PersonalityTestDTO personalityTestDTO) {
@@ -66,13 +65,11 @@ public class RacingService {
         return eventUserRepository.findByEventId(eventId).size();
     }
 
+    @Transactional(readOnly = true)
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
-        List<RacingWinner> racingWinnerList = racingWinnerRepository.findByEventId(eventId);
-        List<RacingWinnersDTO> racingWinnersDTOList = new ArrayList<>();
-        for(RacingWinner racingWinner : racingWinnerList) {
-            racingWinnersDTOList.add(RacingWinnersDTO.toDTO(racingWinner));
-        }
-        return racingWinnersDTOList;
+        return racingWinnerRepository.findByEventId(eventId).stream()
+                .map(RacingWinnersDTO::toDTO)
+                .collect(Collectors.toList());
     }
 
     private void setWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId, Set<Participant> participantSet) {
@@ -84,7 +81,7 @@ public class RacingService {
                 totalWeight -= winner.weight; //전체가중치에서 당첨자의 가중치를 빼준다
                 participantSet.remove(winner);//중복 제거를 위해 Set에서 제거 해준다
                 racingWinnerRepository.save(new RacingWinner(racingEventRepository.getReferenceById(eventId),
-                        eventUserRepository.findByUserIdAndEvendId(winner.userId, eventId),rank));
+                        eventUserRepository.findByUserIdAndEventId(winner.userId, eventId),rank));
             }
         }
     }
