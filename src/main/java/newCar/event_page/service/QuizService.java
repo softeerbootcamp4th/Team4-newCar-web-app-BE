@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.QuizDTO;
 import newCar.event_page.entity.event.EventCommon;
 import newCar.event_page.entity.event.quiz.Quiz;
-import newCar.event_page.repository.EventCommonRepository;
 import newCar.event_page.repository.EventRepository;
 import newCar.event_page.repository.quiz.QuizRepository;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -27,18 +27,12 @@ public class QuizService {
     //event기간에 맞게 선착순 퀴즈 리스트를 보내준다
     @Transactional(readOnly = true)
     public List<QuizDTO> getQuizList(Long eventId) {
-
         EventCommon eventCommon = eventRepository.findById(eventId).get().getEventCommon();
         LocalDate startTime = eventCommon.getStartTime().toLocalDate(); //이벤트 시작 날짜
         LocalDate endTime = eventCommon.getEndTime().toLocalDate();//이벤트 종료 날짜
-        List<Quiz> quizList = quizRepository.findAll();
-        List<QuizDTO> quizDTOList = new ArrayList<>();
-        for(Quiz temp : quizList) {
-            quizDTOList.add(QuizDTO.toDTO(temp));
-        }
-        return quizDTOList.stream().limit(getDuration(startTime,endTime)).toList();
+        return quizRepository.findAll().stream().limit(getDuration(startTime,endTime))
+                .map(QuizDTO::toDTO).collect(Collectors.toList());
     }
-
 
 
     public QuizDTO updateQuiz(QuizDTO quizDTO) {
