@@ -1,6 +1,5 @@
 package newCar.event_page.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.EventCommonDTO;
 import newCar.event_page.entity.event.EventCommon;
@@ -8,20 +7,22 @@ import newCar.event_page.entity.event.quiz.Quiz;
 import newCar.event_page.repository.EventCommonRepository;
 import newCar.event_page.repository.quiz.QuizRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 
+@Service
 @RequiredArgsConstructor
 @Transactional
-@Service
 public class EventService {
 
     private final EventCommonRepository eventCommonRepository;
     private final QuizRepository quizRepository;
 
+    @Transactional(readOnly = true)
     public EventCommonDTO getEventInfo() {
         EventCommon eventCommon = eventCommonRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않습니다."));
@@ -49,3 +50,4 @@ public class EventService {
     }
 
 }
+
