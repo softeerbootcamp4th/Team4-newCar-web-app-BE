@@ -30,26 +30,26 @@ public class AdminController {
 
     @GetMapping("/common-event") //이벤트 관리 버튼(이벤트 공통, 선착순 퀴즈, 캐스퍼 레이싱 설정값 불러옴)
     @Operation(summary = "이벤트명, 상태, 담당자, 진행기간", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886120115")
-    public EventCommonDTO getCommonEvent() {
-        return eventService.getEventInfo();
+    public ResponseEntity<EventCommonDTO> getCommonEvent() {
+        return ResponseEntity.ok(eventService.getEventInfo());
     }
 
     @PostMapping("/common-event")
     @Operation(summary = "이벤트명, 상태, 담당자, 진행기간 수정", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886180035")
-    public EventCommonDTO updateCommonEvent(@Validated @RequestBody EventCommonDTO eventCommonDTO) {
-        return eventService.updateEventInfo(eventCommonDTO);
+    public ResponseEntity<EventCommonDTO> updateCommonEvent(@Validated @RequestBody EventCommonDTO eventCommonDTO) {
+        return ResponseEntity.ok(eventService.updateEventInfo(eventCommonDTO));
     }
 
     @GetMapping("/quiz-list")
     @Operation(summary = "선착순 퀴즈 이벤트 정보", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887413777")
-    public List<QuizDTO> getQuizList() {
-        return quizService.getQuizList(EventId.Quiz.getValue());
+    public ResponseEntity<List<QuizDTO>> getQuizList() {
+        return ResponseEntity.ok(quizService.getQuizList(EventId.Quiz.getValue()));
     }
 
     @PostMapping("/quiz") //선착순퀴즈 수정 버튼
     @Operation(summary = "선착순퀴즈 이벤트 수정버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-4#887450213")
-    public QuizDTO updateQuiz(@Validated @RequestBody QuizDTO quizDTO) {
-        return quizService.updateQuiz(quizDTO);
+    public ResponseEntity<QuizDTO> updateQuiz(@Validated @RequestBody QuizDTO quizDTO) {
+        return ResponseEntity.ok(quizService.updateQuiz(quizDTO));
     }
 
 
@@ -75,13 +75,13 @@ public class AdminController {
 
     @GetMapping("/personality-test-list")
     @Operation(summary = "레이싱 게임 유형검사", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-211#887801621")
-    public List<PersonalityTestDTO> getPersonalities() {
-        return racingService.getPersonalityList();
+    public ResponseEntity<List<PersonalityTestDTO>> getPersonalities() {
+        return ResponseEntity.ok(racingService.getPersonalityList());
     }
 
     @PostMapping("/personality-test") //유형 검사 질문박스 수정
-    public PersonalityTestDTO updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO) {
-        return racingService.updatePersonalityTest(personalityTestDTO);
+    public ResponseEntity<PersonalityTestDTO> updatePersonality(@Validated @RequestBody PersonalityTestDTO personalityTestDTO) {
+        return ResponseEntity.ok(racingService.updatePersonalityTest(personalityTestDTO));
     }
 
     private boolean isDrawingAvailable(List<WinnerSettingDTO> winnerSettingDTOList) {
