@@ -55,11 +55,8 @@ public class AdminController {
     @PostMapping("/racing-winners")//당첨자 추첨하기 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 추첨하기 버튼", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-702#886184643")
     public ResponseEntity<String> drawWinners(@Valid @RequestBody List<WinnerSettingDTO> winnerSettingDTOList) {
-        if (isDrawingAvailable(winnerSettingDTOList)) {
-            racingService.drawWinners(winnerSettingDTOList, EventId.Racing.getValue());
-            return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
-        }
-        return new ResponseEntity<>("추첨하려는 총 인원이 참가자보다 많습니다", HttpStatus.INTERNAL_SERVER_ERROR);
+        racingService.drawWinners(winnerSettingDTOList, EventId.Racing.getValue());
+        return ResponseEntity.ok("추첨이 완료되었습니다.");
     }
 
     @GetMapping("/racing-winners") //당첨자 목록 버튼
@@ -75,7 +72,7 @@ public class AdminController {
     @GetMapping("/personality-test-list")
     @Operation(summary = "레이싱 게임 유형검사", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-211#887801621")
     public ResponseEntity<List<PersonalityTestDTO>> getPersonalities() {
-        return ResponseEntity.ok(racingService.getPersonalityList());
+        return ResponseEntity.ok(racingService.getPersonalityTestList());
     }
 
     @PostMapping("/personality-test") //유형 검사 질문박스 수정
@@ -83,12 +80,9 @@ public class AdminController {
         return ResponseEntity.ok(racingService.updatePersonalityTest(personalityTestDTO));
     }
 
-    private boolean isDrawingAvailable(List<WinnerSettingDTO> winnerSettingDTOList) {
-        int size = racingService.getEventUserSize(EventId.Racing.getValue());//현재 참가자 수
-        int drawNum = 0; // 추첨할 숫자
-        for (WinnerSettingDTO winnerSettingDTO : winnerSettingDTOList) {
-            drawNum += winnerSettingDTO.getNum();
-        }
-        return size >= drawNum;
-    }//추첨이 가능한지 확인하는 메소드
+    @GetMapping("/ci-cd-test")
+    public ResponseEntity<String> getCiCd() {
+        return ResponseEntity.ok("ci/cd success!");
+    }
+
 }
