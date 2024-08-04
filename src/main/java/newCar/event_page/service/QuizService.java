@@ -37,8 +37,9 @@ public class QuizService {
     }
 
     public QuizDTO updateQuiz(QuizDTO quizDTO) {
-        Quiz quiz = quizRepository.findById(quizDTO.getId())
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 퀴즈 ID입니다."));
+        Long id = quizDTO.getId();
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(id + "- 존재하지 않는 퀴즈 ID입니다."));
 
         if(quizDTO.getPostDate() != null){
             throw new UnmodifiableFieldException("게시 날짜는 변경할 수 없습니다.");

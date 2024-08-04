@@ -7,6 +7,7 @@ import newCar.event_page.dto.WinnerSettingDTO;
 import newCar.event_page.entity.event.EventUser;
 import newCar.event_page.entity.event.racing.PersonalityTest;
 import newCar.event_page.entity.event.racing.RacingWinner;
+import newCar.event_page.exception.ExcessiveWinnersRequestedException;
 import newCar.event_page.participant.Participant;
 import newCar.event_page.repository.EventUserRepository;
 import newCar.event_page.repository.racing.PersonalityTestRepository;
@@ -29,26 +30,45 @@ public class RacingService {
 
     private double totalWeight;
 
-    public List<PersonalityTestDTO> getPersonalityList() {
-        List<PersonalityTest> list = personalityTestRepository.findAll();
-        List<PersonalityTestDTO> personalityTestDTOList = new ArrayList<>();
-        for(PersonalityTest temp : list) {
-            personalityTestDTOList.add(PersonalityTestDTO.toDTO(temp));
-        }
-        return personalityTestDTOList;
+    @Transactional(readOnly = true)
+    public List<PersonalityTestDTO> getPersonalityTestList() {
+        return personalityTestRepository.findAllByOrderByIdAsc()
+                .stream()
+                .map(PersonalityTestDTO::toDTO)
+                .toList();
     }
 
     public PersonalityTestDTO updatePersonalityTest(PersonalityTestDTO personalityTestDTO) {
-        PersonalityTest personalityTest = personalityTestRepository.findById(personalityTestDTO.getId()).get();
+        Long id = personalityTestDTO.getId();
+        PersonalityTest personalityTest = personalityTestRepository.findById(id)
+                        .orElseThrow(() -> new NoSuchElementException(id + "- 존재하지 않는 유형검사 ID입니다."));
+
         personalityTest.update(personalityTestDTO);
         personalityTestRepository.save(personalityTest);
+
         return PersonalityTestDTO.toDTO(personalityTest);
     }
 
+    public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long racingEventId) {
+        List<EventUser> eventUserList = eventUserRepository.findByEventId(racingEventId); //Racing게임을 참가한 사람들의 목록을 받아온다
 
-    public void drawWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId) {
-        racingWinnerRepository.deleteByEventId(eventId);//deleteById
-        List<EventUser> eventUserList = eventUserRepository.findByEventId(eventId); //Racing게임을 참가한 사람들의 목록을 받아온다
+        int participantCount = eventUserList.size();
+
+        int drawCount = winnerSettingDTOList
+                .stream()
+                .mapToInt(WinnerSettingDTO::getNum)
+                .sum();
+
+        if(participantCount < drawCount) {
+            throw new ExcessiveWinnersRequestedException(
+                    "추첨하려는 인원이 참가자 수보다 많습니다." +
+                    "추첨 인원 : " + drawCount +
+                    " 참가자 수 : " + participantCount
+            );
+        }
+
+        racingWinnerRepository.deleteByEventId(racingEventId);
+
         Set<Participant> participantSet = new LinkedHashSet<>();
         totalWeight = 0;
         double weight = 0;
@@ -57,13 +77,7 @@ public class RacingService {
             participantSet.add(new Participant(eventUser.getUser().getId(), weight));
             totalWeight += weight;
         }//각 참가자의 가중치와 전체 가중치를 구해 준다
-        setWinners(winnerSettingDTOList, eventId, participantSet);
-    }
-
-
-
-    public int getEventUserSize(Long eventId) {
-        return eventUserRepository.findByEventId(eventId).size();
+        setWinners(winnerSettingDTOList, racingEventId, participantSet);
     }
 
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
@@ -84,7 +98,7 @@ public class RacingService {
                 totalWeight -= winner.weight; //전체가중치에서 당첨자의 가중치를 빼준다
                 participantSet.remove(winner);//중복 제거를 위해 Set에서 제거 해준다
                 racingWinnerRepository.save(new RacingWinner(racingEventRepository.getReferenceById(eventId),
-                        eventUserRepository.findByUserIdAndEvendId(winner.userId, eventId),rank));
+                        eventUserRepository.findByUserIdAndEventId(winner.userId, eventId),rank));
             }
         }
     }
