@@ -45,7 +45,5 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            xargs docker rm --force < running_container_id
-            docker rmi web-app
-            docker build -t web-app .
-            docker run --name web-server -p 8080:8080 -d web-app > running_container_id
+            cd /home/ubuntu/event-page
+            ./exec.sh
