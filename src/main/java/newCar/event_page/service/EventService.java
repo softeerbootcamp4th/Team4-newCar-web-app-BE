@@ -3,8 +3,11 @@ package newCar.event_page.service;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.dto.EventCommonDTO;
 import newCar.event_page.entity.event.EventCommon;
+import newCar.event_page.entity.event.EventId;
 import newCar.event_page.entity.event.quiz.Quiz;
+import newCar.event_page.entity.event.quiz.QuizEvent;
 import newCar.event_page.repository.EventCommonRepository;
+import newCar.event_page.repository.quiz.QuizEventRepository;
 import newCar.event_page.repository.quiz.QuizRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ public class EventService {
 
     private final EventCommonRepository eventCommonRepository;
     private final QuizRepository quizRepository;
+    private final QuizEventRepository quizEventRepository;
 
     @Transactional(readOnly = true)
     public EventCommonDTO getEventInfo() {
@@ -35,19 +39,31 @@ public class EventService {
                 .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않아 수정이 불가능합니다."));
 
         eventCommon.update(eventCommonDTO);
-        updateQuizPostDates(eventCommonDTO.getStartTime().toLocalDate());
+        long duration = eventCommon.getDuration();
+        updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
+
 
         return EventCommonDTO.toDTO(eventCommon);
     }
 
-    private void updateQuizPostDates(LocalDate startDate) {
+    private void updateQuiz(LocalDate startDate, long duration) {
         List<Quiz> quizList = quizRepository.findAllByOrderByPostDateAsc();
+        QuizEvent quizEvent = quizEventRepository.findById(EventId.Quiz.getValue())
+                .orElseThrow(() -> new NoSuchElementException("퀴즈 이벤트가 존재하지 않습니다."));
+
+        int quizCount = quizList.size();
+        if (quizCount < duration) {
+            for (int i = 0; i < duration - quizCount; i++) {
+                quizList.add(Quiz.getDummy(quizEvent));
+            }
+        }
+
         for (Quiz quiz : quizList) {
             quiz.setPostDate(startDate);
             startDate = startDate.plusDays(1L);
         }
+
         quizRepository.saveAll(quizList);
     }
-
 }
 

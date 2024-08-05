@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import newCar.event_page.dto.EventCommonDTO;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Setter
@@ -34,5 +36,11 @@ public class EventCommon {
         this.managerName=eventCommonDTO.getManagerName();
         this.startTime=eventCommonDTO.getStartTime();
         this.endTime=eventCommonDTO.getEndTime();
+    }
+
+    public long getDuration(){
+        LocalDate startDate = startTime.toLocalDate();
+        LocalDate endDate = endTime.toLocalDate();
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1;
     }
 }

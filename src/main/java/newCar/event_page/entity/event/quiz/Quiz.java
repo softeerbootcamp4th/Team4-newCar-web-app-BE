@@ -2,9 +2,12 @@ package newCar.event_page.entity.event.quiz;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import newCar.event_page.dto.QuizDTO;
+import newCar.event_page.entity.event.EventId;
 
 import java.time.LocalDate;
 
@@ -46,10 +49,24 @@ public class Quiz {
         this.winnerCount = quizDTO.getWinnerCount();
         this.postDate=quizDTO.getPostDate();
         this.question=quizDTO.getQuestion();
-        this.choice1=quizDTO.getChoice1();
-        this.choice2=quizDTO.getChoice2();
-        this.choice3=quizDTO.getChoice3();
-        this.choice4=quizDTO.getChoice4();
+        this.choice1=quizDTO.getChoices().get(0).getText();
+        this.choice2=quizDTO.getChoices().get(1).getText();
+        this.choice3=quizDTO.getChoices().get(2).getText();
+        this.choice4=quizDTO.getChoices().get(3).getText();
         this.correctAnswer=quizDTO.getCorrectAnswer();
+    }
+
+    public static Quiz getDummy(QuizEvent quizEvent){
+        Quiz quiz = new Quiz();
+        quiz.setPostDate(LocalDate.parse("2000-01-01"));
+        quiz.setQuestion("질문을 입력해주세요");
+        quiz.setQuizEvent(quizEvent);
+        quiz.setCorrectAnswer(1);
+        quiz.setChoice1("1번 선택지를 입력하세요");
+        quiz.setChoice2("2번 선택지를 입력하세요");
+        quiz.setChoice3("3번 선택지를 입력하세요");
+        quiz.setChoice4("4번 선택지를 입력하세요");
+        quiz.setWinnerCount(100);
+        return quiz;
     }
 }

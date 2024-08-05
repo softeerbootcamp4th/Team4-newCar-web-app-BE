@@ -8,6 +8,8 @@ import lombok.Data;
 import newCar.event_page.entity.event.quiz.Quiz;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 
 @Builder
@@ -21,26 +23,29 @@ public class QuizDTO {
     @NotNull
     private Integer winnerCount;
 
+    @NotNull
     private LocalDate postDate;
 
     @NotEmpty
     private String question;
 
     @NotEmpty
-    private String choice1;
-
-    @NotEmpty
-    private String choice2;
-
-    @NotEmpty
-    private String choice3;
-
-    @NotEmpty
-    private String choice4;
+    private List<Choice> choices;
 
     @NotNull
     private Integer correctAnswer;
 
+
+    @Data
+    @Builder
+    public static class Choice{
+
+        @NotNull
+        private Integer num;
+
+        @NotEmpty
+        private String text;
+    }
 
     public static QuizDTO toDTO(Quiz quiz)
     {
@@ -49,10 +54,12 @@ public class QuizDTO {
                 .winnerCount(quiz.getWinnerCount())
                 .postDate(quiz.getPostDate())
                 .question(quiz.getQuestion())
-                .choice1(quiz.getChoice1())
-                .choice2(quiz.getChoice2())
-                .choice3(quiz.getChoice3())
-                .choice4(quiz.getChoice4())
+                .choices(Arrays.asList(
+                        Choice.builder().num(0).text(quiz.getChoice1()).build(),
+                        Choice.builder().num(1).text(quiz.getChoice2()).build(),
+                        Choice.builder().num(2).text(quiz.getChoice3()).build(),
+                        Choice.builder().num(3).text(quiz.getChoice4()).build()
+                ))
                 .correctAnswer(quiz.getCorrectAnswer())
                 .build();
     }
