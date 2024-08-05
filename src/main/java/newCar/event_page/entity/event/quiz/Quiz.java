@@ -44,7 +44,6 @@ public class Quiz {
 
     public void update(QuizDTO quizDTO) {
         this.winnerCount = quizDTO.getWinnerCount();
-        this.postDate=quizDTO.getPostDate();
         this.question=quizDTO.getQuestion();
         this.choice1=quizDTO.getChoices().get(0).getText();
         this.choice2=quizDTO.getChoices().get(1).getText();
