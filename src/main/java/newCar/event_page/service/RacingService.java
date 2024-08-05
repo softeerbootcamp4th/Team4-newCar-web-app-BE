@@ -81,12 +81,10 @@ public class RacingService {
     }
 
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
-        List<RacingWinner> racingWinnerList = racingWinnerRepository.findByEventId(eventId);
-        List<RacingWinnersDTO> racingWinnersDTOList = new ArrayList<>();
-        for(RacingWinner racingWinner : racingWinnerList) {
-            racingWinnersDTOList.add(RacingWinnersDTO.toDTO(racingWinner));
-        }
-        return racingWinnersDTOList;
+        return racingWinnerRepository.findByEventId(eventId)
+                .stream()
+                .map(RacingWinnersDTO::toDTO)
+                .toList();
     }
 
     private void setWinners(List<WinnerSettingDTO> winnerSettingDTOList, Long eventId, Set<Participant> participantSet) {

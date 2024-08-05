@@ -2,12 +2,13 @@ package newCar.event_page.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.entity.Team;
 import newCar.event_page.entity.event.racing.RacingWinner;
 
-@RequiredArgsConstructor
 @Data
+@RequiredArgsConstructor
 @Builder
 public class RacingWinnersDTO {
 
