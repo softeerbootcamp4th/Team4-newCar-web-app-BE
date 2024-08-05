@@ -8,7 +8,7 @@ import newCar.event_page.entity.event.EventUser;
 @Getter
 public class QuizWinner {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

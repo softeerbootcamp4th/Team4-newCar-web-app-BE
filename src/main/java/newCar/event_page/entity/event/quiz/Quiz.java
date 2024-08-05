@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Setter
 public class Quiz {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="QUIZ_ID")
     private Long id;
 

@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 @DiscriminatorColumn(name="etype")
 public class Event {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="EVENT_ID")
     private Long id;
 

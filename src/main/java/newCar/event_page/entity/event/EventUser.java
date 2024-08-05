@@ -9,7 +9,7 @@ import newCar.event_page.entity.User;
 @Getter
 public class EventUser {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
 @Getter
 public class EventCommon {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="EVENT_COMMON_ID")
     private Long id;
 

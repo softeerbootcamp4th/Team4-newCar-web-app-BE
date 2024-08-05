@@ -12,7 +12,7 @@ import newCar.event_page.entity.event.EventUser;
 @Getter
 public class RacingWinner {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

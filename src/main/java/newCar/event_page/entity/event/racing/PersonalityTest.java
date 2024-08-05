@@ -11,7 +11,7 @@ import newCar.event_page.entity.TeamScore;
 @Getter
 public class PersonalityTest {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
