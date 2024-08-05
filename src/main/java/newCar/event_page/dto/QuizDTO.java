@@ -23,7 +23,6 @@ public class QuizDTO {
     @NotNull
     private Integer winnerCount;
 
-    @NotNull
     private LocalDate postDate;
 
     @NotEmpty
