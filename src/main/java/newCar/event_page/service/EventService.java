@@ -63,7 +63,8 @@ public class EventService {
             startDate = startDate.plusDays(1L);
         }
 
-        quizRepository.saveAll(quizList);
+        quizList.forEach(quizRepository::save);
+        //quizRepository.saveAll(quizList);
     }
 }
 
