@@ -81,6 +81,7 @@ public class RacingService {
         setWinners(winnerSettingDTOList, racingEventId, participantSet);
     }
 
+    @Transactional(readOnly = true)
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
         List<RacingWinner> winnerList = racingWinnerRepository.findByEventId(eventId);
         if(winnerList.isEmpty()) {
