@@ -20,6 +20,7 @@ public class RacingWinner {
     private RacingEvent racingEvent;
 
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name="USER_ID")
     private EventUser eventUser;
 
