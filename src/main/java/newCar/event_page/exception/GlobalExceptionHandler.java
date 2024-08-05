@@ -15,7 +15,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
-    @ExceptionHandler({UnmodifiableFieldException.class, ExcessiveWinnersRequestedException.class})
+    @ExceptionHandler({
+            UnmodifiableFieldException.class,
+            ExcessiveWinnersRequestedException.class,
+            DrawNotYetConductedException.class
+    })
     public ResponseEntity<String> handleUnmodifiableFieldException(final RuntimeException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
