@@ -61,7 +61,7 @@ public class EventService {
     }
 
     private void updateQuiz(LocalDate startDate, long duration) {
-        List<Quiz> quizList = quizRepository.findAllByOrderByPostDateAsc();
+        List<Quiz> quizList = quizRepository.findAllByOrderByIdAsc();
 
         for (Quiz quiz : quizList) {
             quiz.setPostDate(startDate);
