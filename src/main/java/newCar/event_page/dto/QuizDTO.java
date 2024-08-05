@@ -55,10 +55,10 @@ public class QuizDTO {
                 .postDate(quiz.getPostDate())
                 .question(quiz.getQuestion())
                 .choices(Arrays.asList(
-                        Choice.builder().num(1).text(quiz.getChoice1()).build(),
-                        Choice.builder().num(2).text(quiz.getChoice2()).build(),
-                        Choice.builder().num(3).text(quiz.getChoice3()).build(),
-                        Choice.builder().num(4).text(quiz.getChoice4()).build()
+                        Choice.builder().num(0).text(quiz.getChoice1()).build(),
+                        Choice.builder().num(1).text(quiz.getChoice2()).build(),
+                        Choice.builder().num(2).text(quiz.getChoice3()).build(),
+                        Choice.builder().num(3).text(quiz.getChoice4()).build()
                 ))
                 .correctAnswer(quiz.getCorrectAnswer())
                 .build();

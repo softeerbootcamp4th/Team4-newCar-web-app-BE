@@ -56,19 +56,23 @@ public class RacingService {
         List<EventUser> eventUserList = eventUserRepository.findByEventId(eventId); //Racing게임을 참가한 사람들의 목록을 받아온다
         Set<Participant> participantSet = new LinkedHashSet<>();
         totalWeight = 0;
-        double weight = 0;
+        double weight = 0;//Racing Winner 생성자 관련해서 에러 생김
         for (EventUser eventUser : eventUserList) {
             weight = getWeight(eventUser.getUser().getClickNumber());
             participantSet.add(new Participant(eventUser.getUser().getId(), weight));
             totalWeight += weight;
         }//각 참가자의 가중치와 전체 가중치를 구해 준다
         setWinners(winnerSettingDTOList, eventId, participantSet);
-        return new ResponseEntity<>("HTTP 200 OK", HttpStatus.OK);
+        return new ResponseEntity<>("추첨이 완료되었습니다", HttpStatus.OK);
     }
 
 
     @Transactional(readOnly = true)
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
+        System.out.println(racingWinnerRepository.findByEventId(eventId).stream()
+                .map(RacingWinnersDTO::toDTO)
+                .collect(Collectors.toList()));
+
          return racingWinnerRepository.findByEventId(eventId).stream()
                 .map(RacingWinnersDTO::toDTO)
                 .collect(Collectors.toList());
