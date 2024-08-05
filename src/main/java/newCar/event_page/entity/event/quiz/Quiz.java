@@ -2,12 +2,9 @@ package newCar.event_page.entity.event.quiz;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import newCar.event_page.dto.QuizDTO;
-import newCar.event_page.entity.event.EventId;
 
 import java.time.LocalDate;
 
@@ -56,7 +53,7 @@ public class Quiz {
         this.correctAnswer=quizDTO.getCorrectAnswer();
     }
 
-    public static Quiz getDummy(QuizEvent quizEvent){
+    public static Quiz createDummy(QuizEvent quizEvent){
         Quiz quiz = new Quiz();
         quiz.setPostDate(LocalDate.parse("2000-01-01"));
         quiz.setQuestion("질문을 입력해주세요");

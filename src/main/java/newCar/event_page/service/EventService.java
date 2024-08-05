@@ -37,34 +37,38 @@ public class EventService {
     public EventCommonDTO updateEventInfo(EventCommonDTO eventCommonDTO){
         EventCommon eventCommon = eventCommonRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않아 수정이 불가능합니다."));
-
         eventCommon.update(eventCommonDTO);
-        long duration = eventCommon.getDuration();
-        updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
 
+        long duration = eventCommon.getDuration();
+
+        putDummyIfRequired(duration);
+        updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
 
         return EventCommonDTO.toDTO(eventCommon);
     }
 
-    private void updateQuiz(LocalDate startDate, long duration) {
-        List<Quiz> quizList = quizRepository.findAllByOrderByPostDateAsc();
+    private void putDummyIfRequired(long duration) {
+        long quizCount = quizRepository.count();
+
+        if(quizCount > duration) return;
+
         QuizEvent quizEvent = quizEventRepository.findById(EventId.Quiz.getValue())
                 .orElseThrow(() -> new NoSuchElementException("퀴즈 이벤트가 존재하지 않습니다."));
 
-        int quizCount = quizList.size();
-        if (quizCount < duration) {
-            for (int i = 0; i < duration - quizCount; i++) {
-                quizList.add(Quiz.getDummy(quizEvent));
-            }
+        for(int i = 0; i < duration - quizCount; i++){
+            quizRepository.save(Quiz.createDummy(quizEvent));
         }
+    }
+
+    private void updateQuiz(LocalDate startDate, long duration) {
+        List<Quiz> quizList = quizRepository.findAllByOrderByPostDateAsc();
 
         for (Quiz quiz : quizList) {
             quiz.setPostDate(startDate);
             startDate = startDate.plusDays(1L);
         }
 
-        quizList.forEach(quizRepository::save);
-        //quizRepository.saveAll(quizList);
+        quizRepository.saveAll(quizList);
     }
 }
 
