@@ -7,6 +7,7 @@ import newCar.event_page.dto.WinnerSettingDTO;
 import newCar.event_page.entity.event.EventUser;
 import newCar.event_page.entity.event.racing.PersonalityTest;
 import newCar.event_page.entity.event.racing.RacingWinner;
+import newCar.event_page.exception.DrawNotYetConductedException;
 import newCar.event_page.exception.ExcessiveWinnersRequestedException;
 import newCar.event_page.participant.Participant;
 import newCar.event_page.repository.EventUserRepository;
@@ -81,7 +82,12 @@ public class RacingService {
     }
 
     public List<RacingWinnersDTO> getWinnerList(Long eventId) {
-        return racingWinnerRepository.findByEventId(eventId)
+        List<RacingWinner> winnerList = racingWinnerRepository.findByEventId(eventId);
+        if(winnerList.isEmpty()) {
+            throw new DrawNotYetConductedException("당첨자 추첨이 아직 이루어지지 않았습니다.");
+        }
+
+        return winnerList
                 .stream()
                 .map(RacingWinnersDTO::toDTO)
                 .toList();

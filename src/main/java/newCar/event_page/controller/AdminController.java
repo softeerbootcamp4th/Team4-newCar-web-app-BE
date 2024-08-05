@@ -62,11 +62,7 @@ public class AdminController {
     @GetMapping("/racing-winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
     public ResponseEntity<?> getWinnerList() {
-        List<RacingWinnersDTO> winnersDTOList = racingService.getWinnerList(EventId.Racing.getValue());
-        if (winnersDTOList.isEmpty()) {//당첨자 추첨이 이뤄지지 않았을 경우 당첨자 테이블이 비어있다
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("당첨자 추첨이 아직 이뤄지지 않았습니다");
-        }
-        return ResponseEntity.ok(winnersDTOList);
+        return ResponseEntity.ok(racingService.getWinnerList(EventId.Racing.getValue()));
     }
 
     @GetMapping("/personality-test-list")
