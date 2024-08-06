@@ -1,19 +1,32 @@
 package newCar.event_page.dto;
 
+import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDate;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import newCar.event_page.entity.Team;
+import newCar.event_page.entity.event.racing.RacingWinner;
 
 @Data
+@RequiredArgsConstructor
+@Builder
 public class RacingWinnersDTO {
 
-    private String name;
-    private String phoneNumber;
-    private LocalDate time;
+    private final Integer rank;
+    private final String name;
+    private final String phoneNumber;
+    private final Integer clickNumber;
+    private final Team team;
 
-    public RacingWinnersDTO(String name, String phoneNumber, LocalDate time) {
-        this.name = name;
-        this.phoneNumber = phoneNumber;
-        this.time = time;
+
+    public static RacingWinnersDTO toDTO(RacingWinner racingWinner) {
+
+        return RacingWinnersDTO.builder()
+                .rank(racingWinner.getRank())
+                .name(racingWinner.getEventUser().getUser().getUserName())
+                .phoneNumber(racingWinner.getEventUser().getUser().getPhoneNumber())
+                .clickNumber(racingWinner.getEventUser().getUser().getClickNumber())
+                .team(racingWinner.getEventUser().getUser().getTeam())
+                .build();
     }
 }

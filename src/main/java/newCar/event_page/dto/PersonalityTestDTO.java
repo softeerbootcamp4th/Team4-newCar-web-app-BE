@@ -1,43 +1,74 @@
 package newCar.event_page.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
+import newCar.event_page.entity.event.racing.PersonalityTest;
 
+import java.util.Arrays;
+import java.util.List;
 
+@Builder
 @Data
 public class PersonalityTestDTO {
+
+    @NotNull
     private Long id;
 
+    @NotEmpty
     private String question;
 
-    private String choice1;
-    private String choice2;
-
-    private int choice1_pet_score;
-    private int choice1_travel_score;
-    private int choice1_space_score;
-    private int choice1_leisure_score;
-
-    private int choice2_pet_score;
-    private int choice2_travel_score;
-    private int choice2_space_score;
-    private int choice2_leisure_score;
+    @NotEmpty
+    private List<Choice> choices;
 
 
-    public PersonalityTestDTO(Long id, String question, String choice1, String choice2, int choice1_pet_score,
-                              int choice1_travel_score, int choice1_space_score, int choice1_leisure_score, int choice2_pet_score,
-                              int choice2_travel_score, int choice2_space_score, int choice2_leisure_score) {
-        this.id = id;
-        this.question = question;
-        this.choice1 = choice1;
-        this.choice2 = choice2;
-        this.choice1_pet_score = choice1_pet_score;
-        this.choice1_travel_score = choice1_travel_score;
-        this.choice1_space_score = choice1_space_score;
-        this.choice1_leisure_score = choice1_leisure_score;
-        this.choice2_pet_score = choice2_pet_score;
-        this.choice2_travel_score = choice2_travel_score;
-        this.choice2_space_score = choice2_space_score;
-        this.choice2_leisure_score = choice2_leisure_score;
+    @Builder
+    @Data
+    public static class Choice {
+
+        @NotEmpty
+        private String text;
+
+        @NotEmpty
+        private List<Score> scores;
+    }
+
+    @Builder
+    @Data
+    public static class Score{
+        @NotEmpty
+        private String type;
+
+        @NotNull
+        private Integer value;
+    }
+
+
+    public static PersonalityTestDTO toDTO(PersonalityTest personalityTest) {
+        return PersonalityTestDTO.builder()
+                .id(personalityTest.getId())
+                .question(personalityTest.getQuestion())
+                .choices(Arrays.asList(
+                        Choice.builder()
+                                .text(personalityTest.getChoice1())
+                                .scores(Arrays.asList(
+                                        Score.builder().type("pet").value(personalityTest.getChoice1Scores().getPetScore()).build(),
+                                        Score.builder().type("travel").value(personalityTest.getChoice1Scores().getTravelScore()).build(),
+                                        Score.builder().type("space").value(personalityTest.getChoice1Scores().getSpaceScore()).build(),
+                                        Score.builder().type("leisure").value(personalityTest.getChoice1Scores().getLeisureScore()).build()
+                                ))
+                                .build(),
+                        Choice.builder()
+                                .text(personalityTest.getChoice2())
+                                .scores(Arrays.asList(
+                                        Score.builder().type("pet").value(personalityTest.getChoice2Scores().getPetScore()).build(),
+                                        Score.builder().type("travel").value(personalityTest.getChoice2Scores().getTravelScore()).build(),
+                                        Score.builder().type("space").value(personalityTest.getChoice2Scores().getSpaceScore()).build(),
+                                        Score.builder().type("leisure").value(personalityTest.getChoice2Scores().getLeisureScore()).build()
+                                ))
+                                .build()
+                ))
+                .build();
     }
 }

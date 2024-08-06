@@ -1,35 +1,65 @@
 package newCar.event_page.dto;
 
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Data;
+import newCar.event_page.entity.event.quiz.Quiz;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
+
+@Builder
 @Data
 public class QuizDTO {
 
+
+    @NotNull
     private Long id;
-    private int winnerCount;
+
+    @NotNull
+    private Integer winnerCount;
+
     private LocalDate postDate;
+
+    @NotEmpty
     private String question;
 
-    private String choice1;
-    private String choice2;
-    private String choice3;
-    private String choice4;
+    @NotEmpty
+    private List<Choice> choices;
 
-    private int correctAnswer;
+    @NotNull
+    private Integer correctAnswer;
 
 
-    public QuizDTO(Long id, int winnerCount, LocalDate postDate, String question, String choice1, String choice2, String choice3, String choice4, int correctAnswer) {
-        this.id = id;
-        this.winnerCount = winnerCount;
-        this.postDate = postDate;
-        this.question = question;
-        this.choice1 = choice1;
-        this.choice2 = choice2;
-        this.choice3 = choice3;
-        this.choice4 = choice4;
-        this.correctAnswer = correctAnswer;
+    @Data
+    @Builder
+    public static class Choice{
+
+        @NotNull
+        private Integer num;
+
+        @NotEmpty
+        private String text;
+    }
+
+    public static QuizDTO toDTO(Quiz quiz)
+    {
+        return QuizDTO.builder()
+                .id(quiz.getId())
+                .winnerCount(quiz.getWinnerCount())
+                .postDate(quiz.getPostDate())
+                .question(quiz.getQuestion())
+                .choices(Arrays.asList(
+                        Choice.builder().num(0).text(quiz.getChoice1()).build(),
+                        Choice.builder().num(1).text(quiz.getChoice2()).build(),
+                        Choice.builder().num(2).text(quiz.getChoice3()).build(),
+                        Choice.builder().num(3).text(quiz.getChoice4()).build()
+                ))
+                .correctAnswer(quiz.getCorrectAnswer())
+                .build();
     }
 }

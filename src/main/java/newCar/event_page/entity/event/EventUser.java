@@ -9,7 +9,7 @@ import newCar.event_page.entity.User;
 @Getter
 public class EventUser {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -19,6 +19,5 @@ public class EventUser {
     @ManyToOne
     @JoinColumn(name = "EVENT_ID", foreignKey = @ForeignKey(name = "FK_EVENT_ID"))
     private Event event;
-
 }
 

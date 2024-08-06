@@ -3,13 +3,15 @@ package newCar.event_page.entity.event.racing;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import newCar.event_page.dto.PersonalityTestDTO;
+import newCar.event_page.entity.Team;
 import newCar.event_page.entity.TeamScore;
 
 @Entity
 @Getter
 public class PersonalityTest {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -51,4 +53,19 @@ public class PersonalityTest {
                     column = @Column(name = "choice2_leisure_score")),
     })
     private TeamScore choice2Scores;
+
+    public void update(PersonalityTestDTO personalityTestDTO)
+    {
+        this.question = personalityTestDTO.getQuestion();
+        this.choice1= personalityTestDTO.getChoices().get(0).getText();
+        this.choice2=personalityTestDTO.getChoices().get(1).getText();
+        this.choice1Scores = new TeamScore(personalityTestDTO.getChoices().get(0).getScores().get(0).getValue(),
+                personalityTestDTO.getChoices().get(0).getScores().get(1).getValue(),
+                personalityTestDTO.getChoices().get(0).getScores().get(2).getValue(),
+                personalityTestDTO.getChoices().get(0).getScores().get(3).getValue());
+        this.choice2Scores = new TeamScore(personalityTestDTO.getChoices().get(1).getScores().get(0).getValue(),
+                personalityTestDTO.getChoices().get(1).getScores().get(1).getValue(),
+                personalityTestDTO.getChoices().get(1).getScores().get(2).getValue(),
+                personalityTestDTO.getChoices().get(1).getScores().get(3).getValue());
+    }
 }

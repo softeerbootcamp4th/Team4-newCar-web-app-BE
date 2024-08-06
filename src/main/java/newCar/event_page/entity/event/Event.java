@@ -1,37 +1,28 @@
 package newCar.event_page.entity.event;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name="etype")
-@Table(name = "event", indexes = @Index(name = "idx_event_id", columnList = "EVENT_ID"))
 public class Event {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="EVENT_ID")
     private Long id;
 
-    @NotNull
-    private String eventName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="EVENT_COMMON_ID")
+    private EventCommon eventCommon;
 
-    @NotNull
-    private String managerName;
-
-    @Enumerated(EnumType.STRING)
-    private EventStatus status;
-
-    @NotNull
-    private LocalDateTime startTime;
-
-    @NotNull
-    private LocalDateTime endTime;
-
+    public long getDuration(){
+        LocalDate startDate = eventCommon.getStartTime().toLocalDate();
+        LocalDate endDate = eventCommon.getEndTime().toLocalDate();
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1;
+    }
 }
