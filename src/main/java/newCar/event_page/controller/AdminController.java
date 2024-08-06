@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.model.dto.*;
+import newCar.event_page.model.entity.Administrator;
 import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.service.EventService;
+import newCar.event_page.service.LoginService;
 import newCar.event_page.service.QuizService;
 import newCar.event_page.service.RacingService;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class AdminController {
     private final EventService eventService;
     private final QuizService quizService;
     private final RacingService racingService;
+    private final LoginService loginService;
 
     @GetMapping("/common-event") //이벤트 관리 버튼(이벤트 공통, 선착순 퀴즈, 캐스퍼 레이싱 설정값 불러옴)
     @Operation(summary = "이벤트명, 상태, 담당자, 진행기간", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886120115")
@@ -75,9 +78,10 @@ public class AdminController {
         return ResponseEntity.ok(racingService.updatePersonalityTest(personalityTestDTO));
     }
 
-    @GetMapping("/ci-cd-test")
-    public ResponseEntity<String> getCiCd() {
-        return ResponseEntity.ok("ci/cd success!");
+    @PostMapping("/login")
+    public ResponseEntity<String> adminLogin(@Valid @ModelAttribute AdministratorDTO administratorDTO){
+        return loginService.admin(administratorDTO);
     }
+
 
 }
