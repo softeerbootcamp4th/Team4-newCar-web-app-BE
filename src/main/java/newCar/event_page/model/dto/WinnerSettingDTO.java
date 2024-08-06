@@ -1,4 +1,4 @@
-package newCar.event_page.dto;
+package newCar.event_page.model.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

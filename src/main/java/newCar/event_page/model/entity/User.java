@@ -1,4 +1,4 @@
-package newCar.event_page.entity;
+package newCar.event_page.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

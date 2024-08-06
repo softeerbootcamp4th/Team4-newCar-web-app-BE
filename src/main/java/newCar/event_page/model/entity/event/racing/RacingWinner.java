@@ -1,11 +1,10 @@
-package newCar.event_page.entity.event.racing;
+package newCar.event_page.model.entity.event.racing;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import newCar.event_page.entity.event.EventUser;
+import newCar.event_page.model.entity.event.EventUser;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

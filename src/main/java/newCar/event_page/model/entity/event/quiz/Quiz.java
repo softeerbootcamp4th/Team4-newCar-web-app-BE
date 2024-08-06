@@ -1,10 +1,10 @@
-package newCar.event_page.entity.event.quiz;
+package newCar.event_page.model.entity.event.quiz;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import newCar.event_page.dto.QuizDTO;
+import newCar.event_page.model.dto.QuizDTO;
 
 import java.time.LocalDate;
 

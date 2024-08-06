@@ -1,6 +1,6 @@
 package newCar.event_page.repository.racing;
 
-import newCar.event_page.entity.event.racing.RacingWinner;
+import newCar.event_page.model.entity.event.racing.RacingWinner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

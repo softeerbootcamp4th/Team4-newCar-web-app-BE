@@ -1,9 +1,9 @@
 package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.dto.QuizDTO;
-import newCar.event_page.entity.event.Event;
-import newCar.event_page.entity.event.quiz.Quiz;
+import newCar.event_page.model.dto.QuizDTO;
+import newCar.event_page.model.entity.event.Event;
+import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.exception.UnmodifiableFieldException;
 import newCar.event_page.repository.EventRepository;
 import newCar.event_page.repository.quiz.QuizRepository;

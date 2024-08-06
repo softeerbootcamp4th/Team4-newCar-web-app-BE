@@ -1,8 +1,8 @@
-package newCar.event_page.entity.event.quiz;
+package newCar.event_page.model.entity.event.quiz;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import newCar.event_page.entity.event.Event;
+import newCar.event_page.model.entity.event.Event;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,11 +1,10 @@
-package newCar.event_page.dto;
+package newCar.event_page.model.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.entity.Team;
-import newCar.event_page.entity.event.racing.RacingWinner;
+import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.entity.event.racing.RacingWinner;
 
 @Data
 @RequiredArgsConstructor

@@ -1,10 +1,10 @@
-package newCar.event_page.dto;
+package newCar.event_page.model.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import newCar.event_page.entity.event.racing.PersonalityTest;
+import newCar.event_page.model.entity.event.racing.PersonalityTest;
 
 import java.util.Arrays;
 import java.util.List;

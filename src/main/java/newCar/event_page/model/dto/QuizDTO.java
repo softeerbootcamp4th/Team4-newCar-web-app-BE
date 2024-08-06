@@ -1,11 +1,11 @@
-package newCar.event_page.dto;
+package newCar.event_page.model.dto;
 
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
-import newCar.event_page.entity.event.quiz.Quiz;
+import newCar.event_page.model.entity.event.quiz.Quiz;
 
 import java.time.LocalDate;
 import java.util.Arrays;

@@ -1,11 +1,11 @@
-package newCar.event_page.entity.event.racing;
+package newCar.event_page.model.entity.event.racing;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
-import newCar.event_page.entity.event.Event;
+import newCar.event_page.model.entity.event.Event;
 
 import java.util.HashSet;
 import java.util.Set;

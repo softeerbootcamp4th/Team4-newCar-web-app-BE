@@ -1,4 +1,4 @@
-package newCar.event_page.entity.event;
+package newCar.event_page.model.entity.event;
 
 import jakarta.persistence.*;
 import lombok.Getter;

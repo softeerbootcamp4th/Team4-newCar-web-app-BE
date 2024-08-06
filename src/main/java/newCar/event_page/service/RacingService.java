@@ -1,15 +1,14 @@
 package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.dto.PersonalityTestDTO;
-import newCar.event_page.dto.RacingWinnersDTO;
-import newCar.event_page.dto.WinnerSettingDTO;
-import newCar.event_page.entity.event.EventUser;
-import newCar.event_page.entity.event.racing.PersonalityTest;
-import newCar.event_page.entity.event.racing.RacingWinner;
+import newCar.event_page.model.dto.PersonalityTestDTO;
+import newCar.event_page.model.dto.RacingWinnersDTO;
+import newCar.event_page.model.dto.WinnerSettingDTO;
+import newCar.event_page.model.entity.event.EventUser;
+import newCar.event_page.model.entity.event.racing.PersonalityTest;
+import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.exception.DrawNotYetConductedException;
 import newCar.event_page.exception.ExcessiveWinnersRequestedException;
-import newCar.event_page.participant.Participant;
 import newCar.event_page.repository.EventUserRepository;
 import newCar.event_page.repository.racing.PersonalityTestRepository;
 import newCar.event_page.repository.racing.RacingEventRepository;
@@ -138,6 +137,15 @@ public class RacingService {
 
     private double getWeight(int clickNumber) {
         return 1 + ((Math.log(clickNumber+1))/(Math.log(30)));
+    }
+
+    class Participant {
+        public Long userId;
+        public double weight;
+        public Participant(Long userId, double weight) {
+            this.userId=userId;
+            this.weight=weight;
+        }
     }
 }
 

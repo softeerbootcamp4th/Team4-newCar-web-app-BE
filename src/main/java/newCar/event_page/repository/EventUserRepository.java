@@ -1,9 +1,7 @@
 package newCar.event_page.repository;
 
-import newCar.event_page.entity.event.EventUser;
+import newCar.event_page.model.entity.event.EventUser;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

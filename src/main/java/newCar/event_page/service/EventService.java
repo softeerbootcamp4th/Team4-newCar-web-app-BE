@@ -1,11 +1,11 @@
 package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.dto.EventCommonDTO;
-import newCar.event_page.entity.event.EventCommon;
-import newCar.event_page.entity.event.EventId;
-import newCar.event_page.entity.event.quiz.Quiz;
-import newCar.event_page.entity.event.quiz.QuizEvent;
+import newCar.event_page.model.dto.EventCommonDTO;
+import newCar.event_page.model.entity.event.EventCommon;
+import newCar.event_page.model.entity.event.EventId;
+import newCar.event_page.model.entity.event.quiz.Quiz;
+import newCar.event_page.model.entity.event.quiz.QuizEvent;
 import newCar.event_page.repository.EventCommonRepository;
 import newCar.event_page.repository.quiz.QuizEventRepository;
 import newCar.event_page.repository.quiz.QuizRepository;
