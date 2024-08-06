@@ -2,7 +2,7 @@ name: Deploy To EC2
 
 on:
   push:
-    branches: [ "main", "TASK-149--Login" ]
+    branches: [ "main", "TASK-149-Login" ]
 
 jobs:
   deploy:
