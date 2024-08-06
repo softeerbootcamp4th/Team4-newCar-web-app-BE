@@ -2,8 +2,9 @@ package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.AdminLoginFailException;
-import newCar.event_page.model.Session;
-import newCar.event_page.model.SessionStorage;
+import newCar.event_page.service.session.AdminSession;
+import newCar.event_page.service.session.Session;
+import newCar.event_page.service.session.SessionStorage;
 import newCar.event_page.model.dto.AdministratorDTO;
 import newCar.event_page.model.entity.Administrator;
 import newCar.event_page.repository.AdministratorRepository;
@@ -31,13 +32,10 @@ public class LoginService {
             throw new AdminLoginFailException("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
-        System.out.println("로그인 성공!");
-
-        //TODO 로그인 세션 주는 로직 추가
         String sessionId = UUID.randomUUID().toString();
-        Session session = new Session(sessionId, administratorDTO.getAdminId(), "administrator");
+        Session session = new AdminSession(sessionId);
 
-        ResponseCookie cookie = ResponseCookie.from("adminSession", sessionId)
+        ResponseCookie cookie = ResponseCookie.from("session", sessionId)
                 .httpOnly(true)
                 .path("/admin")
                 .maxAge(60 * 30)
@@ -46,10 +44,8 @@ public class LoginService {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        System.out.println("여기까지 ㄱㅊ");
         sessionStorage.addSession(session);
 
-        // ResponseEntity 생성 및 반환
         return new ResponseEntity<>("관리자 로그인 성공", headers, HttpStatus.OK);
     }
 

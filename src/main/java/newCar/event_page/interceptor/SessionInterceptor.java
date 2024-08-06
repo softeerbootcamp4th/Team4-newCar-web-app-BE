@@ -2,8 +2,7 @@ package newCar.event_page.interceptor;
 
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.model.SessionStorage;
-import newCar.event_page.service.SessionService;
+import newCar.event_page.service.session.SessionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +26,7 @@ public class SessionInterceptor implements HandlerInterceptor {
         }
 
         for (Cookie cookie : request.getCookies()) {
-            if ("adminSession".equals(cookie.getName())) {
+            if ("session".equals(cookie.getName())) {
                 sessionId = cookie.getValue();
                 break;
             }

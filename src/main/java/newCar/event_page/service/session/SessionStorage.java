@@ -1,7 +1,6 @@
-package newCar.event_page.model;
+package newCar.event_page.service.session;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.model.session.Session;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
@@ -11,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class SessionStorage {
     private final RedisTemplate<String, Object> redisTemplate;
 
-    private static final String SESSION_PREFIX = "adminSession:";
+    public static final String SESSION_PREFIX = "session:";
 
     public void addSession(Session session) {
         redisTemplate.opsForValue().set(SESSION_PREFIX + session.getSessionId(), session, 30, TimeUnit.MINUTES);
