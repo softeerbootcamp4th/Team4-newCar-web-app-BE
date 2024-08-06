@@ -80,7 +80,7 @@ public class AdminController {
 
     @PostMapping("/login")
     public ResponseEntity<String> adminLogin(@Valid @ModelAttribute AdministratorDTO administratorDTO){
-        return ResponseEntity.ok(LoginService.)
+        return loginService.admin(administratorDTO);
     }
 
 
