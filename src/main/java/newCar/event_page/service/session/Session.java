@@ -1,4 +1,4 @@
-package newCar.event_page.model;
+package newCar.event_page.model.session;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +11,4 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class Session implements Serializable {
     private String sessionId;
-    private String userId;
-    private String username;
 }
