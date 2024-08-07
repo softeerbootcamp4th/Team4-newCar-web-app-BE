@@ -79,7 +79,7 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> adminLogin(@Valid @ModelAttribute AdministratorDTO administratorDTO){
+    public ResponseEntity<String> adminLogin(@Valid @RequestBody AdministratorDTO administratorDTO){
         return loginService.admin(administratorDTO);
     }
 
