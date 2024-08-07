@@ -29,6 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOriginPatterns("http://www.batro.org", "https://www.batro.org", "http://1.231.159.76", "https://1.231.159.76")
                 .allowCredentials(true)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .maxAge(3600);
     }
 
