@@ -19,7 +19,7 @@ import java.util.List;
 @CrossOrigin(origins = {"https://www.batro.org", "http://localhost"}, allowCredentials = "true")
 public class AdminController {
 
-    private AdminService adminService;
+    private final AdminService adminService;
 
     @GetMapping("/common-event") //이벤트 관리 버튼(이벤트 공통, 선착순 퀴즈, 캐스퍼 레이싱 설정값 불러옴)
     @Operation(summary = "이벤트명, 상태, 담당자, 진행기간", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-435#886120115")
