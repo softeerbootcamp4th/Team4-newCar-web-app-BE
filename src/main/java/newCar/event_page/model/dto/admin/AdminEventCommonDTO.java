@@ -1,4 +1,4 @@
-package newCar.event_page.model.dto;
+package newCar.event_page.model.dto.admin;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 @Schema (description = "common-event 정보")
-public class EventCommonDTO {
+public class AdminEventCommonDTO {
 
     @NotEmpty
     @Schema (description = "이벤트명" , example = "캐스퍼 이벤트!!")
@@ -32,8 +32,8 @@ public class EventCommonDTO {
 
 
 
-    public static EventCommonDTO toDTO(EventCommon eventCommon){
-        return EventCommonDTO.builder()
+    public static AdminEventCommonDTO toDTO(EventCommon eventCommon){
+        return AdminEventCommonDTO.builder()
                 .eventName(eventCommon.getEventName())
                 .managerName(eventCommon.getManagerName())
                 .startTime(eventCommon.getStartTime())

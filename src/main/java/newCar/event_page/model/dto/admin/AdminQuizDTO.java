@@ -1,4 +1,4 @@
-package newCar.event_page.model.dto;
+package newCar.event_page.model.dto.admin;
 
 
 import jakarta.validation.constraints.NotEmpty;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Builder
 @Data
-public class QuizDTO {
+public class AdminQuizDTO {
 
 
     @NotNull
@@ -46,9 +46,9 @@ public class QuizDTO {
         private String text;
     }
 
-    public static QuizDTO toDTO(Quiz quiz)
+    public static AdminQuizDTO toDTO(Quiz quiz)
     {
-        return QuizDTO.builder()
+        return AdminQuizDTO.builder()
                 .id(quiz.getId())
                 .winnerCount(quiz.getWinnerCount())
                 .postDate(quiz.getPostDate())

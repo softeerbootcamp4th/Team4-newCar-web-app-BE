@@ -1,4 +1,4 @@
-package newCar.event_page.model.dto;
+package newCar.event_page.model.dto.admin;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Data
-public class WinnerSettingDTO {
+public class AdminWinnerSettingDTO {
     @NotNull
     private final Integer rank;
 
