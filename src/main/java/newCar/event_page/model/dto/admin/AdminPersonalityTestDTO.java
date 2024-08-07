@@ -1,4 +1,4 @@
-package newCar.event_page.model.dto;
+package newCar.event_page.model.dto.admin;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Builder
 @Data
-public class PersonalityTestDTO {
+public class AdminPersonalityTestDTO {
 
     @NotNull
     private Long id;
@@ -45,8 +45,8 @@ public class PersonalityTestDTO {
     }
 
 
-    public static PersonalityTestDTO toDTO(PersonalityTest personalityTest) {
-        return PersonalityTestDTO.builder()
+    public static AdminPersonalityTestDTO toDTO(PersonalityTest personalityTest) {
+        return AdminPersonalityTestDTO.builder()
                 .id(personalityTest.getId())
                 .question(personalityTest.getQuestion())
                 .choices(Arrays.asList(

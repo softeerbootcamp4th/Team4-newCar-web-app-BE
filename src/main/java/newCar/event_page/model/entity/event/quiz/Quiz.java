@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import newCar.event_page.model.dto.QuizDTO;
+import newCar.event_page.model.dto.admin.AdminQuizDTO;
 
 import java.time.LocalDate;
 
@@ -42,7 +42,7 @@ public class Quiz {
     @NotNull
     private Integer correctAnswer;
 
-    public void update(QuizDTO quizDTO) {
+    public void update(AdminQuizDTO quizDTO) {
         this.winnerCount = quizDTO.getWinnerCount();
         this.question=quizDTO.getQuestion();
         this.choice1=quizDTO.getChoices().get(0).getText();
