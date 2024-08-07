@@ -1,4 +1,4 @@
-package newCar.event_page.service.session;
+package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.repository.redis.SessionStorage;

@@ -1,4 +1,4 @@
-package newCar.event_page.service.session;
+package newCar.event_page.model.session;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

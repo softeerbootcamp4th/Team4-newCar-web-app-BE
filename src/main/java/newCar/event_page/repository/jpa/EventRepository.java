@@ -1,4 +1,4 @@
-package newCar.event_page.repository;
+package newCar.event_page.repository.jpa;
 
 import newCar.event_page.model.entity.event.Event;
 import org.springframework.data.jpa.repository.JpaRepository;

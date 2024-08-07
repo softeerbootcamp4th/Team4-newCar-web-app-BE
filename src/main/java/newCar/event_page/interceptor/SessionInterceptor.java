@@ -2,7 +2,7 @@ package newCar.event_page.interceptor;
 
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.service.session.SessionService;
+import newCar.event_page.service.SessionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;

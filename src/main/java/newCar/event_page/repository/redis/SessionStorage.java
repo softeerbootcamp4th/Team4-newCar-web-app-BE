@@ -1,11 +1,13 @@
-package newCar.event_page.service.session;
+package newCar.event_page.repository.redis;
 
 import lombok.RequiredArgsConstructor;
+import newCar.event_page.model.session.Session;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+
 import java.util.concurrent.TimeUnit;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 public class SessionStorage {
     private final RedisTemplate<String, Object> redisTemplate;
