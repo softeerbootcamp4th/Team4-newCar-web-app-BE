@@ -1,6 +1,7 @@
 package newCar.event_page.service.session;
 
 import lombok.RequiredArgsConstructor;
+import newCar.event_page.repository.redis.SessionStorage;
 import org.springframework.stereotype.Service;
 
 @Service
