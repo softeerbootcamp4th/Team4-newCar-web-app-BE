@@ -199,6 +199,7 @@ public class AdminServiceImpl implements AdminService {
                 .path("/admin")
                 .maxAge(60 * 30)
                 .httpOnly(true)
+                .sameSite("Lax")
                 .build();
 
         HttpHeaders headers = new HttpHeaders();
