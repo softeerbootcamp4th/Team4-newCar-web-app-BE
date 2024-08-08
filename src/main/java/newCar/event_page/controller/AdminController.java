@@ -16,7 +16,6 @@ import java.util.List;
 @Tag(name = "admin API", description = "admin API 설계입니다")
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = {"https://www.batro.org", "http://localhost"}, allowCredentials = "true")
 public class AdminController {
 
     private final AdminService adminService;

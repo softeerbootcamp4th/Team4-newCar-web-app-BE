@@ -15,18 +15,19 @@ import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.quiz.QuizEvent;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
-import newCar.event_page.repository.AdministratorRepository;
-import newCar.event_page.repository.EventCommonRepository;
-import newCar.event_page.repository.EventRepository;
-import newCar.event_page.repository.EventUserRepository;
-import newCar.event_page.repository.quiz.QuizEventRepository;
-import newCar.event_page.repository.quiz.QuizRepository;
-import newCar.event_page.repository.racing.PersonalityTestRepository;
-import newCar.event_page.repository.racing.RacingEventRepository;
-import newCar.event_page.repository.racing.RacingWinnerRepository;
-import newCar.event_page.service.session.AdminSession;
-import newCar.event_page.service.session.Session;
-import newCar.event_page.service.session.SessionStorage;
+import newCar.event_page.repository.jpa.AdministratorRepository;
+import newCar.event_page.repository.jpa.EventCommonRepository;
+import newCar.event_page.repository.jpa.EventRepository;
+import newCar.event_page.repository.jpa.EventUserRepository;
+import newCar.event_page.repository.jpa.quiz.QuizEventRepository;
+import newCar.event_page.repository.jpa.quiz.QuizRepository;
+import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
+import newCar.event_page.repository.jpa.racing.RacingEventRepository;
+import newCar.event_page.repository.jpa.racing.RacingWinnerRepository;
+import newCar.event_page.model.session.AdminSession;
+import newCar.event_page.model.session.Session;
+import newCar.event_page.repository.redis.RedisSessionStore;
+import newCar.event_page.repository.redis.SessionRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -53,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
     private final PersonalityTestRepository personalityTestRepository;
 
     private final AdministratorRepository administratorRepository;
-    private final SessionStorage sessionStorage;
+    private final SessionRepository sessionRepository;
 
     private double totalWeight;
 
@@ -198,13 +199,13 @@ public class AdminServiceImpl implements AdminService {
                 .path("/admin")
                 .maxAge(60 * 30)
                 .httpOnly(true)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        sessionStorage.addSession(session);
+        sessionRepository.save(session);
 
         return new ResponseEntity<>("관리자 로그인 성공", headers, HttpStatus.OK);
     }
