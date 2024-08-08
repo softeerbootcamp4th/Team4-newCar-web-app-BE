@@ -18,6 +18,7 @@ public class SessionInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String sessionId = null;
         response.setContentType("text/plain;charset=utf-8");
+
         // 쿠키에서 세션 ID 찾기
         if(request.getCookies() == null) {
             response.getWriter().write("접근 권한이 없습니다.");
