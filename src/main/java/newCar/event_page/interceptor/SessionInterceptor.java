@@ -2,7 +2,7 @@ package newCar.event_page.interceptor;
 
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.service.SessionService;
+import newCar.event_page.repository.redis.SessionRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 public class SessionInterceptor implements HandlerInterceptor {
 
-    private final SessionService sessionService;
+    private final SessionRepository sessionRepository;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -37,7 +37,7 @@ public class SessionInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
 
-        if (!sessionService.validateSession(sessionId)) {
+        if (!sessionRepository.existsById(sessionId)) {
             response.getWriter().write("세션이 만료되었습니다.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
