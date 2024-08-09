@@ -26,7 +26,6 @@ import newCar.event_page.repository.jpa.racing.RacingEventRepository;
 import newCar.event_page.repository.jpa.racing.RacingWinnerRepository;
 import newCar.event_page.model.session.AdminSession;
 import newCar.event_page.model.session.Session;
-import newCar.event_page.repository.redis.RedisSessionStore;
 import newCar.event_page.repository.redis.SessionRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -40,6 +39,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AdminServiceImpl implements AdminService {
 
     private final EventCommonRepository eventCommonRepository;
