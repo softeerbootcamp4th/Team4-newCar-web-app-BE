@@ -36,6 +36,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: app.jar
           target: /home/ubuntu/event-page
+          overwrite: true
 
       - name: SSH로 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
