@@ -19,7 +19,8 @@ public class GlobalExceptionHandler {
             UnmodifiableFieldException.class,
             ExcessiveWinnersRequestedException.class,
             DrawNotYetConductedException.class,
-            AdminLoginFailException.class
+            AdminLoginFailException.class,
+            UserLoginFailException.class
     })
     public ResponseEntity<String> handleUnmodifiableFieldException(final RuntimeException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
