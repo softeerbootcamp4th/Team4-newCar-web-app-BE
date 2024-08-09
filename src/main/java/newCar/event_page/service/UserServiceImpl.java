@@ -41,7 +41,8 @@ public class UserServiceImpl implements UserService {
                 .path("/main")
                 .maxAge(60 * 30)
                 .httpOnly(true)
-                .sameSite("Lax")
+                .sameSite("None")
+                .secure(true)
                 .build();
 
         HttpHeaders headers = new HttpHeaders();
