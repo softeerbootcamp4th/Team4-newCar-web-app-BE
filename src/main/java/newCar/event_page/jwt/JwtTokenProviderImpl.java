@@ -10,13 +10,12 @@ import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
 import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.entity.User;
 import newCar.event_page.repository.jpa.UserLightRepository;
 import newCar.event_page.repository.jpa.UserRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -64,7 +63,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
                             .getBody();//페이로드 부분 추출
 
         //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
-        //왜냐하면
+        //왜냐하면 TokenInterceptor에서 이미 토큰의 유효성을 검사 했기 때문입니다
 
         userId = claims.get("userId",Long.class);
 
@@ -72,15 +71,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     } //토큰에서 유저 Id를 추출
 
     public Team getTeam(String token){
-        Team team;
         Claims claims = Jwts.parserBuilder()
                             .setSigningKey(secretKey())
                             .build()
                             .parseClaimsJws(token)
                             .getBody();//페이로드 부분 추출
 
-        team = claims.get()
-        return Team.PET;
+        User user = userRepository.findById(claims.get("userId",Long.class))
+                .orElseThrow(() -> new NoSuchElementException("해당 유저 정보는 잘못되었습니다"));
+        return user.getTeam();
 
     } //토큰에서 유저 Team을 추출
 
