@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserLightRepository extends JpaRepository<UserLight,Long> {
 
-    Long findByUserId(String userId);
+    UserLight findByUserId(String userId);
 }

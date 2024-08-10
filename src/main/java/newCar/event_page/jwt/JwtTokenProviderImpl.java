@@ -31,11 +31,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         if(role.equals("admin")){
             id=1L;
         } else{
-            id = userLightRepository.findByUserId(name);
+            id = userLightRepository.findByUserId(name).getId();
         }
         // 클레임 설정
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", id);  // 사용자 이름 추가
+        claims.put("userId", id);  // 사용자 아이디 추가
         claims.put("role", role);  // 역할 추가
 
         // 토큰 만료 시간 설정 (현재 시간 + 설정된 만료 시간)
