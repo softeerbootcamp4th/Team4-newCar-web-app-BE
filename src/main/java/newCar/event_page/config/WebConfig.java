@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.interceptor.AdminTokenInterceptor;
 import newCar.event_page.interceptor.LoggingInterceptor;
 import newCar.event_page.interceptor.SessionInterceptor;
+import newCar.event_page.interceptor.UserTokenInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -15,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final LoggingInterceptor loggingInterceptor;
     private final AdminTokenInterceptor adminTokenInterceptor;
+    private final UserTokenInterceptor userTokenInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -23,6 +25,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/admin/login");
 
         registry.addInterceptor(loggingInterceptor);
+
+        registry.addInterceptor(userTokenInterceptor)
+                .addPathPatterns("/main/**")
+                .excludePathPatterns("/main/login");
     }
 
     /*
