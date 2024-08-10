@@ -20,10 +20,16 @@ public class AdminTokenInterceptor implements HandlerInterceptor {
         String token = request.getHeader("Authorization");
 
         if(token==null){
-            response.getWriter().write("접근 권한이 없습니다");
+            response.getWriter().write("관리자 로그인을 먼저 진행해주세요");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return false;
         }//토큰없이 접근 시
+
+        if(!jwtTokenProvider.validateToken(token)){
+            response.getWriter().write("로그인이 만료 되었습니다");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }//만료된 토큰으로 접근시
 
         if(!jwtTokenProvider.validateAdminToken(token)){
             response.getWriter().write("접근 권한이 없습니다");
@@ -31,11 +37,7 @@ public class AdminTokenInterceptor implements HandlerInterceptor {
             return false;
         }//토큰은 있지만 admin토큰이 아닌 다른 토큰으로 접근 시
 
-        if(!jwtTokenProvider.validateToken(token)){
-            response.getWriter().write("로그인이 만료 되었습니다");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return false;
-        }//만료된 토큰으로 접근시
+
 
         return true;
     }

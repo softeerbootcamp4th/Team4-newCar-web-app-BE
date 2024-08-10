@@ -27,11 +27,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     public String generateToken(String name, boolean isAdmin){
 
         String role = isAdmin ? "admin" : "user";
-        Long userId = userLightRepository.findByUserId(name);
-
+        Long id ;
+        if(role.equals("admin")){
+            id=1L;
+        } else{
+            id = userLightRepository.findByUserId(name);
+        }
         // 클레임 설정
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);  // 사용자 이름 추가
+        claims.put("userId", id);  // 사용자 이름 추가
         claims.put("role", role);  // 역할 추가
 
         // 토큰 만료 시간 설정 (현재 시간 + 설정된 만료 시간)
