@@ -71,13 +71,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     } //토큰에서 유저 Id를 추출
 
     public Team getTeam(String token){
-        Claims claims = Jwts.parserBuilder()
-                            .setSigningKey(secretKey())
-                            .build()
-                            .parseClaimsJws(token)
-                            .getBody();//페이로드 부분 추출
 
-        User user = userRepository.findById(claims.get("userId",Long.class))
+        User user = userRepository.findById(getUserId(token))
                 .orElseThrow(() -> new NoSuchElementException("해당 유저 정보는 잘못되었습니다"));
         return user.getTeam();
 
