@@ -1,6 +1,7 @@
 package newCar.event_page.config;
 
 import lombok.RequiredArgsConstructor;
+import newCar.event_page.interceptor.AdminTokenInterceptor;
 import newCar.event_page.interceptor.LoggingInterceptor;
 import newCar.event_page.interceptor.SessionInterceptor;
 import org.springframework.context.annotation.Configuration;
@@ -12,12 +13,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final SessionInterceptor sessionInterceptor;
     private final LoggingInterceptor loggingInterceptor;
+    private final AdminTokenInterceptor adminTokenInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(sessionInterceptor)
+        registry.addInterceptor(adminTokenInterceptor)
                 .addPathPatterns("/admin/**")
                 .excludePathPatterns("/admin/login");
 
