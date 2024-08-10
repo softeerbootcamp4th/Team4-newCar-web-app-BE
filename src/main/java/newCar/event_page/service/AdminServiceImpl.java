@@ -5,6 +5,7 @@ import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.DrawNotYetConductedException;
 import newCar.event_page.exception.ExcessiveWinnersRequestedException;
 import newCar.event_page.exception.UnmodifiableFieldException;
+import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.admin.*;
 import newCar.event_page.model.entity.Administrator;
 import newCar.event_page.model.entity.event.Event;
@@ -56,7 +57,11 @@ public class AdminServiceImpl implements AdminService {
     private final AdministratorRepository administratorRepository;
     private final SessionRepository sessionRepository;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     private double totalWeight;
+
+
 
     @Override
     @Transactional(readOnly = true)
