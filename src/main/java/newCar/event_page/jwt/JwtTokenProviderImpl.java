@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
 import newCar.event_page.model.entity.Team;
 import newCar.event_page.repository.jpa.UserLightRepository;
+import newCar.event_page.repository.jpa.UserRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -22,7 +23,9 @@ import java.util.Map;
 public class JwtTokenProviderImpl implements JwtTokenProvider{
 
     private final JwtConfig jwtConfig;
+
     private final UserLightRepository userLightRepository;
+    private final UserRepository userRepository;
 
     public String generateToken(String name, boolean isAdmin){
 
@@ -52,11 +55,31 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
                 .compact();  // 토큰 생성
     }
 
-    public String getUserId(String token){
-        return "1234";
+    public Long getUserId(String token){
+        Long userId;
+        Claims claims = Jwts.parserBuilder()
+                            .setSigningKey(secretKey())
+                            .build()
+                            .parseClaimsJws(token)
+                            .getBody();//페이로드 부분 추출
+
+        //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
+        //왜냐하면
+
+        userId = claims.get("userId",Long.class);
+
+        return userId;
     } //토큰에서 유저 Id를 추출
 
     public Team getTeam(String token){
+        Team team;
+        Claims claims = Jwts.parserBuilder()
+                            .setSigningKey(secretKey())
+                            .build()
+                            .parseClaimsJws(token)
+                            .getBody();//페이로드 부분 추출
+
+        team = claims.get()
         return Team.PET;
 
     } //토큰에서 유저 Team을 추출

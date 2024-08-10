@@ -37,8 +37,6 @@ public class AdminTokenInterceptor implements HandlerInterceptor {
             return false;
         }//토큰은 있지만 admin토큰이 아닌 다른 토큰으로 접근 시
 
-
-
         return true;
     }
 }
