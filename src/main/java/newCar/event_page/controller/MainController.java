@@ -21,7 +21,6 @@ public class MainController {
     public ResponseEntity<String> userLogin(@Valid @RequestBody UserLightDTO userLightDTO) {
         return userService.login(userLightDTO);
     }
-
     @GetMapping("/abc")
     public ResponseEntity<String> test(){
         return ResponseEntity.ok("테스트용");

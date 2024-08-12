@@ -27,21 +27,31 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     private final UserRepository userRepository;
 
     public String generateAdminToken(){
-        return generateToken(1L,"admin");
+        // 클레임 설정
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", 1L);  // 사용자 아이디 추가
+        claims.put("role", "admin");  // 역할 추가
+        claims.put("team" , null);
+
+        return generateToken(claims);
     }
 
     public String generateUserToken(String name){
         Long id ;
         id = userLightRepository.findByUserId(name).getId();
-        return generateToken(id,"user");
-    }
 
-    public String generateToken(Long id, String role){
-        // 클레임 설정
+        User user = userRepository.findById(id).
+                orElseThrow(() -> new NoSuchElementException("잘못된 유저 정보입니다"));
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", id);  // 사용자 아이디 추가
-        claims.put("role", role);  // 역할 추가
-        claims.put("team" , null);
+        claims.put("role", "user");  // 역할 추가
+        claims.put("team" , user.getTeam().toString());
+
+        return generateToken(claims);
+    }
+
+    public String generateToken(Map<String, Object> claims){
 
         // 토큰 만료 시간 설정 (현재 시간 + 설정된 만료 시간)
         Date now = new Date();
@@ -50,11 +60,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         // JWT 토큰 생성
         return Jwts.builder()
                 .setClaims(claims)  // 클레임 설정
-                .setSubject(id.toString())  // 토큰 주제
+                .setSubject(claims.get("role").toString())  // 토큰 주제
                 .setIssuedAt(now)  // 발급 시간 설정
                 .setExpiration(expiryDate)  // 만료 시간 설정
                 .signWith(Keys.hmacShaKeyFor(secretKey()), SignatureAlgorithm.HS256)  // 서명 키와 알고리즘 설정
                 .compact();  // 토큰 생성
+    }
+
+    public String generateTokenWithTeam(){
+        return "";
     }
 
     public Long getUserId(String token){
@@ -73,12 +87,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         return userId;
     } //토큰에서 유저 Id를 추출
 
-    public Team getTeam(String token){
+    public String getTeam(String token){
 
-        User user = userRepository.findById(getUserId(token))
-                .orElseThrow(() -> new NoSuchElementException("해당 유저 정보는 잘못되었습니다"));
-        return user.getTeam();
-
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();//페이로드 부분 추출
+        //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
+        return claims.get("team",String.class);
     } //토큰에서 유저 Team을 추출
 
     public boolean validateToken(String token){
