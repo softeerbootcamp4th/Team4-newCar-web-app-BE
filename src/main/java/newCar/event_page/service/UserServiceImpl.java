@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<String> login(UserLightDTO userLightDTO) {
+    public ResponseEntity<Map<String,String>> login(UserLightDTO userLightDTO) {
         UserLight userLight = userLightRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 존재하지 않습니다"));
 
@@ -80,24 +80,30 @@ public class UserServiceImpl implements UserService {
             throw new UserLoginFailException("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateUserToken(userLight.getUserId()));
+        Map<String,String> map = new HashMap<>();
         //로그인 성공시 토큰을 발급해서 준다
         //역할이 user인 토큰을 발급받는다
+        map.put("accessToken", jwtTokenProvider.generateUserToken(userLight.getUserId()));
 
-        return new ResponseEntity<>("유저 로그인 성공", headers, HttpStatus.OK);
+        return ResponseEntity.ok(map);
     }
 
     @Override
-    public ResponseEntity<Map<String,Team>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
-        Map<String,Team> map = new HashMap<>();
+    public ResponseEntity<Map<String,Object>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
+        Team team = parsePersonalityAnswer(userPersonalityAnswerDTO);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateTokenWithTeam());
 
-        map.put("team",Team.TRAVEL);
+        Map<String,Object> map = new HashMap<>();
+        map.put("team",team);
+        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam());
 
-        return new ResponseEntity<>(map,headers,HttpStatus.OK);
+        return ResponseEntity.ok(map);
+    }
+
+    private Team parsePersonalityAnswer(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
+        return Team.PET;
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){

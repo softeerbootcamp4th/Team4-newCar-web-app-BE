@@ -25,7 +25,7 @@ public class MainController {
 
     @PostMapping("/login")
     @Operation(summary = "유저 로그인")
-    public ResponseEntity<String> userLogin(@Valid @RequestBody UserLightDTO userLightDTO) {
+    public ResponseEntity<Map<String,String>> userLogin(@Valid @RequestBody UserLightDTO userLightDTO) {
         return userService.login(userLightDTO);
     }
     @GetMapping("/abc")
@@ -53,7 +53,7 @@ public class MainController {
 
     @PostMapping("/personality-test")
     @Operation(summary = "성격 유형 검사 풀고 제출시")
-    public ResponseEntity<Map<String, Team>> personalityTestAnswer(@Valid @RequestBody UserPersonalityAnswerDTO userPersonalityAnswerDTO) {
+    public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody UserPersonalityAnswerDTO userPersonalityAnswerDTO) {
         return userService.personalityTest(userPersonalityAnswerDTO);
     }
 

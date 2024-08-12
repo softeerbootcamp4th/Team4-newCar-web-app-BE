@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class UserPersonalityAnswerDTO {
 
-    @NotNull
+    @NotEmpty
     private List<Choice> answers;
 
     @Data
@@ -20,7 +20,7 @@ public class UserPersonalityAnswerDTO {
         @NotNull
         private Long id;
 
-        @NotEmpty
+        @NotNull
         private Integer answer;
     }
 

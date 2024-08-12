@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface UserService {
 
-    public ResponseEntity<String> login(UserLightDTO userLightDTO);
+    public ResponseEntity<Map<String, String>> login(UserLightDTO userLightDTO);
 
     public UserQuizDTO getQuiz(Long quizEventId);
 
@@ -17,5 +17,5 @@ public interface UserService {
 
     public List<UserPersonalityTestDTO> getPersonalityTestList();
 
-    public ResponseEntity<Map<String, Team>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO);
+    public ResponseEntity<Map<String, Object>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO);
 }
