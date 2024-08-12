@@ -3,6 +3,7 @@ package newCar.event_page.service;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.UserLoginFailException;
+import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.UserLightDTO;
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.session.Session;
@@ -23,7 +24,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserLightRepository userLightRepository;
-    private final SessionRepository sessionRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public ResponseEntity<String> login(UserLightDTO userLightDTO) {
@@ -34,21 +35,10 @@ public class UserServiceImpl implements UserService {
             throw new UserLoginFailException("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
-        String sessionId = UUID.randomUUID().toString();
-        Session session = new UserSession(sessionId);
-
-        ResponseCookie cookie = ResponseCookie.from("session", sessionId)
-                .path("/main")
-                .maxAge(60 * 30)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        sessionRepository.save(session);
+        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateUserToken(userLight.getUserId()));
+        //로그인 성공시 토큰을 발급해서 준다
+        //역할이 user인 토큰을 발급받는다
 
         return new ResponseEntity<>("유저 로그인 성공", headers, HttpStatus.OK);
     }

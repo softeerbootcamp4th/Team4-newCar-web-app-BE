@@ -5,6 +5,7 @@ import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.DrawNotYetConductedException;
 import newCar.event_page.exception.ExcessiveWinnersRequestedException;
 import newCar.event_page.exception.UnmodifiableFieldException;
+import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.admin.*;
 import newCar.event_page.model.entity.Administrator;
 import newCar.event_page.model.entity.event.Event;
@@ -24,9 +25,6 @@ import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import newCar.event_page.repository.jpa.racing.RacingEventRepository;
 import newCar.event_page.repository.jpa.racing.RacingWinnerRepository;
-import newCar.event_page.model.session.AdminSession;
-import newCar.event_page.model.session.Session;
-import newCar.event_page.repository.redis.SessionRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -54,9 +52,12 @@ public class AdminServiceImpl implements AdminService {
     private final PersonalityTestRepository personalityTestRepository;
 
     private final AdministratorRepository administratorRepository;
-    private final SessionRepository sessionRepository;
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     private double totalWeight;
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -192,21 +193,9 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminLoginFailException("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
-        String sessionId = UUID.randomUUID().toString();
-        Session session = new AdminSession(sessionId);
-
-        ResponseCookie cookie = ResponseCookie.from("session", sessionId)
-                .path("/admin")
-                .maxAge(60 * 30)
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        sessionRepository.save(session);
+        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateAdminToken());
+        //로그인 성공시 토큰을 발급해서 준다
 
         return new ResponseEntity<>("관리자 로그인 성공", headers, HttpStatus.OK);
     }
