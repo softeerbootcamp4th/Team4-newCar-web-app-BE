@@ -17,5 +17,5 @@ public interface UserService {
 
     public List<UserPersonalityTestDTO> getPersonalityTestList();
 
-    public Map<String, Team> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO);
+    public ResponseEntity<Map<String, Team>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO);
 }

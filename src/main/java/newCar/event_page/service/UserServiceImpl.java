@@ -89,10 +89,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map<String, Team> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
+    public ResponseEntity<Map<String,Team>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
         Map<String,Team> map = new HashMap<>();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateTokenWithTeam());
+
         map.put("team",Team.TRAVEL);
-        return map;
+
+        return new ResponseEntity<>(map,headers,HttpStatus.OK);
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
