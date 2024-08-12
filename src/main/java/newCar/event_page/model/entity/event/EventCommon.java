@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import newCar.event_page.model.dto.EventCommonDTO;
+import newCar.event_page.model.dto.admin.AdminEventCommonDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +31,7 @@ public class EventCommon {
     @NotNull
     private LocalDateTime endTime;
 
-    public void update(EventCommonDTO eventCommonDTO) {
+    public void update(AdminEventCommonDTO eventCommonDTO) {
         this.eventName=eventCommonDTO.getEventName();
         this.managerName=eventCommonDTO.getManagerName();
         this.startTime=eventCommonDTO.getStartTime();

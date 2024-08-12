@@ -1,4 +1,4 @@
-package newCar.event_page.model.dto;
+package newCar.event_page.model.dto.admin;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +9,7 @@ import newCar.event_page.model.entity.event.racing.RacingWinner;
 @Data
 @RequiredArgsConstructor
 @Builder
-public class RacingWinnersDTO {
+public class AdminRacingWinnersDTO {
 
     private final Integer rank;
     private final String name;
@@ -18,9 +18,9 @@ public class RacingWinnersDTO {
     private final Team team;
 
 
-    public static RacingWinnersDTO toDTO(RacingWinner racingWinner) {
+    public static AdminRacingWinnersDTO toDTO(RacingWinner racingWinner) {
 
-        return RacingWinnersDTO.builder()
+        return AdminRacingWinnersDTO.builder()
                 .rank(racingWinner.getRank())
                 .name(racingWinner.getEventUser().getUser().getUserName())
                 .phoneNumber(racingWinner.getEventUser().getUser().getPhoneNumber())

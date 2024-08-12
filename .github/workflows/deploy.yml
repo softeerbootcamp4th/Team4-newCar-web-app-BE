@@ -2,7 +2,7 @@ name: Deploy To EC2
 
 on:
   push:
-    branches: [ "main", "TASK-29--Admin" ]
+    branches: [ "main", "TASK-149-Login"]
 
 jobs:
   deploy:
@@ -21,6 +21,10 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
+
+      - name: certificate.p12 파일 만들기
+        run: |
+          echo "${{ secrets.SSL_CERTIFICATE }}" | base64 -d > ./src/main/resources/certificate.p12
 
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build -x test
