@@ -185,7 +185,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<String> login(AdminLoginDTO adminLoginDTO) {
+    public ResponseEntity<Map<String , String>> login(AdminLoginDTO adminLoginDTO) {
         Administrator administrator = administratorRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("관리자 정보가 존재하지 않습니다."));
 
@@ -193,11 +193,11 @@ public class AdminServiceImpl implements AdminService {
             throw new AdminLoginFailException("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateAdminToken());
+        Map<String, String> map = new HashMap<>();
+        map.put("accessToken", jwtTokenProvider.generateAdminToken());
         //로그인 성공시 토큰을 발급해서 준다
 
-        return new ResponseEntity<>("관리자 로그인 성공", headers, HttpStatus.OK);
+        return ResponseEntity.ok(map);
     }
 
 

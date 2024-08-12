@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Tag(name = "admin API", description = "admin API 설계입니다")
@@ -69,7 +70,7 @@ public class AdminController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> adminLogin(@Valid @RequestBody AdminLoginDTO adminLoginDTO) {
+    public ResponseEntity<Map<String,String>> adminLogin(@Valid @RequestBody AdminLoginDTO adminLoginDTO) {
         return adminService.login(adminLoginDTO);
     }
 

@@ -20,7 +20,7 @@ public class UserQuizDTO {
     private String question;
 
     @NotEmpty
-    private List<UserQuizDTO.Choice> choices;
+    private List<Choice> choices;
 
 
     @Data

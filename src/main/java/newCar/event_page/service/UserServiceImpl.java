@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
-import newCar.event_page.model.dto.user.UserEventTimeDTO;
-import newCar.event_page.model.dto.user.UserLightDTO;
-import newCar.event_page.model.dto.user.UserPersonalityTestDTO;
-import newCar.event_page.model.dto.user.UserQuizDTO;
+import newCar.event_page.model.dto.user.*;
+import newCar.event_page.model.entity.Team;
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
@@ -29,9 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public List<UserPersonalityTestDTO> getPersonalityTestList() {
         return personalityTestRepository.findAllByOrderByIdAsc()
@@ -52,6 +49,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public UserQuizDTO getQuiz(Long quizEventId ){
         Event quizEvent = eventRepository.findById(quizEventId)
@@ -64,6 +62,7 @@ public class UserServiceImpl implements UserService {
         return UserQuizDTO.toDTO(todayQuiz);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public UserEventTimeDTO getEventTime(){
         EventCommon eventCommon = eventCommonRepository.findById(1L)
@@ -73,7 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<String> login(UserLightDTO userLightDTO) {
+    public ResponseEntity<Map<String,String>> login(UserLightDTO userLightDTO) {
         UserLight userLight = userLightRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 존재하지 않습니다"));
 
@@ -81,13 +80,31 @@ public class UserServiceImpl implements UserService {
             throw new UserLoginFailException("아이디 혹은 비밀번호가 맞지 않습니다.");
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateUserToken(userLight.getUserId()));
+        Map<String,String> map = new HashMap<>();
         //로그인 성공시 토큰을 발급해서 준다
         //역할이 user인 토큰을 발급받는다
+        map.put("accessToken", jwtTokenProvider.generateUserToken(userLight.getUserId()));
 
-        return new ResponseEntity<>("유저 로그인 성공", headers, HttpStatus.OK);
+        return ResponseEntity.ok(map);
     }
+
+    @Override
+    public ResponseEntity<Map<String,Object>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
+        Team team = parsePersonalityAnswer(userPersonalityAnswerDTO);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateTokenWithTeam());
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("team",team);
+        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam());
+
+        return ResponseEntity.ok(map);
+    }
+
+    private Team parsePersonalityAnswer(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
+        return Team.PET;
+    }//유저가 성격유형검사를 제출 했을 때 제출된 결과를 바탕으로 어느 팀에 속해 있을지 정해준다
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
         if(!userLight.getUserId().equals(dto.getUserId())) return false;
