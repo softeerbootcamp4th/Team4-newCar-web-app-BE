@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
 
     private Team parsePersonalityAnswer(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
         return Team.PET;
-    }
+    }//유저가 성격유형검사를 제출 했을 때 제출된 결과를 바탕으로 어느 팀에 속해 있을지 정해준다
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
         if(!userLight.getUserId().equals(dto.getUserId())) return false;
