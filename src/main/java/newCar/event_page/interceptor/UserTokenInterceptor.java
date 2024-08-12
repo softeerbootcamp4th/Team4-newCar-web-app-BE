@@ -27,7 +27,7 @@ public class UserTokenInterceptor implements HandlerInterceptor {
 
         if(!jwtTokenProvider.validateToken(token)){
             response.getWriter().write("로그인이 만료 되었습니다");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }//만료된 토큰으로 접근시
 

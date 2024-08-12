@@ -25,9 +25,6 @@ import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import newCar.event_page.repository.jpa.racing.RacingEventRepository;
 import newCar.event_page.repository.jpa.racing.RacingWinnerRepository;
-import newCar.event_page.model.session.AdminSession;
-import newCar.event_page.model.session.Session;
-import newCar.event_page.repository.redis.SessionRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -55,7 +52,6 @@ public class AdminServiceImpl implements AdminService {
     private final PersonalityTestRepository personalityTestRepository;
 
     private final AdministratorRepository administratorRepository;
-    private final SessionRepository sessionRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
 

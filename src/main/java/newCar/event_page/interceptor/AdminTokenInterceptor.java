@@ -27,13 +27,13 @@ public class AdminTokenInterceptor implements HandlerInterceptor {
 
         if(!jwtTokenProvider.validateToken(token)){
             response.getWriter().write("로그인이 만료 되었습니다");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }//만료된 토큰으로 접근시
 
         if(!jwtTokenProvider.validateAdminToken(token)){
             response.getWriter().write("유저는 접근 권한이 없습니다");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return false;
         }//토큰은 있지만 admin토큰이 아닌 다른 토큰으로 접근 시
 

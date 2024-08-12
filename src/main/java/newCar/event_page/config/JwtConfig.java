@@ -14,6 +14,4 @@ public class JwtConfig {
     @Value("${jwt.expiration}")
     private long expiration;    // 토큰 만료 시간
 
-    @Value("${jwt.prefix}")
-    private String prefix;  // 접두사
 }
