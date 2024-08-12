@@ -194,7 +194,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateToken(adminLoginDTO.getAdminId(),true));
+        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateAdminToken());
         //로그인 성공시 토큰을 발급해서 준다
 
         return new ResponseEntity<>("관리자 로그인 성공", headers, HttpStatus.OK);

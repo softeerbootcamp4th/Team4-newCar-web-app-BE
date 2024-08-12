@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateToken(userLight.getUserId(),false));
+        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateUserToken(userLight.getUserId()));
         //로그인 성공시 토큰을 발급해서 준다
         //역할이 user인 토큰을 발급받는다
 

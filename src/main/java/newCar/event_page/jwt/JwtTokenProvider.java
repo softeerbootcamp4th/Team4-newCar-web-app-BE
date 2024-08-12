@@ -4,7 +4,11 @@ import newCar.event_page.model.entity.Team;
 
 public interface JwtTokenProvider {
 
-    public String generateToken(String username, boolean isAdmin);
+    public String generateAdminToken();
+
+    public String generateUserToken(String name);
+
+    public String generateToken(Long id,String role);
 
     public Long getUserId(String token); //토큰에서 유저 Id를 추출
 

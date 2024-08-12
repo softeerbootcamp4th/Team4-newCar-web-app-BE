@@ -26,19 +26,22 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     private final UserLightRepository userLightRepository;
     private final UserRepository userRepository;
 
-    public String generateToken(String name, boolean isAdmin){
+    public String generateAdminToken(){
+        return generateToken(1L,"admin");
+    }
 
-        String role = isAdmin ? "admin" : "user";
+    public String generateUserToken(String name){
         Long id ;
-        if(role.equals("admin")){
-            id=1L;
-        } else{
-            id = userLightRepository.findByUserId(name).getId();
-        }
+        id = userLightRepository.findByUserId(name).getId();
+        return generateToken(id,"user");
+    }
+
+    public String generateToken(Long id, String role){
         // 클레임 설정
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", id);  // 사용자 아이디 추가
         claims.put("role", role);  // 역할 추가
+        claims.put("team" , null);
 
         // 토큰 만료 시간 설정 (현재 시간 + 설정된 만료 시간)
         Date now = new Date();
@@ -47,7 +50,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         // JWT 토큰 생성
         return Jwts.builder()
                 .setClaims(claims)  // 클레임 설정
-                .setSubject(name)  // 토큰 주제(일반적으로 사용자 이름)
+                .setSubject(id.toString())  // 토큰 주제
                 .setIssuedAt(now)  // 발급 시간 설정
                 .setExpiration(expiryDate)  // 만료 시간 설정
                 .signWith(Keys.hmacShaKeyFor(secretKey()), SignatureAlgorithm.HS256)  // 서명 키와 알고리즘 설정
