@@ -17,7 +17,7 @@ import java.util.Map;
 @Tag(name = "admin API", description = "admin API 설계입니다")
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AdminController {
 
     private final AdminService adminService;

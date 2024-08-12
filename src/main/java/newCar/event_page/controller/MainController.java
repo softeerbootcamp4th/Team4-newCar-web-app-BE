@@ -18,7 +18,7 @@ import java.util.Map;
 @Tag(name = "Main API", description = "Main API 설계입니다")
 @RestController
 @RequestMapping("/main")
-@CrossOrigin("*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class MainController {
 
     private final UserService userService;

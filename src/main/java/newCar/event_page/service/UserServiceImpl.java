@@ -93,7 +93,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<Map<String,Object>> personalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
-        System.out.println(team);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateTokenWithTeam());
