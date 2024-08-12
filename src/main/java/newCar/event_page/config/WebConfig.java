@@ -28,7 +28,9 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(userTokenInterceptor)
                 .addPathPatterns("/main/**")
-                .excludePathPatterns("/main/login");
+                .excludePathPatterns("/main/login")
+                .excludePathPatterns("/main/event-time")
+                .excludePathPatterns("/main/quiz");
     }
 
     /*
