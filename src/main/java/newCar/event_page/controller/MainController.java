@@ -43,7 +43,7 @@ public class MainController {
     @GetMapping("/personality-test-list")
     @Operation(summary = "레이싱 게임 유형검사")
     public ResponseEntity<List<UserPersonalityTestDTO>> getPersonalities() {
-        return ResponseEntity.ok(userService.getUserPersonalityTestList());
+        return ResponseEntity.ok(userService.getPersonalityTestList());
     }
 
     @GetMapping("/quiz")
