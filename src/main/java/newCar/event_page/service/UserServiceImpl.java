@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
-import newCar.event_page.model.dto.user.UserEventTimeDTO;
-import newCar.event_page.model.dto.user.UserLightDTO;
-import newCar.event_page.model.dto.user.UserPersonalityTestDTO;
-import newCar.event_page.model.dto.user.UserQuizDTO;
+import newCar.event_page.model.dto.user.*;
+import newCar.event_page.model.entity.Team;
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
@@ -29,9 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
 
+    @Override
     @Transactional(readOnly = true)
     public List<UserPersonalityTestDTO> getPersonalityTestList() {
         return personalityTestRepository.findAllByOrderByIdAsc()
@@ -52,6 +49,7 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public UserQuizDTO getQuiz(Long quizEventId ){
         Event quizEvent = eventRepository.findById(quizEventId)
@@ -64,6 +62,7 @@ public class UserServiceImpl implements UserService {
         return UserQuizDTO.toDTO(todayQuiz);
     }
 
+    @Override
     @Transactional(readOnly = true)
     public UserEventTimeDTO getEventTime(){
         EventCommon eventCommon = eventCommonRepository.findById(1L)
@@ -87,6 +86,13 @@ public class UserServiceImpl implements UserService {
         //역할이 user인 토큰을 발급받는다
 
         return new ResponseEntity<>("유저 로그인 성공", headers, HttpStatus.OK);
+    }
+
+    @Override
+    public Map<String, Team> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
+        Map<String,Team> map = new HashMap<>();
+        map.put("team",Team.TRAVEL);
+        return map;
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
