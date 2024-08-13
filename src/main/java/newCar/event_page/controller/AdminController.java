@@ -53,8 +53,14 @@ public class AdminController {
 
     @GetMapping("/racing-winners") //당첨자 목록 버튼
     @Operation(summary = "캐스퍼 레이싱 당첨자 목록", description = "https://www.figma.com/design/HhnC3JbEYv2qqQaP6zdhnI?node-id=2355-1024#887658590")
-    public ResponseEntity<List<AdminRacingWinnersDTO>> getWinnerList() {
+    public ResponseEntity<List<AdminRacingWinnersDTO>> getRacingWinnerList() {
         return adminService.getRacingWinnerList(EventId.Racing.getValue());
+    }
+
+    @GetMapping("quiz-winner")
+    @Operation(summary = "선착순 퀴즈 당첨자 목록")
+    public ResponseEntity<List<AdminQuizWinnersDTO>> getQuizWinnerList(){
+        return adminService.getQuizWinnerList(EventId.Quiz.getValue());
     }
 
     @GetMapping("/personality-test-list")
