@@ -37,14 +37,14 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     }
 
     public String generateUserToken(String name){
-        Long id ;
-        id = userLightRepository.findByUserId(name).getId();
+        Long userId ;
+        userId = userLightRepository.findByUserId(name).getId();
 
-        User user = userRepository.findById(id).
+        User user = userRepository.findById(userId).
                 orElseThrow(() -> new NoSuchElementException("잘못된 유저 정보입니다"));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", id);  // 사용자 아이디 추가
+        claims.put("userId", userId);  // 사용자 아이디 추가
         claims.put("role", "user");  // 역할 추가
         claims.put("team" , user.getTeam().toString());
 
@@ -67,44 +67,32 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
                 .compact();  // 토큰 생성
     }
 
-    public String generateTokenWithTeam(){
-        return "";
+    public String generateTokenWithTeam(Team team, String authorizationHeader){
+
+        Long userId;
+        userId = getClamis(authorizationHeader).get("userId",Long.class);
+
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("userId", userId);  // 사용자 아이디 추가
+        claims.put("role", "user");  // 역할 추가
+        claims.put("team" , team.toString());
+        return generateToken(claims);
     }
 
     public Long getUserId(String token){
         Long userId;
-        Claims claims = Jwts.parserBuilder()
-                            .setSigningKey(secretKey())
-                            .build()
-                            .parseClaimsJws(token)
-                            .getBody();//페이로드 부분 추출
-
-        //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
-        //왜냐하면 TokenInterceptor에서 이미 토큰의 유효성을 검사 했기 때문입니다
-
-        userId = claims.get("userId",Long.class);
-
+        userId = getClamis(token).get("userId",Long.class);
         return userId;
     } //토큰에서 유저 Id를 추출
 
     public String getTeam(String token){
-
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();//페이로드 부분 추출
-        //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
-        return claims.get("team",String.class);
+        return getClamis(token).get("team",String.class);
     } //토큰에서 유저 Team을 추출
 
     public boolean validateToken(String token){
         try{
-            Claims claims = Jwts.parserBuilder()
-                                .setSigningKey(secretKey())
-                                .build()
-                                .parseClaimsJws(token)
-                                .getBody();//페이로드 부분 추출
+            getClamis(token);
             return true;
         } catch (ExpiredJwtException | SignatureException e){
             return false;
@@ -115,12 +103,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     public boolean validateAdminToken(String token){
         String role = "";
         try{
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            role = claims.get("role",String.class);
+            role = getClamis(token).get("role",String.class);
             } catch (ExpiredJwtException | SignatureException e){
                 return false;
             } //토큰이 만료되었거나 변조되었다면
@@ -129,6 +112,13 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     }
     //JWT 토큰이 admin의 역할을 담고 있는지 검증
 
+    private Claims getClamis(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
     private byte[] secretKey(){
         return Decoders.BASE64.decode(jwtConfig.getSecret());
     }//원래는 secret key 값을 바로 바꿔 줄 수 있었으나 그 메소드는 deprecated 되어서

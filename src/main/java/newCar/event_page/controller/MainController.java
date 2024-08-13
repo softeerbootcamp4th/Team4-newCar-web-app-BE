@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.model.dto.user.*;
-import newCar.event_page.model.entity.Team;
 import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,6 @@ import java.util.Map;
 @Tag(name = "Main API", description = "Main API 설계입니다")
 @RestController
 @RequestMapping("/main")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class MainController {
 
     private final UserService userService;
@@ -53,8 +51,9 @@ public class MainController {
 
     @PostMapping("/personality-test")
     @Operation(summary = "성격 유형 검사 풀고 제출시")
-    public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList) {
-        return userService.personalityTest(userPersonalityAnswerDTOList);
+    public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+                                                                     @RequestHeader("Authorization") String authorizationHeader) {
+        return userService.personalityTest(userPersonalityAnswerDTOList,authorizationHeader);
     }
 
 }

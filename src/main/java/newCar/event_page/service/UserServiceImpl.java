@@ -1,7 +1,6 @@
 package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
@@ -12,17 +11,11 @@ import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
-import newCar.event_page.model.session.Session;
-import newCar.event_page.model.session.UserSession;
 import newCar.event_page.repository.jpa.EventCommonRepository;
 import newCar.event_page.repository.jpa.EventRepository;
 import newCar.event_page.repository.jpa.UserLightRepository;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
-import newCar.event_page.repository.redis.SessionRepository;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,15 +84,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Map<String,Object>> personalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList){
+    public ResponseEntity<Map<String,Object>> personalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+                                                              String authorizationHeader){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateTokenWithTeam());
 
         Map<String,Object> map = new HashMap<>();
         map.put("team",team);
-        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam());
+        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
 
         return ResponseEntity.ok(map);
     }
@@ -114,7 +105,9 @@ public class UserServiceImpl implements UserService {
         for(UserPersonalityAnswerDTO dto : userPersonalityAnswerDTOList){
             Long id = dto.getId();
             Integer answer = dto.getAnswer();
+
             TeamScore teamScore = calculatePersonality(id,answer);
+
             petScore += teamScore.getPetScore();
             travelScore += teamScore.getTravelScore();
             leisureScore += teamScore.getLeisureScore();

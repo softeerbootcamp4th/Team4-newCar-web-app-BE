@@ -20,5 +20,5 @@ public interface JwtTokenProvider {
 
     public boolean validateAdminToken(String token);//JWT 토큰이 admin의 역할을 담고 있는지 검증
 
-    public String generateTokenWithTeam();
+    public String generateTokenWithTeam(Team team, String authorizationHeader);
 }
