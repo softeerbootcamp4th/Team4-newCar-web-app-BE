@@ -24,6 +24,7 @@ import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import newCar.event_page.repository.jpa.racing.RacingEventRepository;
 import newCar.event_page.repository.jpa.racing.RacingWinnerRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +52,8 @@ public class AdminServiceImpl implements AdminService {
     private final AdministratorRepository administratorRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final RedisTemplate<String,Object> redisTemplate;
 
     private double totalWeight;
 
@@ -106,6 +109,8 @@ public class AdminServiceImpl implements AdminService {
         }
 
         quiz.update(adminQuizDTO);
+        redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
+
         quizRepository.save(quiz);
         return ResponseEntity.ok(AdminQuizDTO.toDTO(quiz));
     }
