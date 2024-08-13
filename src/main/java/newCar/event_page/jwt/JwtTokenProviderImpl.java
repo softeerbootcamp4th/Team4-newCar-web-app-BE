@@ -9,7 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.entity.User;
 import newCar.event_page.repository.jpa.UserLightRepository;
 import newCar.event_page.repository.jpa.UserRepository;

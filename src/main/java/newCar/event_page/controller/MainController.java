@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.event.EventId;
+import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,27 +27,22 @@ public class MainController {
     public ResponseEntity<Map<String,String>> userLogin(@Valid @RequestBody UserLightDTO userLightDTO) {
         return userService.login(userLightDTO);
     }
-    @GetMapping("/abc")
-    public ResponseEntity<String> test(){
-        return ResponseEntity.ok("테스트용");
-    }
-
     @GetMapping("/event-time")
     @Operation(summary = "이벤트 진행 기간을 startTime, endTime 으로 반환한다")
     public ResponseEntity<UserEventTimeDTO> getEventTime(){
-        return ResponseEntity.ok(userService.getEventTime());
+        return userService.getEventTime();
     }
 
     @GetMapping("/personality-test-list")
     @Operation(summary = "레이싱 게임 유형검사")
     public ResponseEntity<List<UserPersonalityTestDTO>> getPersonalities() {
-        return ResponseEntity.ok(userService.getPersonalityTestList());
+        return userService.getPersonalityTestList();
     }
 
     @GetMapping("/quiz")
     @Operation(summary = "해당하는 날짜에 맞는 선착순 퀴즈 정보를 Get 한다")
     public ResponseEntity<UserQuizDTO> getQuiz(){
-        return ResponseEntity.ok(userService.getQuiz(EventId.Quiz.getValue()));
+        return userService.getQuiz(EventId.Quiz.getValue());
     }
 
     @PostMapping("/personality-test")
@@ -56,6 +52,13 @@ public class MainController {
                                                                      @RequestHeader("Authorization") String authorizationHeader) {
         return userService.personalityTest(userPersonalityAnswerDTOList,authorizationHeader);
 
+    }
+
+
+    @PostMapping("/quiz-user")
+    @Operation(summary = "유저가 선착순 퀴즈 풀고 제출시")
+    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(@RequestBody Map<String,Integer> answer, @RequestHeader("Authorization") String authorizationHeader){
+        return userService.quizSubmission(answer,authorizationHeader);
     }
 
 }

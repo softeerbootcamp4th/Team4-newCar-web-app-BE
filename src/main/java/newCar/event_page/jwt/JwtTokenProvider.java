@@ -1,6 +1,6 @@
 package newCar.event_page.jwt;
 
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.enums.Team;
 
 import java.util.Map;
 

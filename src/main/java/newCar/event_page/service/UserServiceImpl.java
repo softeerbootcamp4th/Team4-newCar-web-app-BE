@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.enums.Team;
 
 import newCar.event_page.model.entity.TeamScore;
 import newCar.event_page.model.entity.User;
@@ -14,6 +14,7 @@ import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
+import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.repository.jpa.EventCommonRepository;
 import newCar.event_page.repository.jpa.EventRepository;
 import newCar.event_page.repository.jpa.UserLightRepository;
@@ -44,16 +45,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserPersonalityTestDTO> getPersonalityTestList() {
-        return personalityTestRepository.findAllByOrderByIdAsc()
+    public ResponseEntity<List<UserPersonalityTestDTO>> getPersonalityTestList() {
+        return ResponseEntity.ok(personalityTestRepository.findAllByOrderByIdAsc()
                 .stream()
                 .map(UserPersonalityTestDTO::toDTO)
-                .toList();
+                .toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserQuizDTO getQuiz(Long quizEventId ){
+    public ResponseEntity<UserQuizDTO> getQuiz(Long quizEventId ){
         Event quizEvent = eventRepository.findById(quizEventId)
                 .orElseThrow(() -> new NoSuchElementException("퀴즈 이벤트가 존재하지 않습니다."));
 
@@ -61,16 +62,16 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        return UserQuizDTO.toDTO(todayQuiz);
+        return  ResponseEntity.ok(UserQuizDTO.toDTO(todayQuiz));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserEventTimeDTO getEventTime(){
+    public ResponseEntity<UserEventTimeDTO> getEventTime(){
         EventCommon eventCommon = eventCommonRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않습니다."));
 
-        return UserEventTimeDTO.toDTO(eventCommon);
+        return ResponseEntity.ok(UserEventTimeDTO.toDTO(eventCommon));
     }
 
     @Override
@@ -106,6 +107,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);//계산된 팀 정보를 업데이트해준다
 
 
+        return ResponseEntity.ok(map);
+    }
+
+    @Override
+    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(Map<String,Integer> answer, String authorizationHeader){
+        Map<String,UserQuizStatus> map = new HashMap<>();
+        map.put("status" , UserQuizStatus.END);
         return ResponseEntity.ok(map);
     }
 
