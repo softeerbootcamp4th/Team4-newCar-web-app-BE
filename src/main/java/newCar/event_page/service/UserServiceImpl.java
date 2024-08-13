@@ -5,8 +5,10 @@ import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.Team;
+
 import newCar.event_page.model.entity.TeamScore;
 import newCar.event_page.model.entity.User;
+
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final EventCommonRepository eventCommonRepository;
 
     private final UserRepository userRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -102,8 +105,10 @@ public class UserServiceImpl implements UserService {
         user.setTeam(team);
         userRepository.save(user);//계산된 팀 정보를 업데이트해준다
 
+
         return ResponseEntity.ok(map);
     }
+
 
     private Team parsePersonalityAnswer(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList){
 
@@ -153,6 +158,7 @@ public class UserServiceImpl implements UserService {
         int max2 = Math.max(c, d);
         return Math.max(max1, max2);
     } // 4값 중 가장 큰 값을 찾는 메소드
+
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
         if(!userLight.getUserId().equals(dto.getUserId())) return false;

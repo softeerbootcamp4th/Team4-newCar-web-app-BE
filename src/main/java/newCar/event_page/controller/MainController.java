@@ -51,9 +51,11 @@ public class MainController {
 
     @PostMapping("/personality-test")
     @Operation(summary = "성격 유형 검사 풀고 제출시")
+
     public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                      @RequestHeader("Authorization") String authorizationHeader) {
         return userService.personalityTest(userPersonalityAnswerDTOList,authorizationHeader);
+
     }
 
 }
