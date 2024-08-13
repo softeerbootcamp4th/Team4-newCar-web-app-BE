@@ -50,8 +50,10 @@ public class WebConfig implements WebMvcConfigurer {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:5173");
-        config.addAllowedOrigin("https://d3phfzvzx3wm4l.cloudfront.net/");
-        config.addAllowedOrigin("https://hybrid-jgs.shop");
+        config.addAllowedOrigin("https://admin.batro.org");
+        config.addAllowedOrigin("https://www.batro.org");
+        config.addAllowedOrigin("http://admin.batro.org");
+        config.addAllowedOrigin("http://www.batro.org");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
