@@ -13,6 +13,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<String> handleNoSuchElementException(final NoSuchElementException e){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        //Jackson 라이브러리
     }
 
     @ExceptionHandler({

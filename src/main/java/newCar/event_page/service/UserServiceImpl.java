@@ -1,6 +1,7 @@
 package newCar.event_page.service;
 
 import com.sun.java.accessibility.util.EventID;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
@@ -23,6 +24,7 @@ import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,23 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private static final ArrayList<Boolean> isQuizAvailable = new ArrayList<>();
+
+    private final RedisTemplate<String,Object> redisTemplate;
+
+    @PostConstruct
+    private void Init(){
+        EventCommon eventCommon = eventCommonRepository.findById(1L).get();
+        long count = eventCommon.getDuration();
+        for(int i = 0; i < count; i++){
+            isQuizAvailable.add(true);
+        }
+        List<Quiz> quizList = quizRepository.findAllByOrderByIdAsc();
+        for(int i = 0 ; i<count ;i++){
+            Quiz quiz = quizList.get(i);
+            redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
+        }
+    }//common업데이트, 퀴즈 업데이트 맞춰서
 
     @Override
     @Transactional(readOnly = true)
@@ -205,6 +224,18 @@ public class UserServiceImpl implements UserService {
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
+        int quizId = Integer.parseInt(todayQuiz.getId().toString()));
+
+        if(!isQuizAvailable.get(quizId)){
+            map.put("status",UserQuizStatus.END);
+            return;
+        }//이미 마감되어 있다면
+
+
+        if(redisTemplate.opsForValue().decrement("tikcet"+todayQuiz.getId())<0){
+            isQuizAvailable.set(quizId,false);
+            return ;
+        }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
 
         EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
 
