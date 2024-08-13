@@ -20,6 +20,7 @@ import newCar.event_page.repository.jpa.EventRepository;
 import newCar.event_page.repository.jpa.UserLightRepository;
 import newCar.event_page.repository.jpa.UserRepository;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
+import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class UserServiceImpl implements UserService {
     private final EventRepository eventRepository;
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
+
+    private final QuizWinnerRepository quizWinnerRepository;
 
     private final UserRepository userRepository;
 
@@ -113,7 +116,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(Map<String,Integer> answer, String authorizationHeader){
         Map<String,UserQuizStatus> map = new HashMap<>();
-        map.put("status" , UserQuizStatus.END);
+
+        Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
+                .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
+
+        Integer userAnswer = answer.get("answer");
+
+
+
+        if(todayQuiz.getCorrectAnswer().equals(userAnswer)){
+            map.put("status",UserQuizStatus.RIGHT);
+        } else if(!todayQuiz.getCorrectAnswer().equals(userAnswer)){
+            map.put("status",UserQuizStatus.WRONG);
+        }
+
+        map.put("status" , UserQuizStatus.END);//선착순 마감 시
         return ResponseEntity.ok(map);
     }
 
