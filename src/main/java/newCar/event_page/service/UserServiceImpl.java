@@ -1,6 +1,5 @@
 package newCar.event_page.service;
 
-import com.sun.java.accessibility.util.EventID;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.UserLoginFailException;
@@ -33,7 +32,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
-import static org.springframework.util.ClassUtils.isPresent;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +50,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private static final ArrayList<Boolean> isQuizAvailable = new ArrayList<>();
+    public static ArrayList<Boolean> isQuizAvailable = new ArrayList<>();
 
     private final RedisTemplate<String,Object> redisTemplate;
 

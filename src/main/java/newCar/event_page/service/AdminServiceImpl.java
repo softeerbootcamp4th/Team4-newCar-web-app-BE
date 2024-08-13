@@ -57,6 +57,8 @@ public class AdminServiceImpl implements AdminService {
 
     private double totalWeight;
 
+    private final UserServiceImpl userServiceImpl;
+
 
 
     @Override
@@ -75,9 +77,21 @@ public class AdminServiceImpl implements AdminService {
         eventCommon.update(eventCommonDTO);
 
         long duration = eventCommon.getDuration();
-
+        System.out.println("공통이벤트");
         putDummyIfRequired(duration);
         updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
+
+        userServiceImpl.isQuizAvailable = new ArrayList<>();//기간이 바뀌면 다시 설정
+
+
+        for(int i = 0; i < duration; i++){
+            userServiceImpl.isQuizAvailable.add(true);
+        }
+        List<Quiz> quizList = quizRepository.findAllByOrderByIdAsc();
+        for(int i = 0 ; i< duration ;i++){
+            Quiz quiz = quizList.get(i);
+            redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
+        }
 
         return ResponseEntity.ok(AdminEventCommonDTO.toDTO(eventCommon));
     }
