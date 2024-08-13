@@ -1,9 +1,13 @@
 package newCar.event_page.service;
 
+import com.sun.java.accessibility.util.EventID;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
+import newCar.event_page.model.entity.event.EventId;
+import newCar.event_page.model.entity.event.EventUser;
+import newCar.event_page.model.entity.event.quiz.QuizWinner;
 import newCar.event_page.model.enums.Team;
 
 import newCar.event_page.model.entity.TeamScore;
@@ -15,10 +19,7 @@ import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.model.enums.UserQuizStatus;
-import newCar.event_page.repository.jpa.EventCommonRepository;
-import newCar.event_page.repository.jpa.EventRepository;
-import newCar.event_page.repository.jpa.UserLightRepository;
-import newCar.event_page.repository.jpa.UserRepository;
+import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
@@ -40,6 +41,8 @@ public class UserServiceImpl implements UserService {
     private final EventRepository eventRepository;
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
+
+    private final EventUserRepository eventUserRepository;
 
     private final QuizWinnerRepository quizWinnerRepository;
 
@@ -115,25 +118,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(Map<String,Integer> answer, String authorizationHeader){
+
         Map<String,UserQuizStatus> map = new HashMap<>();
 
-        Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
-                .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
+        Long id = jwtTokenProvider.getUserId(authorizationHeader);//유저 토큰에서 유저 아이디를 받아온다
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
 
-        Integer userAnswer = answer.get("answer");
+        if(eventUser==null){
+            eventUser = new EventUser();
+            eventUser.setEvent(eventRepository.findById(EventId.Quiz.getValue())
+                    .orElseThrow(()->new NoSuchElementException("이벤트 테이블에 퀴즈이벤트가 존재하지 않습니다")));
+            eventUser.setUser(userRepository.findById(id)
+                        .orElseThrow(()-> new NoSuchElementException("유저 정보가 없습니다")));
+            eventUserRepository.save(eventUser);
+        }//퀴즈 이벤트 참여자 명단에 없으면 넣어준다
 
+        Integer userAnswer = answer.get("answer");//유저가 제출한 정답
 
+        quizBranch(userAnswer,id,map);//퀴즈 분기 처리 (정답,오답,이미 참가함, 마감)
 
-        if(todayQuiz.getCorrectAnswer().equals(userAnswer)){
-            map.put("status",UserQuizStatus.RIGHT);
-        } else if(!todayQuiz.getCorrectAnswer().equals(userAnswer)){
-            map.put("status",UserQuizStatus.WRONG);
-        }
-
-        map.put("status" , UserQuizStatus.END);//선착순 마감 시
         return ResponseEntity.ok(map);
     }
-
 
     private Team parsePersonalityAnswer(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList){
 
@@ -184,6 +189,32 @@ public class UserServiceImpl implements UserService {
         return Math.max(max1, max2);
     } // 4값 중 가장 큰 값을 찾는 메소드
 
+    private void quizBranch(Integer userAnswer,Long id,Map<String,UserQuizStatus> map){
+
+        //LocalDate 한국 날짜를 기준으로 오늘의 퀴즈를 받아온다
+        Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
+                .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
+
+        if(quizWinnerRepository.findByQuizIdAndUserId(todayQuiz.getId(),id).isPresent()){
+            map.put("status",UserQuizStatus.PARTICIPATED);
+            return ;
+        }//오늘 퀴즈에 이미 당첨이 되어있다면
+
+        if(!userAnswer.equals(todayQuiz.getCorrectAnswer())){
+            map.put("status",UserQuizStatus.WRONG);
+            return;
+        }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
+
+
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
+
+        QuizWinner quizWinner = new QuizWinner();
+        quizWinner.setQuiz(todayQuiz);
+        quizWinner.setEventUser(eventUser);
+        quizWinnerRepository.save(quizWinner);
+
+        map.put("status",UserQuizStatus.RIGHT);
+    }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
         if(!userLight.getUserId().equals(dto.getUserId())) return false;
