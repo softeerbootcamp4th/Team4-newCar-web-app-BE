@@ -6,6 +6,7 @@ import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.Team;
 import newCar.event_page.model.entity.TeamScore;
+import newCar.event_page.model.entity.User;
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
@@ -14,6 +15,7 @@ import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.repository.jpa.EventCommonRepository;
 import newCar.event_page.repository.jpa.EventRepository;
 import newCar.event_page.repository.jpa.UserLightRepository;
+import newCar.event_page.repository.jpa.UserRepository;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,8 @@ public class UserServiceImpl implements UserService {
     private final EventRepository eventRepository;
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
+
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -91,6 +95,12 @@ public class UserServiceImpl implements UserService {
         Map<String,Object> map = new HashMap<>();
         map.put("team",team);
         map.put("accessToken",jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
+
+        User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
+                .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
+
+        user.setTeam(team);
+        userRepository.save(user);//계산된 팀 정보를 업데이트해준다
 
         return ResponseEntity.ok(map);
     }
