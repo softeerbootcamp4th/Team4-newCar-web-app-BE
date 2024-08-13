@@ -216,7 +216,9 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        if(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(todayQuiz.getId(), id).isPresent()){
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
+
+        if(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(todayQuiz.getId(), eventUser.getId()).isPresent()){
             map.put("status",UserQuizStatus.PARTICIPATED);
             return ;
         }//오늘 퀴즈에 이미 당첨이 되어있다면
@@ -233,13 +235,13 @@ public class UserServiceImpl implements UserService {
             return;
         }//이미 마감되어 있다면
 
-
-        if(redisTemplate.opsForValue().decrement("tikcet"+todayQuiz.getId())<0){
+        if(redisTemplate.opsForValue().decrement("ticket_"+todayQuiz.getId())<0){
             isQuizAvailable.set(quizId,false);
+            map.put("status",UserQuizStatus.END);
             return ;
         }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
 
-        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
+
 
         QuizWinner quizWinner = new QuizWinner();
         quizWinner.setQuiz(todayQuiz);
