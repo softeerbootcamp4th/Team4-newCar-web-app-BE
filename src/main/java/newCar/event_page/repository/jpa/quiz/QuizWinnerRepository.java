@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface QuizWinnerRepository extends JpaRepository<QuizWinner,Long> {
 
-    Optional<QuizWinner> findByQuizIdAndUserId(Long quizId, Long userId);
+    Optional<QuizWinner> findByQuiz_IdAndEventUser_Id(Long quizId, Long userId);
 }

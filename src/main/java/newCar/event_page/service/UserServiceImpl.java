@@ -33,6 +33,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import static org.springframework.util.ClassUtils.isPresent;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -214,7 +216,7 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        if(quizWinnerRepository.findByQuizIdAndUserId(todayQuiz.getId(),id).isPresent()){
+        if(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(todayQuiz.getId(), id).isPresent()){
             map.put("status",UserQuizStatus.PARTICIPATED);
             return ;
         }//오늘 퀴즈에 이미 당첨이 되어있다면
@@ -224,7 +226,7 @@ public class UserServiceImpl implements UserService {
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
-        int quizId = Integer.parseInt(todayQuiz.getId().toString()));
+        int quizId = Integer.parseInt(todayQuiz.getId().toString());
 
         if(!isQuizAvailable.get(quizId)){
             map.put("status",UserQuizStatus.END);
