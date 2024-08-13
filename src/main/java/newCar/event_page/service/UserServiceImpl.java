@@ -1,26 +1,25 @@
 package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.exception.AdminLoginFailException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.Team;
+
+import newCar.event_page.model.entity.TeamScore;
+import newCar.event_page.model.entity.User;
+
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.quiz.Quiz;
-import newCar.event_page.model.session.Session;
-import newCar.event_page.model.session.UserSession;
+import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.repository.jpa.EventCommonRepository;
 import newCar.event_page.repository.jpa.EventRepository;
 import newCar.event_page.repository.jpa.UserLightRepository;
+import newCar.event_page.repository.jpa.UserRepository;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
-import newCar.event_page.repository.redis.SessionRepository;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +38,9 @@ public class UserServiceImpl implements UserService {
     private final EventRepository eventRepository;
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
+
+    private final UserRepository userRepository;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -89,22 +91,74 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Map<String,Object>> personalityTest(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
-        Team team = parsePersonalityAnswer(userPersonalityAnswerDTO);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.AUTHORIZATION, jwtTokenProvider.generateTokenWithTeam());
+    public ResponseEntity<Map<String,Object>> personalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+                                                              String authorizationHeader){
+        Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
 
         Map<String,Object> map = new HashMap<>();
         map.put("team",team);
-        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam());
+        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
+
+        User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
+                .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
+
+        user.setTeam(team);
+        userRepository.save(user);//계산된 팀 정보를 업데이트해준다
+
 
         return ResponseEntity.ok(map);
     }
 
-    private Team parsePersonalityAnswer(UserPersonalityAnswerDTO userPersonalityAnswerDTO){
-        return Team.PET;
+
+    private Team parsePersonalityAnswer(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList){
+
+        int petScore = 0;
+        int travelScore = 0;
+        int leisureScore = 0;
+        int spaceScore = 0;
+
+        for(UserPersonalityAnswerDTO dto : userPersonalityAnswerDTOList){
+            Long id = dto.getId();
+            Integer answer = dto.getAnswer();
+
+            TeamScore teamScore = calculatePersonality(id,answer);
+
+            petScore += teamScore.getPetScore();
+            travelScore += teamScore.getTravelScore();
+            leisureScore += teamScore.getLeisureScore();
+            spaceScore += teamScore.getSpaceScore();
+        }
+
+        return determineTeam(petScore, travelScore, leisureScore, spaceScore);
     }//유저가 성격유형검사를 제출 했을 때 제출된 결과를 바탕으로 어느 팀에 속해 있을지 정해준다
+
+    private TeamScore calculatePersonality(Long id, Integer answer){
+        PersonalityTest personalityTest = personalityTestRepository.findById(id).
+                orElseThrow(()->new NoSuchElementException("해당 성격 유형검사 문제에 대한 정보를 찾을 수 없습니다"));
+
+        return (answer == 0) ? personalityTest.getChoice1Scores() : personalityTest.getChoice2Scores();
+    }//해당 문제의 성격 점수를 계산해준다
+
+    private Team determineTeam(int petScore, int travelScore, int leisureScore, int spaceScore) {
+        int maxScore = findMax(petScore, travelScore, leisureScore, spaceScore);
+
+        if (maxScore == petScore) {
+            return Team.PET;
+        } else if (maxScore == travelScore) {
+            return Team.TRAVEL;
+        } else if (maxScore == leisureScore) {
+            return Team.LEISURE;
+        } else {
+            return Team.SPACE;
+        }
+    }//주어진 4개의 점수를 가지고 어느 팀인지 판단
+
+    private int findMax(int a,int b,int c, int d){
+        int max1 = Math.max(a, b);
+        int max2 = Math.max(c, d);
+        return Math.max(max1, max2);
+    } // 4값 중 가장 큰 값을 찾는 메소드
+
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
         if(!userLight.getUserId().equals(dto.getUserId())) return false;
