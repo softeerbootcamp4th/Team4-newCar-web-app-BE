@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.filter.CorsFilter;
@@ -36,6 +37,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/main/quiz");
     }
 
+    /*
     @Bean
     public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean() {
         FilterRegistrationBean<CorsFilter> registrationBean = new FilterRegistrationBean<>();
@@ -58,18 +60,22 @@ public class WebConfig implements WebMvcConfigurer {
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
+    }*/
 
 
-    /*
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("http://www.batro.org", "http://*.batro.org:*", "https://*.batro.org:*", "http://1.231.159.76:*", "https://1.231.159.76:*", "http://*.batro.org/:*", "https://*.batro.org/:*")
-                .allowCredentials(false)
+                .allowedOrigins("http://localhost:5173")
+                .allowedOrigins("https://admin.batro.org")
+                .allowedOrigins("https://www.batro.org")
+                .allowedOrigins("http://admin.batro.org")
+                .allowedOrigins("http://www.batro.org")
+                .allowCredentials(true)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .maxAge(3600);
-    }*/
+    }
 
 
 }
