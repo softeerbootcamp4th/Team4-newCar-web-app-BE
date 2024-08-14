@@ -61,7 +61,7 @@ public class MainController {
         return userService.submitQuiz(answer, authorizationHeader);
     }
 
-    @PostMapping("/dummy-token")
+    @GetMapping("/dummy-token")
     public ResponseEntity<Map<String,String>> dummyToken(){
         return userService.dummyToken();
     }
