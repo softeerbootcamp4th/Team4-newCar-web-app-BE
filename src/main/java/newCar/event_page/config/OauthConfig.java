@@ -14,4 +14,7 @@ public class OauthConfig {
 
     @Value("${kakao.redirect.uri}")
     private String redirectUri;
+
+    @Value("${kakao.client.secret.id}")
+    private String clientSecretId;
 }
