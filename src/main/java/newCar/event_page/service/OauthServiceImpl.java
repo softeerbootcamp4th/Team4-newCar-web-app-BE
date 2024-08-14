@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.OauthConfig;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -14,14 +15,14 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class OauthServiceImpl implements OauthService{
 
     private final OauthConfig oauthConfig;
-
-
+    private final UserService userService;
 
     @Override
     public String getAccessToken(String code){
@@ -78,16 +79,18 @@ public class OauthServiceImpl implements OauthService{
         return accessToken;
     }
 
-    @Override
-    public HashMap<String,Object> getUserInfo(String accessToken){
 
-        HashMap<String, Object> userInfo = new HashMap<>();
+    //카카오 엑세스 토큰을 통해 userInfo를 받아온다
+    @Override
+    public Map<String,String> getUserInfo(String kakaoAccessToken){
+
+        HashMap<String, String> userInfo = new HashMap<>();
         String reqUrl = "https://kapi.kakao.com/v2/user/me";
         try{
             URL url = new URL(reqUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");//GET 이든 POST이든 상관없는듯
-            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            conn.setRequestProperty("Authorization", "Bearer " + kakaoAccessToken);
             conn.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
             int responseCode = conn.getResponseCode();
@@ -105,7 +108,6 @@ public class OauthServiceImpl implements OauthService{
                 responseSb.append(line);
             }
             String result = responseSb.toString();
-            System.out.println(result);
 
             JsonElement element = JsonParser.parseString(result);
 
@@ -118,16 +120,13 @@ public class OauthServiceImpl implements OauthService{
             userInfo.put("nickname", nickname);
             userInfo.put("email", email);
 
-            System.out.println("nickname = "+nickname);
-            System.out.println("email = " + email);
-
             br.close();
 
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        return userInfo;
+        return userService.kakaoLogin(userInfo);
     }
 
 }

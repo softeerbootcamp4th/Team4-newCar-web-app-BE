@@ -10,6 +10,7 @@ import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.QuizWinner;
+import newCar.event_page.model.enums.LoginType;
 import newCar.event_page.model.enums.Team;
 
 import newCar.event_page.model.entity.TeamScore;
@@ -181,6 +182,34 @@ public class UserServiceImpl implements UserService {
         map.put("accessToken", jwtTokenProvider.generateUserToken("user"));
 
         return ResponseEntity.ok(map);
+    }
+
+    @Override
+    public Map<String,String> kakaoLogin(Map<String,String> userInfo){
+
+        String userName = userInfo.get("email");//userName은 이메일 입니다
+        Map<String,String> map = new HashMap<>();
+
+        Optional<User> user = userRepository.findByUserName(userName);
+        if(user.isPresent()){
+            map.put("accessToken",jwtTokenProvider.generateUserToken(userName));
+            return map;
+        }//이미 유저 정보가 저장되어 있다면
+
+        User newUser = new User();
+        newUser.setLoginType(LoginType.KAKAO);
+        newUser.setClickNumber(0);
+        newUser.setIsMarketingAgree(true);
+        newUser.setPhoneNumber("11111");
+        newUser.setNickName(userInfo.get("nickName"));
+        newUser.setUserName(userName);
+
+        userRepository.save(newUser);
+        //유저가 없다면, UserDB에 저장을 해주어야 한다
+
+        map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
+
+        return map;
     }
 
     public void setQuizAvailableArray(ArrayList<Boolean> availableArray){

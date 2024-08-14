@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,10 +41,24 @@ public class OauthController {
     @GetMapping("/kakao/callback")
     public ResponseEntity<Void> kakaoCallBack(@RequestParam("code") String code){
 
-        String accessToken = oauthService.getAccessToken(code);
-        HashMap<String,Object> map = oauthService.getUserInfo(accessToken);
+
+        String kakaoAccessToken = oauthService.getAccessToken(code);
+
+        Map<String,String> map = oauthService.getUserInfo(kakaoAccessToken);
+        //카카오 엑세스 토큰을 이용해서 새로운 엑세스 토큰을 발급한다
+
+
+        // 리디렉션할 URL과 쿼리 파라미터 생성
+
+        String redirectUrl = "http://yourdomain.com/redirected-page";
+        //여기서 redirect url을 지정해 줘야 한다
+        String queryParams = "accessToken=" +map.get("accessToken");
+
+        // URL에 쿼리 파라미터 추가
+        String fullRedirectUrl = redirectUrl + "?" + queryParams;
 
         HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(fullRedirectUrl));
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
