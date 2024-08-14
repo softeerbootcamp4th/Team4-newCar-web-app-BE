@@ -23,7 +23,7 @@ public class OauthController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/main/kakao")
-    public ResponseEntity<Void> kakaoConnect() {
+    public ResponseEntity<Void> kakaoConnect(/*@RequestParam("newUrl") String newUrl*/) {
         StringBuffer url = new StringBuffer();
         url.append("https://kauth.kakao.com/oauth/authorize?");
         url.append("response_type=code");
@@ -41,12 +41,10 @@ public class OauthController {
     public ResponseEntity<Void> kakaoCallBack(@RequestParam("code") String code){
 
         String accessToken = oauthService.getAccessToken(code);
-        System.out.println("accessToken" + accessToken);
         HashMap<String,Object> map = oauthService.getUserInfo(accessToken);
 
         HttpHeaders headers = new HttpHeaders();
 
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
-
 }

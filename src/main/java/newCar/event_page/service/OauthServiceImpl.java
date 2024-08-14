@@ -14,7 +14,6 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -114,13 +113,13 @@ public class OauthServiceImpl implements OauthService{
             JsonObject kakaoAccount = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
 
             String nickname = properties.getAsJsonObject().get("nickname").getAsString();
-            //String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
+            String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
 
             userInfo.put("nickname", nickname);
-            //userInfo.put("email", email);
+            userInfo.put("email", email);
 
             System.out.println("nickname = "+nickname);
-            //System.out.println("email = " + email);
+            System.out.println("email = " + email);
 
             br.close();
 
