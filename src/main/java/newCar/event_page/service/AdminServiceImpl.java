@@ -1,10 +1,8 @@
 package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.exception.AdminLoginFailException;
-import newCar.event_page.exception.DrawNotYetConductedException;
-import newCar.event_page.exception.ExcessiveWinnersRequestedException;
-import newCar.event_page.exception.UnmodifiableFieldException;
+import newCar.event_page.exception.*;
+import newCar.event_page.exception.FCFS.FCFSNotYetConductedException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.admin.*;
 import newCar.event_page.model.entity.Administrator;
@@ -14,6 +12,7 @@ import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.quiz.QuizEvent;
+import newCar.event_page.model.entity.event.quiz.QuizWinner;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.repository.jpa.AdministratorRepository;
@@ -22,12 +21,11 @@ import newCar.event_page.repository.jpa.EventRepository;
 import newCar.event_page.repository.jpa.EventUserRepository;
 import newCar.event_page.repository.jpa.quiz.QuizEventRepository;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
+import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import newCar.event_page.repository.jpa.racing.RacingEventRepository;
 import newCar.event_page.repository.jpa.racing.RacingWinnerRepository;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +44,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final QuizRepository quizRepository;
     private final QuizEventRepository quizEventRepository;
+    private final QuizWinnerRepository quizWinnerRepository;
 
     private final RacingWinnerRepository racingWinnerRepository;
     private final RacingEventRepository racingEventRepository;
@@ -55,7 +54,11 @@ public class AdminServiceImpl implements AdminService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final RedisTemplate<String,Object> redisTemplate;
+
     private double totalWeight;
+
+    private final UserServiceImpl userServiceImpl;
 
 
 
@@ -75,9 +78,17 @@ public class AdminServiceImpl implements AdminService {
         eventCommon.update(eventCommonDTO);
 
         long duration = eventCommon.getDuration();
-
+        System.out.println("공통이벤트");
         putDummyIfRequired(duration);
         updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
+
+        userServiceImpl.setQuizAvailableArray(new ArrayList<>(Collections.nCopies((int)duration, true)));
+
+        List<Quiz> quizList = quizRepository.findAllByOrderByIdAsc();
+        for(int i = 0; i < duration; i++){
+            Quiz quiz = quizList.get(i);
+            redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
+        }
 
         return ResponseEntity.ok(AdminEventCommonDTO.toDTO(eventCommon));
     }
@@ -109,6 +120,8 @@ public class AdminServiceImpl implements AdminService {
         }
 
         quiz.update(adminQuizDTO);
+        redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
+
         quizRepository.save(quiz);
         return ResponseEntity.ok(AdminQuizDTO.toDTO(quiz));
     }
@@ -182,6 +195,19 @@ public class AdminServiceImpl implements AdminService {
         personalityTestRepository.save(personalityTest);
 
         return ResponseEntity.ok(AdminPersonalityTestDTO.toDTO(personalityTest));
+    }
+
+    @Override
+    public ResponseEntity<List<AdminQuizWinnersDTO>> getQuizWinnerList(Long quizEventId){
+        List<QuizWinner> quizWinnerList = quizWinnerRepository.findAllByOrderByQuiz_Id();
+        if(quizWinnerList.isEmpty()){
+            throw new FCFSNotYetConductedException("아직 선착순 퀴즈 당첨자가 존재하지 않습니다");
+        }
+
+        return ResponseEntity.ok(quizWinnerList
+                .stream()
+                .map(AdminQuizWinnersDTO::toDTO)
+                .toList());
     }
 
     @Override

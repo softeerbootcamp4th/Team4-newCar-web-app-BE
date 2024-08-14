@@ -3,7 +3,7 @@ package newCar.event_page.model.dto.admin;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
 
 @Data

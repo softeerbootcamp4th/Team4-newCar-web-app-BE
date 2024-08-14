@@ -1,10 +1,16 @@
 package newCar.event_page.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import newCar.event_page.exception.FCFS.FCFSFinishedException;
+import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.entity.event.EventId;
+import newCar.event_page.model.entity.event.EventUser;
+import newCar.event_page.model.entity.event.quiz.QuizWinner;
+import newCar.event_page.model.enums.Team;
 
 import newCar.event_page.model.entity.TeamScore;
 import newCar.event_page.model.entity.User;
@@ -14,22 +20,26 @@ import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
-import newCar.event_page.repository.jpa.EventCommonRepository;
-import newCar.event_page.repository.jpa.EventRepository;
-import newCar.event_page.repository.jpa.UserLightRepository;
-import newCar.event_page.repository.jpa.UserRepository;
+import newCar.event_page.model.enums.UserQuizStatus;
+import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
+import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserLightRepository userLightRepository;
@@ -39,21 +49,42 @@ public class UserServiceImpl implements UserService {
     private final QuizRepository quizRepository;
     private final EventCommonRepository eventCommonRepository;
 
+    private final EventUserRepository eventUserRepository;
+
+    private final QuizWinnerRepository quizWinnerRepository;
+
     private final UserRepository userRepository;
 
+    private ArrayList<Boolean> isQuizAvailable = new ArrayList<>();
+
+    private final RedisTemplate<String,Object> redisTemplate;
+
+    @PostConstruct
+    private void Init(){
+        EventCommon eventCommon = eventCommonRepository.findById(1L).get();
+        long count = eventCommon.getDuration();
+        for(int i = 0; i < count; i++){
+            isQuizAvailable.add(true);
+        }
+        List<Quiz> quizList = quizRepository.findAllByOrderByIdAsc();
+        for(int i = 0 ; i<count ;i++){
+            Quiz quiz = quizList.get(i);
+            redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
+        }
+    }//common업데이트, 퀴즈 업데이트 맞춰서
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserPersonalityTestDTO> getPersonalityTestList() {
-        return personalityTestRepository.findAllByOrderByIdAsc()
+    public ResponseEntity<List<UserPersonalityTestDTO>> getPersonalityTestList() {
+        return ResponseEntity.ok(personalityTestRepository.findAllByOrderByIdAsc()
                 .stream()
                 .map(UserPersonalityTestDTO::toDTO)
-                .toList();
+                .toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserQuizDTO getQuiz(Long quizEventId ){
+    public ResponseEntity<UserQuizDTO> getQuiz(Long quizEventId ){
         Event quizEvent = eventRepository.findById(quizEventId)
                 .orElseThrow(() -> new NoSuchElementException("퀴즈 이벤트가 존재하지 않습니다."));
 
@@ -61,16 +92,25 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        return UserQuizDTO.toDTO(todayQuiz);
+        if(!isQuizAvailable.get(todayQuiz.getId().intValue())){
+            throw new FCFSFinishedException("선착순 퀴즈가 마감되었습니다");
+        }//오늘 퀴즈가 마감되었다면
+
+        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(15, 15))){
+            throw new FCFSNotStartedYet("퀴즈가 아직 시작되지 않았습니다");
+        }//퀴즈가 아직 시작 안되었다면
+
+
+        return  ResponseEntity.ok(UserQuizDTO.toDTO(todayQuiz));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserEventTimeDTO getEventTime(){
+    public ResponseEntity<UserEventTimeDTO> getEventTime(){
         EventCommon eventCommon = eventCommonRepository.findById(1L)
                 .orElseThrow(() -> new NoSuchElementException("공통 이벤트 정보가 존재하지 않습니다."));
 
-        return UserEventTimeDTO.toDTO(eventCommon);
+        return ResponseEntity.ok(UserEventTimeDTO.toDTO(eventCommon));
     }
 
     @Override
@@ -91,13 +131,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Map<String,Object>> personalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
-                                                              String authorizationHeader){
+    public ResponseEntity<Map<String,Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+                                                                    String authorizationHeader){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
 
         Map<String,Object> map = new HashMap<>();
-        map.put("team",team);
-        map.put("accessToken",jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
+        map.put("team", team);
+        map.put("accessToken", jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
 
         User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
@@ -109,6 +149,42 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok(map);
     }
 
+    @Override
+    public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String token){
+
+        Map<String,UserQuizStatus> map = new HashMap<>();
+
+        Long id = jwtTokenProvider.getUserId(token);//유저 토큰에서 유저 아이디를 받아온다
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
+
+        if(eventUser==null){
+            eventUser = new EventUser();
+            eventUser.setEvent(eventRepository.findById(EventId.Quiz.getValue())
+                    .orElseThrow(()->new NoSuchElementException("이벤트 테이블에 퀴즈이벤트가 존재하지 않습니다")));
+            eventUser.setUser(userRepository.findById(id)
+                        .orElseThrow(()-> new NoSuchElementException("유저 정보가 없습니다")));
+            eventUserRepository.save(eventUser);
+        }//퀴즈 이벤트 참여자 명단에 없으면 넣어준다
+
+        Integer userAnswer = answer.getAnswer();//유저가 제출한 정답
+
+        quizBranch(userAnswer,id,map);//퀴즈 분기 처리 (정답,오답,이미 참가함, 마감)
+
+        return ResponseEntity.ok(map);
+    }
+
+    @Override
+    public ResponseEntity<Map<String,String>> dummyToken(){
+
+        Map<String,String> map = new HashMap<>();
+        map.put("accessToken", jwtTokenProvider.generateUserToken("user"));
+
+        return ResponseEntity.ok(map);
+    }
+
+    public void setQuizAvailableArray(ArrayList<Boolean> availableArray){
+        isQuizAvailable = availableArray;
+    }
 
     private Team parsePersonalityAnswer(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList){
 
@@ -140,7 +216,7 @@ public class UserServiceImpl implements UserService {
     }//해당 문제의 성격 점수를 계산해준다
 
     private Team determineTeam(int petScore, int travelScore, int leisureScore, int spaceScore) {
-        int maxScore = findMax(petScore, travelScore, leisureScore, spaceScore);
+        int maxScore = Arrays.stream(new int[]{petScore, travelScore, leisureScore, spaceScore}).max().orElseThrow();
 
         if (maxScore == petScore) {
             return Team.PET;
@@ -153,12 +229,46 @@ public class UserServiceImpl implements UserService {
         }
     }//주어진 4개의 점수를 가지고 어느 팀인지 판단
 
-    private int findMax(int a,int b,int c, int d){
-        int max1 = Math.max(a, b);
-        int max2 = Math.max(c, d);
-        return Math.max(max1, max2);
-    } // 4값 중 가장 큰 값을 찾는 메소드
+    private void quizBranch(Integer userAnswer,Long id,Map<String,UserQuizStatus> map){
 
+        //LocalDate 한국 날짜를 기준으로 오늘의 퀴즈를 받아온다
+        Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
+                .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
+
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
+
+        if(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(todayQuiz.getId(), eventUser.getId()).isPresent()){
+            map.put("status",UserQuizStatus.PARTICIPATED);
+            return ;
+        }//오늘 퀴즈에 이미 당첨이 되어있다면
+
+        if(!userAnswer.equals(todayQuiz.getCorrectAnswer())){
+            map.put("status",UserQuizStatus.WRONG);
+            return;
+        }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
+
+        int quizId = Integer.parseInt(todayQuiz.getId().toString());
+
+        if(!isQuizAvailable.get(quizId)){
+            map.put("status",UserQuizStatus.END);
+            return;
+        }//이미 마감되어 있다면
+
+        if(redisTemplate.opsForValue().decrement("ticket_"+todayQuiz.getId())<0){
+            isQuizAvailable.set(quizId,false);
+            map.put("status",UserQuizStatus.END);
+            return ;
+        }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
+
+
+
+        QuizWinner quizWinner = new QuizWinner();
+        quizWinner.setQuiz(todayQuiz);
+        quizWinner.setEventUser(eventUser);
+        quizWinnerRepository.save(quizWinner);
+
+        map.put("status",UserQuizStatus.RIGHT);
+    }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
         if(!userLight.getUserId().equals(dto.getUserId())) return false;
