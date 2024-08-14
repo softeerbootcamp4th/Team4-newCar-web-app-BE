@@ -3,11 +3,13 @@ package newCar.event_page.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.OauthConfig;
+import newCar.event_page.service.OauthService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
@@ -19,6 +21,7 @@ import java.net.URI;
 public class OauthController {
 
     private final OauthConfig oauthConfig;
+    private final OauthService oauthService;
 
     @GetMapping("/kakao")
     public ResponseEntity<Void> kakaoConnect() {
@@ -34,5 +37,13 @@ public class OauthController {
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
+    @GetMapping("/kakao/callback")
+    public ResponseEntity<Void> kakaoCallBack(@RequestParam("code") String code){
+        System.out.println(code);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    }
 
 }
