@@ -153,8 +153,8 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String token){
 
         Map<String,UserQuizStatus> map = new HashMap<>();
-
         Long id = jwtTokenProvider.getUserId(token);//유저 토큰에서 유저 아이디를 받아온다
+
         EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
 
         if(eventUser==null){
@@ -165,6 +165,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(()-> new NoSuchElementException("유저 정보가 없습니다")));
             eventUserRepository.save(eventUser);
         }//퀴즈 이벤트 참여자 명단에 없으면 넣어준다
+
 
         Integer userAnswer = answer.getAnswer();//유저가 제출한 정답
 
