@@ -2,6 +2,7 @@ package newCar.event_page.service;
 
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.exception.*;
+import newCar.event_page.exception.FCFS.FCFSNotYetConductedException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.admin.*;
 import newCar.event_page.model.entity.Administrator;
@@ -81,14 +82,10 @@ public class AdminServiceImpl implements AdminService {
         putDummyIfRequired(duration);
         updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
 
-        userServiceImpl.isQuizAvailable = new ArrayList<>();//기간이 바뀌면 다시 설정
+        userServiceImpl.setQuizAvailableArray(new ArrayList<>(Collections.nCopies((int)duration, true)));
 
-
-        for(int i = 0; i < duration; i++){
-            userServiceImpl.isQuizAvailable.add(true);
-        }
         List<Quiz> quizList = quizRepository.findAllByOrderByIdAsc();
-        for(int i = 0 ; i< duration ;i++){
+        for(int i = 0; i < duration; i++){
             Quiz quiz = quizList.get(i);
             redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
         }

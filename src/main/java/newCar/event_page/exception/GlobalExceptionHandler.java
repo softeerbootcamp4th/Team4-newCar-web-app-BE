@@ -1,5 +1,8 @@
 package newCar.event_page.exception;
 
+import newCar.event_page.exception.FCFS.FCFSFinishedException;
+import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
+import newCar.event_page.exception.FCFS.FCFSNotYetConductedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,10 +25,20 @@ public class GlobalExceptionHandler {
             DrawNotYetConductedException.class,
             AdminLoginFailException.class,
             UserLoginFailException.class,
-            FCFSNotYetConductedException.class
+            FCFSNotYetConductedException.class,
     })
     public ResponseEntity<String> handleUnmodifiableFieldException(final RuntimeException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+
+    @ExceptionHandler(FCFSFinishedException.class)
+    public ResponseEntity<String> handleFCFSFinishedException(final RuntimeException e){
+        return ResponseEntity.status(HttpStatus.GONE).body(e.getMessage());
+    }
+
+    @ExceptionHandler(FCFSNotStartedYet.class)
+    public ResponseEntity<String> handleFCFSNotStartedException(final RuntimeException e){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 
 }

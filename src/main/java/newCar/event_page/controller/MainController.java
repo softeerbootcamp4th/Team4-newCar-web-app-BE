@@ -50,15 +50,20 @@ public class MainController {
 
     public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                      @RequestHeader("Authorization") String authorizationHeader) {
-        return userService.personalityTest(userPersonalityAnswerDTOList,authorizationHeader);
+        return userService.submitPersonalityTest(userPersonalityAnswerDTOList, authorizationHeader);
 
     }
 
 
     @PostMapping("/quiz-user")
     @Operation(summary = "유저가 선착순 퀴즈 풀고 제출시")
-    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(@RequestBody Map<String,Integer> answer, @RequestHeader("Authorization") String authorizationHeader){
-        return userService.quizSubmission(answer,authorizationHeader);
+    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(@Valid @RequestBody UserQuizAnswerDTO answer, @RequestHeader("Authorization") String authorizationHeader){
+        return userService.submitQuiz(answer, authorizationHeader);
+    }
+
+    @PostMapping("/dummy-token")
+    public ResponseEntity<Map<String,String>> dummyToken(){
+        return userService.dummyToken();
     }
 
 }

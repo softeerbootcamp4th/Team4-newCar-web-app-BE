@@ -17,10 +17,10 @@ public interface UserService {
 
     public ResponseEntity<List<UserPersonalityTestDTO>> getPersonalityTestList();
 
+    public ResponseEntity<Map<String, Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+                                                                     String authorizationHeader);
 
-    public ResponseEntity<Map<String, Object>> personalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
-                                                               String authorizationHeader);
+    public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader);
 
-    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(Map<String,Integer> answer, String authorizationHeader);
-
+    public ResponseEntity<Map<String,String>> dummyToken();
 }

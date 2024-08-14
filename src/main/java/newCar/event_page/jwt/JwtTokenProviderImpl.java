@@ -86,8 +86,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         return userId;
     } //토큰에서 유저 Id를 추출
 
-    public String getTeam(String token){
-        return getClamis(token).get("team",String.class);
+    public Team getTeam(String token){
+        return claimsToTeam(getClamis(token).get("team",String.class));
     } //토큰에서 유저 Team을 추출
 
     public boolean validateToken(String token){
@@ -111,6 +111,17 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         return role.equals("admin");//role 이 admin이라면 true를, 아니라면 false를 반환한다
     }
     //JWT 토큰이 admin의 역할을 담고 있는지 검증
+
+    private Team claimsToTeam(String team){
+
+        switch(team){
+            case "PET" : return Team.PET;
+            case "TRAVEL" : return Team.TRAVEL;
+            case "LEISURE" : return Team.LEISURE;
+            case "SPACE" : return Team.SPACE;
+            default: return Team.PET;
+        }
+    }
 
     private Claims getClamis(String token){
         return Jwts.parserBuilder()
