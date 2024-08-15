@@ -40,7 +40,6 @@ public class OauthController {
     @GetMapping("/kakao/callback")
     public ResponseEntity<Void> kakaoCallBack(@RequestParam("code") String code){
 
-
         String kakaoAccessToken = oauthService.getAccessToken(code);
 
         Map<String,String> map = oauthService.getUserInfo(kakaoAccessToken);
@@ -49,7 +48,7 @@ public class OauthController {
 
         // 리디렉션할 URL과 쿼리 파라미터 생성
 
-        String redirectUrl = "http://yourdomain.com/redirected-page";
+        String redirectUrl = "http://www.naver";
         //여기서 redirect url을 지정해 줘야 한다
         String queryParams = "accessToken=" +map.get("accessToken");
 

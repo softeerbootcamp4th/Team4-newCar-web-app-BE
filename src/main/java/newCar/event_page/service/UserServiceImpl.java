@@ -135,10 +135,11 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Map<String,Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                     String authorizationHeader){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
-
+        System.out.println(team);
         Map<String,Object> map = new HashMap<>();
-        map.put("team", team);
+        map.put("team : ", team);
         map.put("accessToken", jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
+
 
         User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
@@ -196,15 +197,7 @@ public class UserServiceImpl implements UserService {
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
-        User newUser = new User();
-        newUser.setLoginType(LoginType.KAKAO);
-        newUser.setClickNumber(0);
-        newUser.setIsMarketingAgree(true);
-        newUser.setPhoneNumber("11111");
-        newUser.setNickName(userInfo.get("nickname"));
-        newUser.setUserName(userName);
-
-        userRepository.save(newUser);
+        userRepository.save(getNewUser(userInfo.get("nickname"),userInfo.get(userName)));
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
@@ -298,6 +291,18 @@ public class UserServiceImpl implements UserService {
         quizWinnerRepository.save(quizWinner);
 
         map.put("status",UserQuizStatus.RIGHT);
+    }
+
+    private User getNewUser(String nickName,String userName){
+        User newUser = new User();
+        newUser.setLoginType(LoginType.KAKAO);
+        newUser.setClickNumber(0);
+        newUser.setIsMarketingAgree(true);
+        newUser.setPhoneNumber("11111");
+        newUser.setNickName(nickName);
+        newUser.setUserName(userName);
+
+        return newUser;
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){

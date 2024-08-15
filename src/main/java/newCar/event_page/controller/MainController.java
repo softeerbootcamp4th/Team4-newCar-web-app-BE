@@ -27,10 +27,11 @@ public class MainController {
     private final UserService userService;
 
     @PostMapping("/login")
-    @Operation(summary = "유저 로그인")
+    @Operation(summary = "단순 유저 로그인")
     public ResponseEntity<Map<String,String>> userLogin(@Valid @RequestBody UserLightDTO userLightDTO) {
         return userService.login(userLightDTO);
     }
+
     @GetMapping("/event-time")
     @Operation(summary = "이벤트 진행 기간을 startTime, endTime 으로 반환한다")
     public ResponseEntity<UserEventTimeDTO> getEventTime(){
@@ -51,11 +52,10 @@ public class MainController {
 
     @PostMapping("/personality-test")
     @Operation(summary = "성격 유형 검사 풀고 제출시")
-
     public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                      @RequestHeader("Authorization") String authorizationHeader) {
+        System.out.println("daifjadf");
         return userService.submitPersonalityTest(userPersonalityAnswerDTOList, authorizationHeader);
-
     }
 
     @PostMapping("/quiz-user")
