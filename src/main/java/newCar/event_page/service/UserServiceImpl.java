@@ -201,7 +201,7 @@ public class UserServiceImpl implements UserService {
         newUser.setClickNumber(0);
         newUser.setIsMarketingAgree(true);
         newUser.setPhoneNumber("11111");
-        newUser.setNickName(userInfo.get("nickName"));
+        newUser.setNickName(userInfo.get("nickname"));
         newUser.setUserName(userName);
 
         userRepository.save(newUser);
