@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Getter
-public class OauthConfig {
+public class OAuthConfig {
 
     @Value("${kakao.client.id}")
     private String clientId;

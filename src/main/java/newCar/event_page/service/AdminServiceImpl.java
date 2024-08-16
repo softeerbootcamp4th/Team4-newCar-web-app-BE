@@ -227,9 +227,6 @@ public class AdminServiceImpl implements AdminService {
     }
 
 
-
-
-
     private void putDummyIfRequired(long duration) {
         long quizCount = quizRepository.count();
 

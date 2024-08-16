@@ -4,17 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.config.OauthConfig;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.service.UserService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 

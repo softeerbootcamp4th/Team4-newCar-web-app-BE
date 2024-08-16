@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.config.OauthConfig;
+import newCar.event_page.config.OAuthConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -18,9 +18,9 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class OauthServiceImpl implements OauthService{
+public class OAuthServiceImpl implements OAuthService {
 
-    private final OauthConfig oauthConfig;
+    private final OAuthConfig oauthConfig;
     private final UserService userService;
 
     private final String CONTENT_TYPE = "application/x-www-form-urlencoded;charset=utf-8";
@@ -120,6 +120,8 @@ public class OauthServiceImpl implements OauthService{
 
             userInfo.put("nickname", nickname);
             userInfo.put("email", email);
+
+            System.out.println("email : " + email);
 
             br.close();
 

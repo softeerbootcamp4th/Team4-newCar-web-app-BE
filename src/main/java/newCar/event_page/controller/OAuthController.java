@@ -2,9 +2,9 @@ package newCar.event_page.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.config.OauthConfig;
+import newCar.event_page.config.OAuthConfig;
 import newCar.event_page.jwt.JwtTokenProvider;
-import newCar.event_page.service.OauthService;
+import newCar.event_page.service.OAuthService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +16,10 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Oauth 컨트롤러입니다", description = "카카오 로그인을 위한 컨트롤러입ㄴ다")
-public class OauthController {
+public class OAuthController {
 
-    private final OauthConfig oauthConfig;
-    private final OauthService oauthService;
+    private final OAuthConfig oauthConfig;
+    private final OAuthService oauthService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/main/kakao")
@@ -45,13 +45,15 @@ public class OauthController {
         Map<String,String> map = oauthService.getUserInfo(kakaoAccessToken);
         //카카오 엑세스 토큰을 이용해서 새로운 엑세스 토큰을 발급한다
 
+        String accessToken = map.get("accessToken");
         // 리디렉션할 URL과 쿼리 파라미터 생성
-        String redirectUrl = "http://www.naver";
+        String redirectUrl = "http://www.batro.org";
         //여기서 redirect url을 지정해 줘야 한다
-        String queryParams = "accessToken=" +map.get("accessToken");
+        String queryParams = "accessToken=" + accessToken;
+        String userId = "&userId=" + jwtTokenProvider.getUserId(accessToken);
 
         // URL에 쿼리 파라미터 추가
-        String fullRedirectUrl = redirectUrl + "?" + queryParams;
+        String fullRedirectUrl = redirectUrl + "?" + queryParams + userId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(fullRedirectUrl));

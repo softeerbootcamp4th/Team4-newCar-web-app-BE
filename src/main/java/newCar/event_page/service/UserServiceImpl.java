@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -196,7 +197,7 @@ public class UserServiceImpl implements UserService {
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
-        userRepository.save(getNewUser(userInfo.get("nickname"),userInfo.get(userName)));
+        userRepository.save(getNewUser(userInfo.get("nickname"), userName));
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
