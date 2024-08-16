@@ -22,14 +22,16 @@ public class OAuthController {
     private final OAuthService oauthService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private String redirectUrl;
+
     @GetMapping("/main/kakao")
-    public ResponseEntity<Void> kakaoConnect(/*@RequestParam("newUrl") String newUrl*/) {
+    public ResponseEntity<Void> kakaoConnect(@RequestParam("redirectUrl") String redirectUrl) {
         StringBuffer url = new StringBuffer();
+        this.redirectUrl=redirectUrl;
         url.append("https://kauth.kakao.com/oauth/authorize?");
         url.append("response_type=code");
         url.append("&client_id=" + oauthConfig.getClientId());
-        //url.append("&redirect_uri=" + oauthConfig.getRedirectUri());
-        url.append("&redirect_uri=" + "http://localhost:8080/kakao/callback");
+        url.append("&redirect_uri=" + oauthConfig.getRedirectUri());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(url.toString()));
@@ -47,13 +49,12 @@ public class OAuthController {
 
         String accessToken = map.get("accessToken");
         // 리디렉션할 URL과 쿼리 파라미터 생성
-        String redirectUrl = "http://www.batr";
-        //여기서 redirect url을 지정해 줘야 한다
+
         String queryParams = "accessToken=" + accessToken;
         String userId = "&userId=" + jwtTokenProvider.getUserId(accessToken);
 
         // URL에 쿼리 파라미터 추가
-        String fullRedirectUrl = redirectUrl + "?" + queryParams + userId;
+        String fullRedirectUrl = this.redirectUrl + "?" + queryParams + userId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(fullRedirectUrl));

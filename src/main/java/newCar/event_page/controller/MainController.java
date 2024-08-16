@@ -48,14 +48,19 @@ public class MainController {
 
     @PostMapping("/personality-test")
     @Operation(summary = "성격 유형 검사 풀고 제출시")
-    public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
-                                                                     @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<Map<String, Object>> personalityTestAnswer(
+            @Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
         return userService.submitPersonalityTest(userPersonalityAnswerDTOList, authorizationHeader);
     }
 
     @PostMapping("/quiz-user")
     @Operation(summary = "유저가 선착순 퀴즈 풀고 제출시")
-    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(@Valid @RequestBody UserQuizAnswerDTO answer, @RequestHeader("Authorization") String authorizationHeader){
+    public ResponseEntity<Map<String,UserQuizStatus>> quizSubmission(
+            @Valid @RequestBody UserQuizAnswerDTO answer,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
         return userService.submitQuiz(answer, authorizationHeader);
     }
 
@@ -68,7 +73,6 @@ public class MainController {
     @GetMapping("/share-link")
     @Operation(summary = "유저가 생성해낸 공유 링크를 클릭 했을 때")
     public ResponseEntity<Void> plusClickNumber(@RequestParam("userId") Long userId) {
-
         return userService.plusClickNumber(userId);
     }
 
