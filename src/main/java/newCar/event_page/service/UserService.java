@@ -17,7 +17,7 @@ public interface UserService {
 
     public ResponseEntity<List<UserPersonalityTestDTO>> getPersonalityTestList();
 
-    public ResponseEntity<Map<String, Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+    public ResponseEntity<UserPersonalityUrlDTO> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                      String authorizationHeader);
 
     public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader);
@@ -28,5 +28,5 @@ public interface UserService {
 
     public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader);
 
-    public ResponseEntity<Void> plusClickNumber(Long userId);
+    public ResponseEntity<Void> plusClickNumber(String url);
 }

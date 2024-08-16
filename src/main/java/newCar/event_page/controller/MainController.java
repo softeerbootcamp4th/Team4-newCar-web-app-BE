@@ -48,7 +48,7 @@ public class MainController {
 
     @PostMapping("/personality-test")
     @Operation(summary = "성격 유형 검사 풀고 제출시")
-    public ResponseEntity<Map<String, Object>> personalityTestAnswer(
+    public ResponseEntity<UserPersonalityUrlDTO> personalityTestAnswer(
             @Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
@@ -70,10 +70,10 @@ public class MainController {
         return userService.getClickNumber(authorizationHeader);
     }
 
-    @GetMapping("/share-link")
+    @GetMapping("/share-link/{url}")
     @Operation(summary = "유저가 생성해낸 공유 링크를 클릭 했을 때")
-    public ResponseEntity<Void> plusClickNumber(@RequestParam("userId") Long userId) {
-        return userService.plusClickNumber(userId);
+    public ResponseEntity<Void> plusClickNumber(@PathVariable("url") String url) {
+        return userService.plusClickNumber(url);
     }
 
     @GetMapping("/dummy-token")
