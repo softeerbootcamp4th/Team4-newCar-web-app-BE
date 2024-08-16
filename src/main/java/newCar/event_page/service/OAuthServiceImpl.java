@@ -45,7 +45,7 @@ public class OAuthServiceImpl implements OAuthService {
             sb.append("grant_type=authorization_code");
             sb.append("&client_id=").append(oauthConfig.getClientId());
             sb.append("&client_secret=").append(oauthConfig.getClientSecretId());
-            sb.append("&redirect_uri=").append("http://localhost:8080/kakao/callback");
+            sb.append("&redirect_uri=").append(oauthConfig.getRedirectUri());
             sb.append("&code=").append(code);
 
             bw.write(sb.toString());
@@ -66,6 +66,9 @@ public class OAuthServiceImpl implements OAuthService {
                 responseSb.append(line);
             }
             String result = responseSb.toString();
+            System.out.println("======");
+            System.out.println(result);
+            System.out.println("=====");
 
             JsonElement element = JsonParser.parseString(result);
             accessToken = element.getAsJsonObject().get("access_token").getAsString();
