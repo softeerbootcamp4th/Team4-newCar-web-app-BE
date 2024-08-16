@@ -2,6 +2,7 @@ package newCar.event_page.service;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import newCar.event_page.config.JwtConfig;
 import newCar.event_page.exception.FCFS.FCFSFinishedException;
 import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
 import newCar.event_page.exception.UserLoginFailException;
@@ -60,6 +61,10 @@ public class UserServiceImpl implements UserService {
 
     private final RedisTemplate<String,Object> redisTemplate;
 
+    private final JwtConfig jwtConfig;
+
+    private long key ;
+
     @PostConstruct
     private void Init(){
         EventCommon eventCommon = eventCommonRepository.findById(1L).get();
@@ -72,6 +77,7 @@ public class UserServiceImpl implements UserService {
             Quiz quiz = quizList.get(i);
             redisTemplate.opsForValue().set("ticket_"+quiz.getId(), quiz.getWinnerCount());
         }
+        key = jwtConfig.getExpiration();
     }//common업데이트, 퀴즈 업데이트 맞춰서
 
     @Override
@@ -132,13 +138,18 @@ public class UserServiceImpl implements UserService {
     }//가벼운 로그인으로 카카오 로그인 구현 후에는 실제로 쓰진 않을 예정
 
     @Override
-    public ResponseEntity<Map<String,Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
+    public ResponseEntity<UserPersonalityUrlDTO> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                     String authorizationHeader){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
-        Map<String,Object> map = new HashMap<>();
-        map.put("team : ", team);
-        map.put("accessToken", jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
 
+        UserPersonalityUrlDTO userPersonalityUrlDTO = new UserPersonalityUrlDTO();
+
+        userPersonalityUrlDTO.setTeam(team);
+        userPersonalityUrlDTO.setAccessToken(jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
+        userPersonalityUrlDTO.setUrl(encryptedId(jwtTokenProvider.getUserId(authorizationHeader)));
+
+        System.out.println(userPersonalityUrlDTO.getUrl());
+        System.out.println(decryptedId(userPersonalityUrlDTO.getUrl()));
 
         User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
@@ -146,8 +157,7 @@ public class UserServiceImpl implements UserService {
         user.setTeam(team);
         userRepository.save(user);//계산된 팀 정보를 업데이트해준다
 
-
-        return ResponseEntity.ok(map);
+        return ResponseEntity.ok(userPersonalityUrlDTO);
     }
 
     @Override
@@ -166,7 +176,6 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(()-> new NoSuchElementException("유저 정보가 없습니다")));
             eventUserRepository.save(eventUser);
         }//퀴즈 이벤트 참여자 명단에 없으면 넣어준다
-
 
         Integer userAnswer = answer.getAnswer();//유저가 제출한 정답
 
@@ -220,8 +229,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Void> plusClickNumber(Long userId){
+    public ResponseEntity<Void> plusClickNumber(String url){
 
+        Long userId = decryptedId(url);
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
         //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
@@ -326,6 +336,23 @@ public class UserServiceImpl implements UserService {
         newUser.setUserName(userName);
 
         return newUser;
+    }
+
+    private String encryptedId(Long id){
+
+        // XOR 연산
+        long encrypted = id ^ key;
+
+        // 암호화된 값을 16진수 문자열로 변환
+        return Long.toHexString(encrypted);
+    }
+
+    private Long decryptedId(String url){
+
+        long encrypted = Long.parseLong(url, 16);
+
+        // XOR 복호화
+        return encrypted ^ key;
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){

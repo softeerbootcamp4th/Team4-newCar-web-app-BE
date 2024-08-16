@@ -37,7 +37,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/main/quiz")
                 .excludePathPatterns("/main/dummy-token")
                 .excludePathPatterns("/main/kakao")
-                .excludePathPatterns("/main/share-link");
+                .excludePathPatterns("/main/share-link/{url}");
     }
 
 
