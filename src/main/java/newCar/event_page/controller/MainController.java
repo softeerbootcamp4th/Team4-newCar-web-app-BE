@@ -59,6 +59,19 @@ public class MainController {
         return userService.submitQuiz(answer, authorizationHeader);
     }
 
+    @GetMapping("/click-number")
+    @Operation(summary = "유저의 공유 링크 클릭 수 ")
+    public ResponseEntity<UserClickNumberDTO> getClickNumber(@RequestHeader("Authorization") String authorizationHeader){
+        return userService.getClickNumber(authorizationHeader);
+    }
+
+    @GetMapping("/share-link")
+    @Operation(summary = "유저가 생성해낸 공유 링크를 클릭 했을 때")
+    public ResponseEntity<Void> plusClickNumber(@RequestParam("userId") Long userId) {
+
+        return userService.plusClickNumber(userId);
+    }
+
     @GetMapping("/dummy-token")
     public ResponseEntity<Map<String,String>> dummyToken(){
         return userService.dummyToken();

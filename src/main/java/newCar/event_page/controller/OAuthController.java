@@ -47,7 +47,7 @@ public class OAuthController {
 
         String accessToken = map.get("accessToken");
         // 리디렉션할 URL과 쿼리 파라미터 생성
-        String redirectUrl = "http://www.batro.org";
+        String redirectUrl = "http://www.batr";
         //여기서 redirect url을 지정해 줘야 한다
         String queryParams = "accessToken=" + accessToken;
         String userId = "&userId=" + jwtTokenProvider.getUserId(accessToken);

@@ -121,8 +121,6 @@ public class OAuthServiceImpl implements OAuthService {
             userInfo.put("nickname", nickname);
             userInfo.put("email", email);
 
-            System.out.println("email : " + email);
-
             br.close();
 
         }catch (Exception e){

@@ -31,7 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -205,6 +204,32 @@ public class UserServiceImpl implements UserService {
         return map;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader){
+
+        Long userId = jwtTokenProvider.getUserId(authorizationHeader);
+        //토큰에서 유저 Id를 꺼내온다
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
+        //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
+
+        return ResponseEntity.ok(UserClickNumberDTO.toDTO(user));
+
+    }
+
+    @Override
+    public ResponseEntity<Void> plusClickNumber(Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
+        //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
+
+        user.setClickNumber(user.getClickNumber()+1);
+
+        return ResponseEntity.ok().build();
+    }
     public void setQuizAvailableArray(ArrayList<Boolean> availableArray){
         isQuizAvailable = availableArray;
     }
