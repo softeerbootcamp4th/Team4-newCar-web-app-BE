@@ -79,7 +79,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         claims.put("role", "user");  // 역할 추가
         claims.put("team" , team.toString());
         return generateToken(claims);
-    }
+    }//성격 유형검사가 끝났을 때 다시 team값을 설정해줘서 엑세스토큰을 새로 발급해준다
 
     @Override
     public Long getUserId(String token){

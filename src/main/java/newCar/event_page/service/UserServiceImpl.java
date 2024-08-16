@@ -129,13 +129,12 @@ public class UserServiceImpl implements UserService {
         map.put("accessToken", jwtTokenProvider.generateUserToken(userLight.getUserId()));
 
         return ResponseEntity.ok(map);
-    }
+    }//가벼운 로그인으로 카카오 로그인 구현 후에는 실제로 쓰진 않을 예정
 
     @Override
     public ResponseEntity<Map<String,Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                     String authorizationHeader){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
-        System.out.println(team);
         Map<String,Object> map = new HashMap<>();
         map.put("team : ", team);
         map.put("accessToken", jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
@@ -282,8 +281,6 @@ public class UserServiceImpl implements UserService {
             map.put("status",UserQuizStatus.END);
             return ;
         }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
-
-
 
         QuizWinner quizWinner = new QuizWinner();
         quizWinner.setQuiz(todayQuiz);

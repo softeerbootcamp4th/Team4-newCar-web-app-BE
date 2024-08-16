@@ -23,17 +23,19 @@ public class OauthServiceImpl implements OauthService{
     private final OauthConfig oauthConfig;
     private final UserService userService;
 
+    private final String CONTENT_TYPE = "application/x-www-form-urlencoded;charset=utf-8";
+
     @Override
     public String getAccessToken(String code){
         String accessToken = "";
-        String reqUrl = "https://kauth.kakao.com/oauth/token";
 
         try{
-            URL url = new URL(reqUrl);
+            String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
+            URL url = new URL(TOKEN_URL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             //필수 헤더 세팅
-            conn.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+            conn.setRequestProperty("Content-type", CONTENT_TYPE);
             conn.setDoOutput(true); //OutputStream으로 POST 데이터를 넘겨주겠다는 옵션.
 
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
@@ -84,13 +86,13 @@ public class OauthServiceImpl implements OauthService{
     public Map<String,String> getUserInfo(String kakaoAccessToken){
 
         HashMap<String, String> userInfo = new HashMap<>();
-        String reqUrl = "https://kapi.kakao.com/v2/user/me";
         try{
-            URL url = new URL(reqUrl);
+            String USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
+            URL url = new URL(USER_INFO_URL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");//GET 이든 POST이든 상관없는듯
             conn.setRequestProperty("Authorization", "Bearer " + kakaoAccessToken);
-            conn.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+            conn.setRequestProperty("Content-type", CONTENT_TYPE);
 
             int responseCode = conn.getResponseCode();
 

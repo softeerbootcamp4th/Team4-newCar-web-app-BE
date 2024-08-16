@@ -54,7 +54,6 @@ public class MainController {
     @Operation(summary = "성격 유형 검사 풀고 제출시")
     public ResponseEntity<Map<String, Object>> personalityTestAnswer(@Valid @RequestBody List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                      @RequestHeader("Authorization") String authorizationHeader) {
-        System.out.println("daifjadf");
         return userService.submitPersonalityTest(userPersonalityAnswerDTOList, authorizationHeader);
     }
 
@@ -68,7 +67,5 @@ public class MainController {
     public ResponseEntity<Map<String,String>> dummyToken(){
         return userService.dummyToken();
     }
-
-
 
 }

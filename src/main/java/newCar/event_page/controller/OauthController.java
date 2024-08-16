@@ -45,9 +45,7 @@ public class OauthController {
         Map<String,String> map = oauthService.getUserInfo(kakaoAccessToken);
         //카카오 엑세스 토큰을 이용해서 새로운 엑세스 토큰을 발급한다
 
-
         // 리디렉션할 URL과 쿼리 파라미터 생성
-
         String redirectUrl = "http://www.naver";
         //여기서 redirect url을 지정해 줘야 한다
         String queryParams = "accessToken=" +map.get("accessToken");
