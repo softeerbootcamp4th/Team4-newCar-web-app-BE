@@ -24,7 +24,7 @@ public class AdminQuizWinnersDTO {
 
         return AdminQuizWinnersDTO.builder()
                 .name(quizWinner.getEventUser().getUser().getNickName())
-                .phoneNumber(quizWinner.getEventUser().getUser().getPhoneNumber())
+                .phoneNumber(quizWinner.getEventUser().getUser().getUserName())
                 .postDate(quizWinner.getQuiz().getPostDate())
                 .build();
     }

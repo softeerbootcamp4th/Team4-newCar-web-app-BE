@@ -35,7 +35,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/main/login")
                 .excludePathPatterns("/main/event-time")
                 .excludePathPatterns("/main/quiz")
-                .excludePathPatterns("/main/dummy-token");
+                .excludePathPatterns("/main/dummy-token")
+                .excludePathPatterns("/main/kakao")
+                .excludePathPatterns("/main/share-link");
     }
 
 

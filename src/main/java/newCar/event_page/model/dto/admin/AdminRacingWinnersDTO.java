@@ -22,8 +22,8 @@ public class AdminRacingWinnersDTO {
 
         return AdminRacingWinnersDTO.builder()
                 .rank(racingWinner.getRank())
-                .name(racingWinner.getEventUser().getUser().getUserName())
-                .phoneNumber(racingWinner.getEventUser().getUser().getPhoneNumber())
+                .name(racingWinner.getEventUser().getUser().getNickName())
+                .phoneNumber(racingWinner.getEventUser().getUser().getUserName())
                 .clickNumber(racingWinner.getEventUser().getUser().getClickNumber())
                 .team(racingWinner.getEventUser().getUser().getTeam())
                 .build();

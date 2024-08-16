@@ -23,4 +23,10 @@ public interface UserService {
     public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader);
 
     public ResponseEntity<Map<String,String>> dummyToken();
+
+    public Map<String,String> kakaoLogin(Map<String,String> userInfo);
+
+    public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader);
+
+    public ResponseEntity<Void> plusClickNumber(Long userId);
 }

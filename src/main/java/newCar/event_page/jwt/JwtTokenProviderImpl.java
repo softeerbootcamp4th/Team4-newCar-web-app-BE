@@ -23,9 +23,9 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
 
     private final JwtConfig jwtConfig;
 
-    private final UserLightRepository userLightRepository;
     private final UserRepository userRepository;
 
+    @Override
     public String generateAdminToken(){
         // 클레임 설정
         Map<String, Object> claims = new HashMap<>();
@@ -36,21 +36,21 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         return generateToken(claims);
     }
 
-    public String generateUserToken(String name){
-        Long userId ;
-        userId = userLightRepository.findByUserId(name).getId();
+    @Override
+    public String generateUserToken(String userName){
 
-        User user = userRepository.findById(userId).
+        User user = userRepository.findByUserName(userName).
                 orElseThrow(() -> new NoSuchElementException("잘못된 유저 정보입니다"));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userId);  // 사용자 아이디 추가
+        claims.put("userId", user.getId());  // 사용자 아이디 추가
         claims.put("role", "user");  // 역할 추가
-        claims.put("team" , user.getTeam().toString());
+        claims.put("team" , user.getTeam()== null ? "" : user.getTeam().toString());
 
         return generateToken(claims);
     }
 
+    @Override
     public String generateToken(Map<String, Object> claims){
 
         // 토큰 만료 시간 설정 (현재 시간 + 설정된 만료 시간)
@@ -67,6 +67,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
                 .compact();  // 토큰 생성
     }
 
+    @Override
     public String generateTokenWithTeam(Team team, String authorizationHeader){
 
         Long userId;
@@ -78,18 +79,21 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         claims.put("role", "user");  // 역할 추가
         claims.put("team" , team.toString());
         return generateToken(claims);
-    }
+    }//성격 유형검사가 끝났을 때 다시 team값을 설정해줘서 엑세스토큰을 새로 발급해준다
 
+    @Override
     public Long getUserId(String token){
         Long userId;
         userId = getClamis(token).get("userId",Long.class);
         return userId;
     } //토큰에서 유저 Id를 추출
 
+    @Override
     public Team getTeam(String token){
         return claimsToTeam(getClamis(token).get("team",String.class));
     } //토큰에서 유저 Team을 추출
 
+    @Override
     public boolean validateToken(String token){
         try{
             getClamis(token);
@@ -100,6 +104,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
 
     } //JWT 토큰 유효성 검증
 
+    @Override
     public boolean validateAdminToken(String token){
         String role = "";
         try{

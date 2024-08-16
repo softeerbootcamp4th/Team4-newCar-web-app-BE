@@ -10,6 +10,7 @@ import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.QuizWinner;
+import newCar.event_page.model.enums.LoginType;
 import newCar.event_page.model.enums.Team;
 
 import newCar.event_page.model.entity.TeamScore;
@@ -128,16 +129,16 @@ public class UserServiceImpl implements UserService {
         map.put("accessToken", jwtTokenProvider.generateUserToken(userLight.getUserId()));
 
         return ResponseEntity.ok(map);
-    }
+    }//가벼운 로그인으로 카카오 로그인 구현 후에는 실제로 쓰진 않을 예정
 
     @Override
     public ResponseEntity<Map<String,Object>> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                     String authorizationHeader){
         Team team = parsePersonalityAnswer(userPersonalityAnswerDTOList);
-
         Map<String,Object> map = new HashMap<>();
-        map.put("team", team);
+        map.put("team : ", team);
         map.put("accessToken", jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
+
 
         User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
@@ -153,8 +154,8 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String token){
 
         Map<String,UserQuizStatus> map = new HashMap<>();
-
         Long id = jwtTokenProvider.getUserId(token);//유저 토큰에서 유저 아이디를 받아온다
+
         EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
 
         if(eventUser==null){
@@ -165,6 +166,7 @@ public class UserServiceImpl implements UserService {
                         .orElseThrow(()-> new NoSuchElementException("유저 정보가 없습니다")));
             eventUserRepository.save(eventUser);
         }//퀴즈 이벤트 참여자 명단에 없으면 넣어준다
+
 
         Integer userAnswer = answer.getAnswer();//유저가 제출한 정답
 
@@ -182,6 +184,52 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok(map);
     }
 
+    @Override
+    public Map<String,String> kakaoLogin(Map<String,String> userInfo){
+
+        String userName = userInfo.get("email");//userName은 이메일 입니다
+        Map<String,String> map = new HashMap<>();
+
+        Optional<User> user = userRepository.findByUserName(userName);
+        if(user.isPresent()){
+            map.put("accessToken",jwtTokenProvider.generateUserToken(userName));
+            return map;
+        }//이미 유저 정보가 저장되어 있다면
+
+        userRepository.save(getNewUser(userInfo.get("nickname"), userName));
+        //유저가 없다면, UserDB에 저장을 해주어야 한다
+
+        map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
+
+        return map;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader){
+
+        Long userId = jwtTokenProvider.getUserId(authorizationHeader);
+        //토큰에서 유저 Id를 꺼내온다
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
+        //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
+
+        return ResponseEntity.ok(UserClickNumberDTO.toDTO(user));
+
+    }
+
+    @Override
+    public ResponseEntity<Void> plusClickNumber(Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
+        //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
+
+        user.setClickNumber(user.getClickNumber()+1);
+
+        return ResponseEntity.ok().build();
+    }
     public void setQuizAvailableArray(ArrayList<Boolean> availableArray){
         isQuizAvailable = availableArray;
     }
@@ -260,14 +308,24 @@ public class UserServiceImpl implements UserService {
             return ;
         }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
 
-
-
         QuizWinner quizWinner = new QuizWinner();
         quizWinner.setQuiz(todayQuiz);
         quizWinner.setEventUser(eventUser);
         quizWinnerRepository.save(quizWinner);
 
         map.put("status",UserQuizStatus.RIGHT);
+    }
+
+    private User getNewUser(String nickName,String userName){
+        User newUser = new User();
+        newUser.setLoginType(LoginType.KAKAO);
+        newUser.setClickNumber(0);
+        newUser.setIsMarketingAgree(true);
+        newUser.setPhoneNumber("11111");
+        newUser.setNickName(nickName);
+        newUser.setUserName(userName);
+
+        return newUser;
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
