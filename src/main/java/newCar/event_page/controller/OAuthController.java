@@ -54,7 +54,7 @@ public class OAuthController {
         String userId = "&userId=" + jwtTokenProvider.getUserId(accessToken);
 
         // URL에 쿼리 파라미터 추가
-        String fullRedirectUrl = "?" + queryParams + userId+"&redirect_uri="+this.redirectUrl;
+        String fullRedirectUrl = this.redirectUrl+"?" + queryParams + userId;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(fullRedirectUrl));
