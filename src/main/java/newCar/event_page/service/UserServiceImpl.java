@@ -202,6 +202,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByUserName(userName);
         if(user.isPresent()){
             map.put("accessToken",jwtTokenProvider.generateUserToken(userName));
+            map.put("userName",userInfo.get("nickname"));
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
