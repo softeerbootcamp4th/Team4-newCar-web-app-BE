@@ -1,19 +1,17 @@
 package newCar.event_page.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
+import newCar.event_page.exception.UnverifiedTokenException;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.entity.User;
 import newCar.event_page.repository.jpa.UserRepository;
 import org.springframework.stereotype.Component;
 
+import java.security.SignatureException;
 import java.util.*;
 
 @Component
@@ -70,7 +68,11 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     public String generateTokenWithTeam(Team team, String authorizationHeader){
 
         Long userId;
-        userId = getClaims(authorizationHeader).get("userId",Long.class);
+        try {
+            userId = getClaims(authorizationHeader).get("userId",Long.class);
+        } catch (Exception e) {
+            throw new UnverifiedTokenException("잘못된 토큰입니다.");
+        }
 
         Map<String, Object> claims = new HashMap<>();
 
@@ -82,14 +84,20 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
 
     @Override
     public Long getUserId(String token){
-        Long userId;
-        userId = getClaims(token).get("userId",Long.class);
-        return userId;
+        try{
+            return getClaims(token).get("userId", Long.class);
+        } catch (Exception e){
+            throw new UnverifiedTokenException("토큰 검증을 먼저 진행해야합니다.");
+        }
     } //토큰에서 유저 Id를 추출
 
     @Override
     public Team getTeam(String token){
-        return claimsToTeam(getClaims(token).get("team",String.class));
+        try{
+            return claimsToTeam(getClaims(token).get("team", String.class));
+        } catch (Exception e){
+            throw new UnverifiedTokenException("토큰 검증을 먼저 진행해야합니다.");
+        }
     } //토큰에서 유저 Team을 추출
 
     @Override
@@ -97,22 +105,18 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         try{
             getClaims(token);
             return true;
-        } catch (ExpiredJwtException | SignatureException e){
+        } catch (Exception e){
             return false;
         } //토큰이 만료되었거나 변조되었다면
-
     } //JWT 토큰 유효성 검증
 
     @Override
     public boolean validateAdminToken(String token){
-        String role = "";
         try{
-            role = getClaims(token).get("role",String.class);
-            } catch (ExpiredJwtException | SignatureException e){
-                return false;
-            } //토큰이 만료되었거나 변조되었다면
-
-        return role.equals("admin");//role 이 admin이라면 true를, 아니라면 false를 반환한다
+            return getClaims(token).get("role", String.class).equals("admin");
+        } catch (Exception e){
+            return false;
+        }
     }
     //JWT 토큰이 admin의 역할을 담고 있는지 검증
 
@@ -127,13 +131,15 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         }
     }
 
-    private Claims getClaims(String token){
+    private Claims getClaims(String token)
+            throws ExpiredJwtException, SignatureException, IllegalArgumentException, MalformedJwtException, UnsupportedJwtException {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
+
     private byte[] secretKey(){
         return Decoders.BASE64.decode(jwtConfig.getSecret());
     }//원래는 secret key 값을 바로 바꿔 줄 수 있었으나 그 메소드는 deprecated 되어서
