@@ -67,9 +67,6 @@ public class OAuthServiceImpl implements OAuthService {
                 responseSb.append(line);
             }
             String result = responseSb.toString();
-            System.out.println("======");
-            System.out.println(result);
-            System.out.println("=====");
 
             JsonElement element = JsonParser.parseString(result);
             accessToken = element.getAsJsonObject().get("access_token").getAsString();

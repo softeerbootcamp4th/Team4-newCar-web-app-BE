@@ -1,6 +1,8 @@
 package newCar.event_page.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
 import newCar.event_page.exception.FCFS.FCFSFinishedException;
@@ -28,6 +30,8 @@ import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -231,16 +235,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Void> plusClickNumber(String url){
+    public ResponseEntity<Void> plusClickNumber(String url, HttpServletRequest request){
+
+        // 쿠키에서 해당 URL에 대한 방문 여부 확인
+        Cookie[] cookies = request.getCookies();
+        boolean hasVisited = false;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("visited_" + url)) {
+                    hasVisited = true;
+                    break;
+                }
+            }
+        }
+
+        if(hasVisited){
+            return ResponseEntity.ok().build();
+        }//해당 url을 방문 한 적이 있다면 아무 것도 실행하지않고 종료시킨다
 
         Long userId = decryptedId(url);
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
         //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
 
+        //해당 userId의 clickNumber를 증가시켜준다
         user.setClickNumber(user.getClickNumber()+1);
 
-        return ResponseEntity.ok().build();
+        // ResponseCookie를 사용하여 방문 쿠키 생성
+        ResponseCookie visitCookie = ResponseCookie.from("visited_" + url, "true")
+                .maxAge(60 * 60 * 24)  // 1일 동안 유지
+                .path("/")              // 쿠키 경로 설정
+                .httpOnly(true)         // XSS 공격 방지
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, visitCookie.toString())
+                .build();
     }
     public void setQuizAvailableArray(ArrayList<Boolean> availableArray){
         isQuizAvailable = availableArray;

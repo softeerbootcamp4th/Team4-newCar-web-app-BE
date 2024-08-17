@@ -1,5 +1,6 @@
 package newCar.event_page.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.enums.UserQuizStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,5 @@ public interface UserService {
 
     public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader);
 
-    public ResponseEntity<Void> plusClickNumber(String url);
+    public ResponseEntity<Void> plusClickNumber(String url, HttpServletRequest request);
 }

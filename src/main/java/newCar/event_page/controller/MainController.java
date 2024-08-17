@@ -2,6 +2,7 @@ package newCar.event_page.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.model.dto.user.*;
@@ -72,8 +73,8 @@ public class MainController {
 
     @GetMapping("/share-link/{url}")
     @Operation(summary = "유저가 생성해낸 공유 링크를 클릭 했을 때")
-    public ResponseEntity<Void> plusClickNumber(@PathVariable("url") String url) {
-        return userService.plusClickNumber(url);
+    public ResponseEntity<Void> plusClickNumber(@PathVariable("url") String url , HttpServletRequest request) {
+        return userService.plusClickNumber(url,request);
     }
 
     @GetMapping("/dummy-token")
