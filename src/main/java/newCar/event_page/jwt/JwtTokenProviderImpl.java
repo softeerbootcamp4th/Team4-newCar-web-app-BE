@@ -28,7 +28,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", 1L);  // 사용자 아이디 추가
         claims.put("role", "admin");  // 역할 추가
-        claims.put("team" , null);
+        claims.put("team", null);
 
         return generateToken(claims);
     }
@@ -42,7 +42,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());  // 사용자 아이디 추가
         claims.put("role", "user");  // 역할 추가
-        claims.put("team" , user.getTeam()== null ? "" : user.getTeam().toString());
+        claims.put("team", user.getTeam()== null ? "" : user.getTeam().toString());
 
         return generateToken(claims);
     }
@@ -69,7 +69,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
 
         Long userId;
         try {
-            userId = getClaims(authorizationHeader).get("userId",Long.class);
+            userId = getClaims(authorizationHeader).get("userId", Long.class);
         } catch (Exception e) {
             throw new UnverifiedTokenException("잘못된 토큰입니다.");
         }

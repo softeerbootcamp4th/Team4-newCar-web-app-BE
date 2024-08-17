@@ -1,5 +1,6 @@
 package newCar.event_page.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.enums.UserQuizStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,13 @@ public interface UserService {
     public ResponseEntity<UserPersonalityUrlDTO> submitPersonalityTest(List<UserPersonalityAnswerDTO> userPersonalityAnswerDTOList,
                                                                      String authorizationHeader);
 
-    public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader);
+    public ResponseEntity<Map<String, UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader);
 
-    public ResponseEntity<Map<String,String>> dummyToken();
+    public ResponseEntity<Map<String, String>> dummyToken();
 
-    public Map<String,String> kakaoLogin(Map<String,String> userInfo);
+    public Map<String, String> kakaoLogin(UserKakaoInfoDTO userKakaoInfoDTO);
 
     public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader);
 
-    public ResponseEntity<Void> plusClickNumber(String url);
+    public ResponseEntity<Void> plusClickNumber(String url, HttpServletRequest request);
 }

@@ -1,6 +1,8 @@
 package newCar.event_page.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
 import newCar.event_page.exception.FCFS.FCFSFinishedException;
@@ -28,6 +30,8 @@ import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -194,23 +198,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map<String,String> kakaoLogin(Map<String,String> userInfo){
+    public Map<String,String> kakaoLogin(UserKakaoInfoDTO userKakaoInfoDTO){
 
-        String userName = userInfo.get("email");//userName은 이메일 입니다
+        String userName = userKakaoInfoDTO.getEmail();//userName은 이메일 입니다
         Map<String,String> map = new HashMap<>();
 
         Optional<User> user = userRepository.findByUserName(userName);
         if(user.isPresent()){
-            map.put("accessToken",jwtTokenProvider.generateUserToken(userName));
-            map.put("userName",userInfo.get("nickname"));
+            map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
+            map.put("userName", userKakaoInfoDTO.getNickname());
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
-        userRepository.save(getNewUser(userInfo.get("nickname"), userName));
+        userRepository.save(getNewUser(userKakaoInfoDTO.getNickname(), userName));
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
-        map.put("userName",userInfo.get("nickname"));
+        map.put("userName", userKakaoInfoDTO.getNickname());
 
         return map;
     }
@@ -231,16 +235,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Void> plusClickNumber(String url){
+    public ResponseEntity<Void> plusClickNumber(String url, HttpServletRequest request){
+
+        // 쿠키에서 해당 URL에 대한 방문 여부 확인
+        Cookie[] cookies = request.getCookies();
+        boolean hasVisited = false;
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("visited_" + url)) {
+                    hasVisited = true;
+                    break;
+                }
+            }
+        }
+
+        if(hasVisited){
+            return ResponseEntity.ok().build();
+        }//해당 url을 방문 한 적이 있다면 아무 것도 실행하지않고 종료시킨다
 
         Long userId = decryptedId(url);
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
         //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
 
+        //해당 userId의 clickNumber를 증가시켜준다
         user.setClickNumber(user.getClickNumber()+1);
 
-        return ResponseEntity.ok().build();
+        // ResponseCookie를 사용하여 방문 쿠키 생성
+        ResponseCookie visitCookie = ResponseCookie.from("visited_" + url, "true")
+                .maxAge(60 * 60 * 24)  // 1일 동안 유지
+                .path("/")              // 쿠키 경로 설정
+                .httpOnly(true)         // XSS 공격 방지
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, visitCookie.toString())
+                .build();
     }
     public void setQuizAvailableArray(ArrayList<Boolean> availableArray){
         isQuizAvailable = availableArray;
@@ -257,7 +288,7 @@ public class UserServiceImpl implements UserService {
             Long id = dto.getId();
             Integer answer = dto.getAnswer();
 
-            TeamScore teamScore = calculatePersonality(id,answer);
+            TeamScore teamScore = calculatePersonality(id, answer);
 
             petScore += teamScore.getPetScore();
             travelScore += teamScore.getTravelScore();
@@ -289,34 +320,34 @@ public class UserServiceImpl implements UserService {
         }
     }//주어진 4개의 점수를 가지고 어느 팀인지 판단
 
-    private void quizBranch(Integer userAnswer,Long id,Map<String,UserQuizStatus> map){
+    private void quizBranch(Integer userAnswer, Long id, Map<String, UserQuizStatus> map){
 
         //LocalDate 한국 날짜를 기준으로 오늘의 퀴즈를 받아온다
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
 
         if(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(todayQuiz.getId(), eventUser.getId()).isPresent()){
-            map.put("status",UserQuizStatus.PARTICIPATED);
+            map.put("status", UserQuizStatus.PARTICIPATED);
             return ;
         }//오늘 퀴즈에 이미 당첨이 되어있다면
 
         if(!userAnswer.equals(todayQuiz.getCorrectAnswer())){
-            map.put("status",UserQuizStatus.WRONG);
+            map.put("status", UserQuizStatus.WRONG);
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
         int quizId = Integer.parseInt(todayQuiz.getId().toString());
 
         if(!isQuizAvailable.get(quizId)){
-            map.put("status",UserQuizStatus.END);
+            map.put("status", UserQuizStatus.END);
             return;
         }//이미 마감되어 있다면
 
         if(redisTemplate.opsForValue().decrement("ticket_"+todayQuiz.getId())<0){
             isQuizAvailable.set(quizId,false);
-            map.put("status",UserQuizStatus.END);
+            map.put("status", UserQuizStatus.END);
             return ;
         }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
 
@@ -325,10 +356,10 @@ public class UserServiceImpl implements UserService {
         quizWinner.setEventUser(eventUser);
         quizWinnerRepository.save(quizWinner);
 
-        map.put("status",UserQuizStatus.RIGHT);
+        map.put("status", UserQuizStatus.RIGHT);
     }
 
-    private User getNewUser(String nickName,String userName){
+    private User getNewUser(String nickName, String userName){
         User newUser = new User();
         newUser.setLoginType(LoginType.KAKAO);
         newUser.setClickNumber(0);

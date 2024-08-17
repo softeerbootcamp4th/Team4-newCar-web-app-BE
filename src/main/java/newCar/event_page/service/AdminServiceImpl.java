@@ -54,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    private final RedisTemplate<String,Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     private double totalWeight;
 
@@ -80,7 +80,7 @@ public class AdminServiceImpl implements AdminService {
         long duration = eventCommon.getDuration();
         System.out.println("공통이벤트");
         putDummyIfRequired(duration);
-        updateQuiz(eventCommonDTO.getStartTime().toLocalDate() , duration);
+        updateQuiz(eventCommonDTO.getStartTime().toLocalDate(), duration);
 
         userServiceImpl.setQuizAvailableArray(new ArrayList<>(Collections.nCopies((int)duration, true)));
 
@@ -256,11 +256,11 @@ public class AdminServiceImpl implements AdminService {
             int numberOfWinners = winnerSettingDTO.getNum();// 각 등수별로 몇명 뽑는지 넘어온 설정 값으로 참조
             int rank = winnerSettingDTO.getRank(); //이번 추첨은 어떤 랭크인지
             for (int i = 0; i < numberOfWinners; i++) {
-                Participant winner = drawOneWinner(participantSet,totalWeight);
+                Participant winner = drawOneWinner(participantSet, totalWeight);
                 totalWeight -= winner.weight; //전체가중치에서 당첨자의 가중치를 빼준다
                 participantSet.remove(winner);//중복 제거를 위해 Set에서 제거 해준다
                 racingWinnerRepository.save(new RacingWinner(racingEventRepository.getReferenceById(eventId),
-                        eventUserRepository.findByUserIdAndEventId(winner.userId, eventId),rank));
+                        eventUserRepository.findByUserIdAndEventId(winner.userId, eventId), rank));
             }
         }
     }
