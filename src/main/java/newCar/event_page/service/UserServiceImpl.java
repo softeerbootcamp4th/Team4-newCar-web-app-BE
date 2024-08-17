@@ -209,6 +209,7 @@ public class UserServiceImpl implements UserService {
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
+        map.put("userName",userInfo.get("nickname"));
 
         return map;
     }

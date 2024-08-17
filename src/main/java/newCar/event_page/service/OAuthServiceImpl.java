@@ -121,8 +121,8 @@ public class OAuthServiceImpl implements OAuthService {
             String nickname = properties.getAsJsonObject().get("nickname").getAsString();
             String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
 
-            userInfo.put("nickname", nickname);
-            userInfo.put("email", email);
+            userInfo.put("nickname", nickname);//카카오 토큰을 통해 얻은 닉네임
+            userInfo.put("email", email);//카카오 토큰을 통해 얻은 카카오이메일
 
             br.close();
 
