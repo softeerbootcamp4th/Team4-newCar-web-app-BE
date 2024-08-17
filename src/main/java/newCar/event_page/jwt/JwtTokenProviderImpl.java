@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.entity.User;
-import newCar.event_page.repository.jpa.UserLightRepository;
 import newCar.event_page.repository.jpa.UserRepository;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +70,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     public String generateTokenWithTeam(Team team, String authorizationHeader){
 
         Long userId;
-        userId = getClamis(authorizationHeader).get("userId",Long.class);
+        userId = getClaims(authorizationHeader).get("userId",Long.class);
 
         Map<String, Object> claims = new HashMap<>();
 
@@ -84,19 +83,19 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     @Override
     public Long getUserId(String token){
         Long userId;
-        userId = getClamis(token).get("userId",Long.class);
+        userId = getClaims(token).get("userId",Long.class);
         return userId;
     } //토큰에서 유저 Id를 추출
 
     @Override
     public Team getTeam(String token){
-        return claimsToTeam(getClamis(token).get("team",String.class));
+        return claimsToTeam(getClaims(token).get("team",String.class));
     } //토큰에서 유저 Team을 추출
 
     @Override
     public boolean validateToken(String token){
         try{
-            getClamis(token);
+            getClaims(token);
             return true;
         } catch (ExpiredJwtException | SignatureException e){
             return false;
@@ -108,7 +107,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
     public boolean validateAdminToken(String token){
         String role = "";
         try{
-            role = getClamis(token).get("role",String.class);
+            role = getClaims(token).get("role",String.class);
             } catch (ExpiredJwtException | SignatureException e){
                 return false;
             } //토큰이 만료되었거나 변조되었다면
@@ -128,7 +127,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
         }
     }
 
-    private Claims getClamis(String token){
+    private Claims getClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey())
                 .build()
