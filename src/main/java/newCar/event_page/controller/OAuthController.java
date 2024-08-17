@@ -18,8 +18,8 @@ import java.util.Map;
 @Tag(name = "Oauth 컨트롤러입니다", description = "카카오 로그인을 위한 컨트롤러입ㄴ다")
 public class OAuthController {
 
-    private final OAuthConfig oauthConfig;
-    private final OAuthService oauthService;
+    private final OAuthConfig oAuthConfig;
+    private final OAuthService oAuthService;
     private final JwtTokenProvider jwtTokenProvider;
 
     private String redirectUrl;
@@ -30,8 +30,8 @@ public class OAuthController {
         this.redirectUrl=redirectUrl;
         url.append("https://kauth.kakao.com/oauth/authorize?");
         url.append("response_type=code");
-        url.append("&client_id=" + oauthConfig.getClientId());
-        url.append("&redirect_uri=" + oauthConfig.getRedirectUri());
+        url.append("&client_id=" + oAuthConfig.getClientId());
+        url.append("&redirect_uri=" + oAuthConfig.getRedirectUri());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(url.toString()));
@@ -42,9 +42,9 @@ public class OAuthController {
     @GetMapping("/kakao/callback")
     public ResponseEntity<Void> kakaoCallBack(@RequestParam("code") String code){
 
-        String kakaoAccessToken = oauthService.getAccessToken(code);
+        String kakaoAccessToken = oAuthService.getAccessToken(code);
 
-        Map<String,String> map = oauthService.getUserInfo(kakaoAccessToken);
+        Map<String,String> map = oAuthService.getUserInfo(kakaoAccessToken);
         //카카오 엑세스 토큰을 이용해서 새로운 엑세스 토큰을 발급한다
 
         String accessToken = map.get("accessToken");
