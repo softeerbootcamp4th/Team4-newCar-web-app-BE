@@ -24,7 +24,7 @@ public interface UserService {
 
     public ResponseEntity<Map<String, String>> dummyToken();
 
-    public Map<String, String> kakaoLogin(Map<String, String> userInfo);
+    public Map<String, String> kakaoLogin(UserKakaoInfoDTO userKakaoInfoDTO);
 
     public ResponseEntity<UserClickNumberDTO> getClickNumber(String authorizationHeader);
 

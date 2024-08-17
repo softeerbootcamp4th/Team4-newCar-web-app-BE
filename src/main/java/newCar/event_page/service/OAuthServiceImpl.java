@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.OAuthConfig;
+import newCar.event_page.model.dto.user.UserKakaoInfoDTO;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -88,7 +89,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public Map<String, String> getUserInfo(String kakaoAccessToken){
 
-        HashMap<String, String> userInfo = new HashMap<>();
+        UserKakaoInfoDTO userKakaoInfoDTO = new UserKakaoInfoDTO();
         try{
             String USER_INFO_URL = "https://kapi.kakao.com/v2/user/me";
             URL url = new URL(USER_INFO_URL);
@@ -118,19 +119,13 @@ public class OAuthServiceImpl implements OAuthService {
             JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonObject();
             JsonObject kakaoAccount = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
 
-            String nickname = properties.getAsJsonObject().get("nickname").getAsString();
-            String email = kakaoAccount.getAsJsonObject().get("email").getAsString();
-
-            userInfo.put("nickname", nickname);//카카오 토큰을 통해 얻은 닉네임
-            userInfo.put("email", email);//카카오 토큰을 통해 얻은 카카오이메일
-
-            br.close();
-
+            userKakaoInfoDTO.setNickname(properties.getAsJsonObject().get("nickname").getAsString());
+            userKakaoInfoDTO.setEmail(kakaoAccount.getAsJsonObject().get("email").getAsString());
         }catch (Exception e){
             e.printStackTrace();
         }
 
-        return userService.kakaoLogin(userInfo);
+        return userService.kakaoLogin(userKakaoInfoDTO);
     }
 
 }

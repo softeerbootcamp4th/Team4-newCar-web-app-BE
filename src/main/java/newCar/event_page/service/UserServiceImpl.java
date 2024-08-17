@@ -194,23 +194,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map<String,String> kakaoLogin(Map<String,String> userInfo){
+    public Map<String,String> kakaoLogin(UserKakaoInfoDTO userKakaoInfoDTO){
 
-        String userName = userInfo.get("email");//userName은 이메일 입니다
+        String userName = userKakaoInfoDTO.getEmail();//userName은 이메일 입니다
         Map<String,String> map = new HashMap<>();
 
         Optional<User> user = userRepository.findByUserName(userName);
         if(user.isPresent()){
             map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
-            map.put("userName", userInfo.get("nickname"));
+            map.put("userName", userKakaoInfoDTO.getNickname());
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
-        userRepository.save(getNewUser(userInfo.get("nickname"), userName));
+        userRepository.save(getNewUser(userKakaoInfoDTO.getNickname(), userName));
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
-        map.put("userName", userInfo.get("nickname"));
+        map.put("userName", userKakaoInfoDTO.getNickname());
 
         return map;
     }
