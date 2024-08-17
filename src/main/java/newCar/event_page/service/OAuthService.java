@@ -6,5 +6,5 @@ public interface OAuthService {
 
     public String getAccessToken(String code);
 
-    public Map<String,String> getUserInfo(String kakaoAccessToken);
+    public Map<String, String> getUserInfo(String kakaoAccessToken);
 }

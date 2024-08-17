@@ -201,8 +201,8 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> user = userRepository.findByUserName(userName);
         if(user.isPresent()){
-            map.put("accessToken",jwtTokenProvider.generateUserToken(userName));
-            map.put("userName",userInfo.get("nickname"));
+            map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
+            map.put("userName", userInfo.get("nickname"));
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
-        map.put("userName",userInfo.get("nickname"));
+        map.put("userName", userInfo.get("nickname"));
 
         return map;
     }
@@ -257,7 +257,7 @@ public class UserServiceImpl implements UserService {
             Long id = dto.getId();
             Integer answer = dto.getAnswer();
 
-            TeamScore teamScore = calculatePersonality(id,answer);
+            TeamScore teamScore = calculatePersonality(id, answer);
 
             petScore += teamScore.getPetScore();
             travelScore += teamScore.getTravelScore();
@@ -289,34 +289,34 @@ public class UserServiceImpl implements UserService {
         }
     }//주어진 4개의 점수를 가지고 어느 팀인지 판단
 
-    private void quizBranch(Integer userAnswer,Long id,Map<String,UserQuizStatus> map){
+    private void quizBranch(Integer userAnswer, Long id, Map<String, UserQuizStatus> map){
 
         //LocalDate 한국 날짜를 기준으로 오늘의 퀴즈를 받아온다
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id,EventId.Quiz.getValue());
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
 
         if(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(todayQuiz.getId(), eventUser.getId()).isPresent()){
-            map.put("status",UserQuizStatus.PARTICIPATED);
+            map.put("status", UserQuizStatus.PARTICIPATED);
             return ;
         }//오늘 퀴즈에 이미 당첨이 되어있다면
 
         if(!userAnswer.equals(todayQuiz.getCorrectAnswer())){
-            map.put("status",UserQuizStatus.WRONG);
+            map.put("status", UserQuizStatus.WRONG);
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
         int quizId = Integer.parseInt(todayQuiz.getId().toString());
 
         if(!isQuizAvailable.get(quizId)){
-            map.put("status",UserQuizStatus.END);
+            map.put("status", UserQuizStatus.END);
             return;
         }//이미 마감되어 있다면
 
         if(redisTemplate.opsForValue().decrement("ticket_"+todayQuiz.getId())<0){
             isQuizAvailable.set(quizId,false);
-            map.put("status",UserQuizStatus.END);
+            map.put("status", UserQuizStatus.END);
             return ;
         }// 티켓을 하나 뻇을때 -1이 나온다면 종료 시킨다
 
@@ -325,10 +325,10 @@ public class UserServiceImpl implements UserService {
         quizWinner.setEventUser(eventUser);
         quizWinnerRepository.save(quizWinner);
 
-        map.put("status",UserQuizStatus.RIGHT);
+        map.put("status", UserQuizStatus.RIGHT);
     }
 
-    private User getNewUser(String nickName,String userName){
+    private User getNewUser(String nickName, String userName){
         User newUser = new User();
         newUser.setLoginType(LoginType.KAKAO);
         newUser.setClickNumber(0);

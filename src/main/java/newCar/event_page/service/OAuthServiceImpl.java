@@ -86,7 +86,7 @@ public class OAuthServiceImpl implements OAuthService {
 
     //카카오 엑세스 토큰을 통해 userInfo를 받아온다
     @Override
-    public Map<String,String> getUserInfo(String kakaoAccessToken){
+    public Map<String, String> getUserInfo(String kakaoAccessToken){
 
         HashMap<String, String> userInfo = new HashMap<>();
         try{
