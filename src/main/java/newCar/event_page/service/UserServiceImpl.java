@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
 import newCar.event_page.exception.FCFS.FCFSFinishedException;
 import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
+import newCar.event_page.exception.UserAlreadyHasTeamException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
@@ -152,11 +153,12 @@ public class UserServiceImpl implements UserService {
         userPersonalityUrlDTO.setAccessToken(jwtTokenProvider.generateTokenWithTeam(team,authorizationHeader));
         userPersonalityUrlDTO.setUrl(encryptedId(jwtTokenProvider.getUserId(authorizationHeader)));
 
-        System.out.println(userPersonalityUrlDTO.getUrl());
-        System.out.println(decryptedId(userPersonalityUrlDTO.getUrl()));
-
         User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
                 .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
+
+        if(user.getTeam()!=null){
+            throw new UserAlreadyHasTeamException("유저가 이미 성격 유형 검사를 마쳤습니다");
+        }
 
         user.setTeam(team);
         userRepository.save(user);//계산된 팀 정보를 업데이트해준다
@@ -206,7 +208,6 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByUserName(userName);
         if(user.isPresent()){
             map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
-            map.put("userName", userKakaoInfoDTO.getNickname());
             return map;
         }//이미 유저 정보가 저장되어 있다면
 
@@ -214,8 +215,6 @@ public class UserServiceImpl implements UserService {
         //유저가 없다면, UserDB에 저장을 해주어야 한다
 
         map.put("accessToken", jwtTokenProvider.generateUserToken(userName));
-        map.put("userName", userKakaoInfoDTO.getNickname());
-
         return map;
     }
 

@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
             AdminLoginFailException.class,
             UserLoginFailException.class,
             FCFSNotYetConductedException.class,
+            UserAlreadyHasTeamException.class
     })
     public ResponseEntity<String> handleUnmodifiableFieldException(final RuntimeException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
