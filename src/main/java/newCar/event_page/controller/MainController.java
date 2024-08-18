@@ -82,4 +82,10 @@ public class MainController {
         return userService.dummyToken();
     }
 
+    @GetMapping("/user-info")
+    @Operation(summary = "엑세스토큰과 함께 유저 정보 요청시")
+    public ResponseEntity<UserInfoDTO> getUserInfo(@RequestHeader("Authorization") String authorizationHeader){
+        return userService.getUserInfo(authorizationHeader);
+    }
+
 }
