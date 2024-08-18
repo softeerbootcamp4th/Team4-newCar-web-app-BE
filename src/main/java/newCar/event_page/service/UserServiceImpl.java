@@ -273,6 +273,26 @@ public class UserServiceImpl implements UserService {
                 .header(HttpHeaders.SET_COOKIE, visitCookie.toString())
                 .build();
     }
+
+
+    @Override
+    public ResponseEntity<UserInfoDTO> getUserInfo(String authorizationHeader){
+        Long userId = jwtTokenProvider.getUserId(authorizationHeader);
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new NoSuchElementException("잘못된 유저 정보입니다"));
+        //유저 Id를 이용해서 User Repo에서 해당 User를 찾는다
+
+        UserInfoDTO userInfoDTO = UserInfoDTO.toDTO(user);
+
+        if(userInfoDTO.getTeam()==null){
+            userInfoDTO.setUrl(null);
+        } else{
+            userInfoDTO.setUrl(encryptedId(userId));
+        }//team이 null일 때는 url도 null, 아니라면 암호화된 url을 내려준다
+
+        return ResponseEntity.ok(userInfoDTO);
+    }
+
     public void setQuizAvailableArray(ArrayList<Boolean> availableArray){
         isQuizAvailable = availableArray;
     }
