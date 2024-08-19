@@ -2,11 +2,13 @@ package newCar.event_page.model.entity.event;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import newCar.event_page.model.entity.User;
 
 
 @Entity
 @Getter
+@Setter
 public class EventUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

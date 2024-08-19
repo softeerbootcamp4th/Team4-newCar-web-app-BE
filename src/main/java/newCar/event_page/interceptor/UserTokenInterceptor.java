@@ -31,9 +31,6 @@ public class UserTokenInterceptor implements HandlerInterceptor {
             return false;
         }//만료된 토큰으로 접근시
 
-        System.out.println("팀 이름 : "+jwtTokenProvider.getTeam(token).toString()+" userId ( 인덱스) : " + jwtTokenProvider.getUserId(token));
-        //getTeam , getUserId 테스트용
-
         return true;
     }
 }

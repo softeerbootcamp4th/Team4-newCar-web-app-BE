@@ -1,20 +1,17 @@
 package newCar.event_page.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.exception.UnverifiedTokenException;
+import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.entity.User;
-import newCar.event_page.repository.jpa.UserLightRepository;
 import newCar.event_page.repository.jpa.UserRepository;
 import org.springframework.stereotype.Component;
 
+import java.security.SignatureException;
 import java.util.*;
 
 @Component
@@ -23,34 +20,34 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
 
     private final JwtConfig jwtConfig;
 
-    private final UserLightRepository userLightRepository;
     private final UserRepository userRepository;
 
+    @Override
     public String generateAdminToken(){
         // 클레임 설정
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", 1L);  // 사용자 아이디 추가
         claims.put("role", "admin");  // 역할 추가
-        claims.put("team" , null);
+        claims.put("team", null);
 
         return generateToken(claims);
     }
 
-    public String generateUserToken(String name){
-        Long id ;
-        id = userLightRepository.findByUserId(name).getId();
+    @Override
+    public String generateUserToken(String userName){
 
-        User user = userRepository.findById(id).
+        User user = userRepository.findByUserName(userName).
                 orElseThrow(() -> new NoSuchElementException("잘못된 유저 정보입니다"));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", id);  // 사용자 아이디 추가
+        claims.put("userId", user.getId());  // 사용자 아이디 추가
         claims.put("role", "user");  // 역할 추가
-        claims.put("team" , user.getTeam().toString());
+        claims.put("team", user.getTeam()== null ? "" : user.getTeam().toString());
 
         return generateToken(claims);
     }
 
+    @Override
     public String generateToken(Map<String, Object> claims){
 
         // 토큰 만료 시간 설정 (현재 시간 + 설정된 만료 시간)
@@ -67,67 +64,81 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
                 .compact();  // 토큰 생성
     }
 
-    public String generateTokenWithTeam(){
-        return "";
-    }
+    @Override
+    public String generateTokenWithTeam(Team team, String authorizationHeader){
 
-    public Long getUserId(String token){
         Long userId;
-        Claims claims = Jwts.parserBuilder()
-                            .setSigningKey(secretKey())
-                            .build()
-                            .parseClaimsJws(token)
-                            .getBody();//페이로드 부분 추출
+        try {
+            userId = getClaims(authorizationHeader).get("userId", Long.class);
+        } catch (Exception e) {
+            throw new UnverifiedTokenException("잘못된 토큰입니다.");
+        }
 
-        //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
-        //왜냐하면 TokenInterceptor에서 이미 토큰의 유효성을 검사 했기 때문입니다
+        Map<String, Object> claims = new HashMap<>();
 
-        userId = claims.get("userId",Long.class);
+        claims.put("userId", userId);  // 사용자 아이디 추가
+        claims.put("role", "user");  // 역할 추가
+        claims.put("team" , team.toString());
+        return generateToken(claims);
+    }//성격 유형검사가 끝났을 때 다시 team값을 설정해줘서 엑세스토큰을 새로 발급해준다
 
-        return userId;
+    @Override
+    public Long getUserId(String token){
+        try{
+            return getClaims(token).get("userId", Long.class);
+        } catch (Exception e){
+            throw new UnverifiedTokenException("토큰 검증을 먼저 진행해야합니다.");
+        }
     } //토큰에서 유저 Id를 추출
 
-    public String getTeam(String token){
+    @Override
+    public Team getTeam(String token){
+        try{
+            return claimsToTeam(getClaims(token).get("team", String.class));
+        } catch (Exception e){
+            throw new UnverifiedTokenException("토큰 검증을 먼저 진행해야합니다.");
+        }
+    } //토큰에서 유저 Team을 추출
 
-        Claims claims = Jwts.parserBuilder()
+    @Override
+    public boolean validateToken(String token){
+        try{
+            getClaims(token);
+            return true;
+        } catch (Exception e){
+            return false;
+        } //토큰이 만료되었거나 변조되었다면
+    } //JWT 토큰 유효성 검증
+
+    @Override
+    public boolean validateAdminToken(String token){
+        try{
+            return getClaims(token).get("role", String.class).equals("admin");
+        } catch (Exception e){
+            return false;
+        }
+    }
+    //JWT 토큰이 admin의 역할을 담고 있는지 검증
+
+    private Team claimsToTeam(String team){
+
+        switch(team){
+            case "PET" : return Team.PET;
+            case "TRAVEL" : return Team.TRAVEL;
+            case "LEISURE" : return Team.LEISURE;
+            case "SPACE" : return Team.SPACE;
+            default: return Team.PET;
+        }
+    }
+
+    private Claims getClaims(String token)
+            throws ExpiredJwtException, SignatureException, IllegalArgumentException, MalformedJwtException, UnsupportedJwtException {
+        return Jwts.parserBuilder()
                 .setSigningKey(secretKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody();//페이로드 부분 추출
-        //이 부분에서 따로 토큰의 유효성이나 만료는 확인 안합니다
-        return claims.get("team",String.class);
-    } //토큰에서 유저 Team을 추출
-
-    public boolean validateToken(String token){
-        try{
-            Claims claims = Jwts.parserBuilder()
-                                .setSigningKey(secretKey())
-                                .build()
-                                .parseClaimsJws(token)
-                                .getBody();//페이로드 부분 추출
-            return true;
-        } catch (ExpiredJwtException | SignatureException e){
-            return false;
-        } //토큰이 만료되었거나 변조되었다면
-
-    } //JWT 토큰 유효성 검증
-
-    public boolean validateAdminToken(String token){
-        String role = "";
-        try{
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(secretKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            role = claims.get("role",String.class);
-            } catch (ExpiredJwtException | SignatureException e){
-                return false;
-            } //토큰이 만료되었거나 변조되었다면
-
-        return role.equals("admin");//role 이 admin이라면 true를, 아니라면 false를 반환한다
+                .getBody();
     }
-    //JWT 토큰이 admin의 역할을 담고 있는지 검증
 
     private byte[] secretKey(){
         return Decoders.BASE64.decode(jwtConfig.getSecret());

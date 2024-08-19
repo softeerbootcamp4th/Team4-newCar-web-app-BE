@@ -1,10 +1,12 @@
 package newCar.event_page.service;
 
 import newCar.event_page.model.dto.admin.*;
+import newCar.event_page.model.entity.event.EventId;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface AdminService {
@@ -25,6 +27,7 @@ public interface AdminService {
 
     public ResponseEntity<AdminPersonalityTestDTO> updatePersonalityTest(AdminPersonalityTestDTO personalityTestDTO);
 
-    public ResponseEntity<String> login(AdminLoginDTO adminLoginDTO);
+    public ResponseEntity<Map<String,String>> login(AdminLoginDTO adminLoginDTO);
 
+    public ResponseEntity<List<AdminQuizWinnersDTO>> getQuizWinnerList(Long quizEventId);
 }

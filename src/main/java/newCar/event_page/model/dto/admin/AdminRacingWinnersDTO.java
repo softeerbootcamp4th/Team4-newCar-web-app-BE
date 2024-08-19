@@ -3,7 +3,7 @@ package newCar.event_page.model.dto.admin;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import newCar.event_page.model.entity.Team;
+import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
 
 @Data
@@ -22,8 +22,8 @@ public class AdminRacingWinnersDTO {
 
         return AdminRacingWinnersDTO.builder()
                 .rank(racingWinner.getRank())
-                .name(racingWinner.getEventUser().getUser().getUserName())
-                .phoneNumber(racingWinner.getEventUser().getUser().getPhoneNumber())
+                .name(racingWinner.getEventUser().getUser().getNickName())
+                .phoneNumber(racingWinner.getEventUser().getUser().getUserName())
                 .clickNumber(racingWinner.getEventUser().getUser().getClickNumber())
                 .team(racingWinner.getEventUser().getUser().getTeam())
                 .build();

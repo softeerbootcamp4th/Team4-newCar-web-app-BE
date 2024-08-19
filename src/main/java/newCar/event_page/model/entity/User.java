@@ -3,9 +3,13 @@ package newCar.event_page.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
+import newCar.event_page.model.enums.LoginType;
+import newCar.event_page.model.enums.Team;
 
 @Entity
 @Getter
+@Setter
 public class User {
 
     @Id
