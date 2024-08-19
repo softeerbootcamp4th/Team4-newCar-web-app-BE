@@ -96,13 +96,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public ResponseEntity<UserQuizDTO> getQuiz(Long quizEventId ){
+    public ResponseEntity<UserQuizDTO> getQuiz(Long quizEventId ) {
+
         Event quizEvent = eventRepository.findById(quizEventId)
                 .orElseThrow(() -> new NoSuchElementException("퀴즈 이벤트가 존재하지 않습니다."));
 
         //LocalDate 한국 날짜를 기준으로 오늘의 퀴즈를 받아온다
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
+
+        if(isQuizAvailable.size()<=todayQuiz.getId().intValue()){
+            throw new IndexOutOfBoundsException("이벤트 기간이 지났습니다");
+        }
 
         if(!isQuizAvailable.get(todayQuiz.getId().intValue())){
             throw new FCFSFinishedException("선착순 퀴즈가 마감되었습니다");
