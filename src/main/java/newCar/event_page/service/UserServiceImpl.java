@@ -104,6 +104,10 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
+        if(isQuizAvailable.size()<=todayQuiz.getId().intValue()){
+            throw new IndexOutOfBoundsException("이벤트 기간이 지났습니다");
+        }
+
         if(!isQuizAvailable.get(todayQuiz.getId().intValue())){
             throw new FCFSFinishedException("선착순 퀴즈가 마감되었습니다");
         }//오늘 퀴즈가 마감되었다면
