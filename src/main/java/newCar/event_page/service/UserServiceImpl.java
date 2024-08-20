@@ -165,30 +165,27 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyHasTeamException("유저가 이미 성격 유형 검사를 마쳤습니다");
         }
 
+        setEventUser(user,EventId.Racing.getValue());//이벤트 참여자 명단에 넣어준다
+
         user.setTeam(team);
         userRepository.save(user);//계산된 팀 정보를 업데이트해준다
 
         return ResponseEntity.ok(userPersonalityUrlDTO);
     }
 
+
+
     @Override
-    public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String token){
+    public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader){
 
         Map<String,UserQuizStatus> map = new HashMap<>();
-        Long id = jwtTokenProvider.getUserId(token);//유저 토큰에서 유저 아이디를 받아온다
+        User user = userRepository.findById(jwtTokenProvider.getUserId(authorizationHeader))
+                .orElseThrow(() -> new NoSuchElementException("유저 정보가 잘못되었습니다"));
 
-        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(id, EventId.Quiz.getValue());
-
-        if(eventUser==null){
-            eventUser = new EventUser();
-            eventUser.setEvent(eventRepository.findById(EventId.Quiz.getValue())
-                    .orElseThrow(()->new NoSuchElementException("이벤트 테이블에 퀴즈이벤트가 존재하지 않습니다")));
-            eventUser.setUser(userRepository.findById(id)
-                        .orElseThrow(()-> new NoSuchElementException("유저 정보가 없습니다")));
-            eventUserRepository.save(eventUser);
-        }//퀴즈 이벤트 참여자 명단에 없으면 넣어준다
+        setEventUser(user,EventId.Quiz.getValue());//이벤트 참여자 명단에 넣어준다
 
         Integer userAnswer = answer.getAnswer();//유저가 제출한 정답
+        Long id = user.getId();
 
         quizBranch(userAnswer,id,map);//퀴즈 분기 처리 (정답,오답,이미 참가함, 마감)
 
@@ -410,6 +407,18 @@ public class UserServiceImpl implements UserService {
 
         // XOR 복호화
         return encrypted ^ key;
+    }
+    private void setEventUser(User user,Long eventId) {
+        EventUser eventUser = eventUserRepository.findByUserIdAndEventId(user.getId(),eventId);
+
+        if(eventUser==null){
+            eventUser = new EventUser();
+            eventUser.setEvent(eventRepository.findById(eventId)
+                    .orElseThrow(()->new NoSuchElementException("이벤트 테이블에 레이싱 이벤트가 존재하지 않습니다")));
+            eventUser.setUser(user);
+            eventUserRepository.save(eventUser);
+        }//이벤트 참여자명단에 없으면 넣어준다.
+
     }
 
     private boolean isUserLoginSuccess(UserLight userLight, UserLightDTO dto){
