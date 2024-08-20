@@ -2,7 +2,7 @@ name: Deploy To EC2
 
 on:
   push:
-    branches: [ "main", "TASK-200--MainAPI"]
+    branches: [ "main"]
 
 jobs:
   deploy:
