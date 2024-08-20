@@ -266,14 +266,9 @@ public class AdminServiceImpl implements AdminService {
 
     private Participant drawOneWinner(Set<Participant> participantSet, double totalWeight){
         Random rand = new Random();
-        int maxInt = (int)totalWeight; //totalWeight가 8.45일 경우 8이 저장됨
-        int randomInt = rand.nextInt(maxInt) + 1; // 1~8이 저장됨
-        if (randomInt == maxInt) { //만약 randomInt가 최대값으로 들어왔다면 마지막이 당첨자이다
-            Participant participant = findLast(participantSet);//참가자리스트의 마지막
-            return participant;
-        }
+        double randomValue = rand.nextDouble() * totalWeight; // totalWeight 내에서 랜덤 실수 값 생성
         double cumulativeWeight = 0; // 누적 가중치
-        double randomValue = randomInt + rand.nextDouble(); //랜덤 값
+
         for (Participant participant : participantSet) {
             cumulativeWeight += participant.weight;
             if (randomValue <= cumulativeWeight) {
