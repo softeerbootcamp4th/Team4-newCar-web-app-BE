@@ -173,8 +173,6 @@ public class UserServiceImpl implements UserService {
         return ResponseEntity.ok(userPersonalityUrlDTO);
     }
 
-
-
     @Override
     public ResponseEntity<Map<String,UserQuizStatus>> submitQuiz(UserQuizAnswerDTO answer, String authorizationHeader){
 
