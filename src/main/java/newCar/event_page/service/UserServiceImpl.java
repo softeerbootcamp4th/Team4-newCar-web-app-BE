@@ -266,6 +266,7 @@ public class UserServiceImpl implements UserService {
                 .maxAge(60 * 60 * 24)  // 1일 동안 유지
                 .path("/")              // 쿠키 경로 설정
                 .httpOnly(true)         // XSS 공격 방지
+                .sameSite("None")
                 .build();
 
         return ResponseEntity.ok()
