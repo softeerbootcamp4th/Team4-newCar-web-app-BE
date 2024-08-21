@@ -21,11 +21,10 @@ import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.*;
 import newCar.event_page.repository.jpa.racing.*;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -75,7 +74,19 @@ class AdminServiceImplTest {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
-    private AdminQuizWinnersDTO adminQuizWinnersDTO;
+    private UserServiceImpl userServiceImpl;
+
+    private static MockedStatic<AdminQuizWinnersDTO> mockedAdminQuizWinnersDTO;
+
+    @BeforeAll
+    public static void beforeClass(){
+        mockedAdminQuizWinnersDTO = mockStatic(AdminQuizWinnersDTO.class);
+    }
+
+    @AfterAll
+    public static void afterClass(){
+        mockedAdminQuizWinnersDTO.close();
+    }
 
     @BeforeEach
     void setUp() {
@@ -316,7 +327,7 @@ class AdminServiceImplTest {
 
         AdminQuizWinnersDTO expectedDTO = mock(AdminQuizWinnersDTO.class);
 
-        when().thenReturn(expectedDTO);
+        when(AdminQuizWinnersDTO.toDTO(quizWinner)).thenReturn(expectedDTO);
 
         // When
         ResponseEntity<List<AdminQuizWinnersDTO>> response = adminServiceImpl.getQuizWinnerList(quizEventId);
