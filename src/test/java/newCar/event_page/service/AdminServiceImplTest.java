@@ -13,6 +13,7 @@ import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.quiz.QuizEvent;
+import newCar.event_page.model.entity.event.quiz.QuizWinner;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.model.enums.Team;
@@ -74,7 +75,7 @@ class AdminServiceImplTest {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
-    private UserServiceImpl userServiceImpl;
+    private AdminQuizWinnersDTO adminQuizWinnersDTO;
 
     @BeforeEach
     void setUp() {
@@ -211,6 +212,31 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("퀴즈 업데이트 - 게시글 날짜 수정은 불가능 합니다")
+    void updateQuiz_UnmodifiableFieldException(){
+        Long quizId = 1L;
+        AdminQuizDTO adminQuizDTO = AdminQuizDTO.builder()
+                .id(quizId)
+                .postDate(LocalDate.now()) // postDate를 설정하여 예외 발생 조건 충족
+                .winnerCount(100)
+                .question("Sample Question")
+                .choices(Arrays.asList(
+                        AdminQuizDTO.Choice.builder().num(0).text("Choice 1").build(),
+                        AdminQuizDTO.Choice.builder().num(1).text("Choice 2").build(),
+                        AdminQuizDTO.Choice.builder().num(2).text("Choice 3").build(),
+                        AdminQuizDTO.Choice.builder().num(3).text("Choice 4").build()
+                ))
+                .correctAnswer(1)
+                .build();
+
+        when(quizRepository.findById(quizId)).thenReturn(Optional.of(mock(Quiz.class)));
+
+        assertThatThrownBy(() -> adminServiceImpl.updateQuiz(adminQuizDTO))
+                .isInstanceOf(UnmodifiableFieldException.class);
+
+    }
+
+    @Test
     @DisplayName("레이싱 당첨자 추첨 - 실패")
     void drawRacingWinners_ExcessiveWinners() {
         // given
@@ -263,6 +289,43 @@ class AdminServiceImplTest {
         // when, then
         assertThatThrownBy(() -> adminServiceImpl.getRacingWinnerList(1L))
                 .isInstanceOf(DrawNotYetConductedException.class);
+    }
+    @Test
+    @DisplayName("선착순 퀴즈 당첨자 불러오기 - 당첨자 추첨이 아직 이뤄지지 않았을때")
+    public void testGetQuizWinnerList_WhenNoWinners_ThrowsFCFSNotYetConductedException() {
+        when(quizWinnerRepository.findAllByOrderByQuiz_Id()).thenReturn(Collections.emptyList());
+
+        // When & Then
+        assertThatThrownBy(() -> adminServiceImpl.getQuizWinnerList(EventId.Quiz.getValue()))
+                .isInstanceOf(FCFSNotYetConductedException.class);
+
+        // quizWinnerRepository의 메서드가 호출되었는지 확인
+        verify(quizWinnerRepository, times(1)).findAllByOrderByQuiz_Id();
+    }
+
+    @Test
+    @DisplayName("선착순 퀴즈 당첨자 불러오기 - 성공")
+    public void testGetQuizWinnerList_WhenWinnersExist_ReturnsWinnerList() {
+        // Given
+        Long quizEventId = 1L;
+
+        QuizWinner quizWinner = mock(QuizWinner.class);
+        List<QuizWinner> quizWinnerList = List.of(quizWinner);
+
+        when(quizWinnerRepository.findAllByOrderByQuiz_Id()).thenReturn(quizWinnerList);
+
+        AdminQuizWinnersDTO expectedDTO = mock(AdminQuizWinnersDTO.class);
+
+        when().thenReturn(expectedDTO);
+
+        // When
+        ResponseEntity<List<AdminQuizWinnersDTO>> response = adminServiceImpl.getQuizWinnerList(quizEventId);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // quizWinnerRepository의 메서드가 호출되었는지 확인
+        verify(quizWinnerRepository, times(1)).findAllByOrderByQuiz_Id();
     }
 
     @Test
@@ -324,6 +387,7 @@ class AdminServiceImplTest {
         assertThatThrownBy(() -> adminServiceImpl.updatePersonalityTest(personalityTestDTO))
                 .isInstanceOf(NoSuchElementException.class);
     }
+
 
     @Test
     @DisplayName("로그인 - 성공")
