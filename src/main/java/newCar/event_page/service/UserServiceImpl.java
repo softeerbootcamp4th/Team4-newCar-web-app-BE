@@ -267,6 +267,7 @@ public class UserServiceImpl implements UserService {
                 .path("/")              // 쿠키 경로 설정
                 .httpOnly(true)         // XSS 공격 방지
                 .sameSite("None")
+                .secure(true)
                 .build();
 
         return ResponseEntity.ok()
