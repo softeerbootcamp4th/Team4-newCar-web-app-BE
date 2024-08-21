@@ -162,9 +162,6 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public ResponseEntity<List<AdminRacingWinnersDTO>> getRacingWinnerList(Long racingEventId) {
         List<RacingWinner> winnerList = racingWinnerRepository.findByEventId(racingEventId);
-        if(winnerList.isEmpty()) {
-            throw new DrawNotYetConductedException("당첨자 추첨이 아직 이루어지지 않았습니다.");
-        }
 
         return ResponseEntity.ok(
                 winnerList
@@ -199,9 +196,6 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ResponseEntity<List<AdminQuizWinnersDTO>> getQuizWinnerList(Long quizEventId){
         List<QuizWinner> quizWinnerList = quizWinnerRepository.findAllByOrderByQuiz_Id();
-        if(quizWinnerList.isEmpty()){
-            throw new FCFSNotYetConductedException("아직 선착순 퀴즈 당첨자가 존재하지 않습니다");
-        }
 
         return ResponseEntity.ok(quizWinnerList
                 .stream()
