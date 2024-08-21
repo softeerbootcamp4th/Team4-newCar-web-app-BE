@@ -78,7 +78,6 @@ public class AdminServiceImpl implements AdminService {
         eventCommon.update(eventCommonDTO);
 
         long duration = eventCommon.getDuration();
-        System.out.println("공통이벤트");
         putDummyIfRequired(duration);
         updateQuiz(eventCommonDTO.getStartTime().toLocalDate(), duration);
 
