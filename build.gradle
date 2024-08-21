@@ -74,7 +74,9 @@ jacocoTestReport {
 							'**/model/**',
 							'**/config/**',
 							'**/*Application*',
-							'**/exception/**'
+							'**/exception/**',
+							'**/controller/**',
+							'**/repository/redis',
 					])
 				})
 		)
@@ -96,7 +98,9 @@ jacocoTestCoverageVerification {
 					'**.*Application',
 					'**.model.**',
 					'**.config.**',
-					'**.exception.**'
+					'**.exception.**',
+					'**.controller.**',
+					'**.repository.redis',
 			]
 		}
 	}

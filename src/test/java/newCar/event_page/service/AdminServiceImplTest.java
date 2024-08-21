@@ -1,7 +1,6 @@
 package newCar.event_page.service;
 
 import newCar.event_page.exception.*;
-import newCar.event_page.exception.FCFS.FCFSNotYetConductedException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.admin.*;
 import newCar.event_page.model.entity.Administrator;
