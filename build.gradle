@@ -74,7 +74,7 @@ jacocoTestReport {
 							'**/model/**',
 							'**/config/**',
 							'**/*Application*',
-							"**/exception/**"
+							'**/exception/**'
 					])
 				})
 		)
@@ -96,7 +96,7 @@ jacocoTestCoverageVerification {
 					'**.*Application',
 					'**.model.**',
 					'**.config.**',
-					"**.exception.**"
+					'**.exception.**'
 			]
 		}
 	}

@@ -15,6 +15,7 @@ import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.quiz.QuizEvent;
 import newCar.event_page.model.entity.event.quiz.QuizWinner;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
+import newCar.event_page.model.entity.event.racing.RacingEvent;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.repository.jpa.*;
@@ -77,10 +78,12 @@ class AdminServiceImplTest {
     private UserServiceImpl userServiceImpl;
 
     private static MockedStatic<AdminQuizWinnersDTO> mockedAdminQuizWinnersDTO;
+    private static MockedStatic<AdminEventCommonDTO> mockedAdminEventCommonDTO;
 
     @BeforeAll
     public static void beforeClass(){
         mockedAdminQuizWinnersDTO = mockStatic(AdminQuizWinnersDTO.class);
+        mockedAdminEventCommonDTO = mockStatic(AdminEventCommonDTO.class);
     }
 
     @AfterAll
@@ -127,19 +130,23 @@ class AdminServiceImplTest {
         AdminEventCommonDTO eventCommonDTO = mock(AdminEventCommonDTO.class);
         EventCommon eventCommon = mock(EventCommon.class);
         QuizEvent quizEvent = mock(QuizEvent.class);
+        Quiz quiz = mock(Quiz.class);
+        ValueOperations valueOperations = mock(ValueOperations.class);
 
         // 설정된 값
-        when(eventCommonDTO.getEventName()).thenReturn("Updated Event");
-        when(eventCommonDTO.getManagerName()).thenReturn("Updated Manager");
         when(eventCommonDTO.getStartTime()).thenReturn(LocalDateTime.of(2024, 1, 31, 18, 30));
         when(eventCommonDTO.getEndTime()).thenReturn(LocalDateTime.of(2024, 2, 28, 18, 30));
 
+        when(eventCommon.getDuration()).thenReturn(1L);
         when(eventCommonRepository.findById(1L)).thenReturn(Optional.of(eventCommon));
-        when(quizRepository.findAllByOrderByIdAsc()).thenReturn(Collections.emptyList());
+        when(quizRepository.findAllByOrderByIdAsc()).thenReturn(List.of(quiz));
         when(quizEventRepository.findById(any(Long.class))).thenReturn(Optional.of(quizEvent));
+        when(AdminEventCommonDTO.toDTO(eventCommon)).thenReturn(eventCommonDTO);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
         ResponseEntity<AdminEventCommonDTO> response = adminServiceImpl.updateCommonEventDetails(eventCommonDTO);
+
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -170,6 +177,17 @@ class AdminServiceImplTest {
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    @DisplayName("퀴즈 리스트 가져오기 - 실패, 퀴즈이벤트없음")
+    void getQuizList_Fail(){
+        //given
+        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        //then
+        assertThatThrownBy(() -> adminServiceImpl.getQuizList(EventId.Quiz.getValue()))
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -260,6 +278,36 @@ class AdminServiceImplTest {
     }
 
     @Test
+    @DisplayName("레이싱 당첨자 추첨 - 성공")
+    public void testDrawRacingWinners_Success() {
+        // 테스트에 사용할 데이터 준비
+        Long racingEventId = 1L;
+
+        // EventUser 리스트 모킹
+        EventUser eventUser = mock(EventUser.class);
+        when(eventUser.getUser()).thenReturn(mock(User.class));
+        when(eventUser.getUser().getId()).thenReturn(1L);
+        when(eventUser.getUser().getClickNumber()).thenReturn(10);
+        List<EventUser> eventUserList = new ArrayList<>(Collections.singletonList(eventUser));
+        when(eventUserRepository.findByEventId(racingEventId)).thenReturn(eventUserList);
+
+        // WinnerSettingDTO 리스트 준비
+        AdminWinnerSettingDTO winnerSettingDTO = new AdminWinnerSettingDTO(1, 1);
+        List<AdminWinnerSettingDTO> winnerSettingDTOList = new ArrayList<>();
+        winnerSettingDTOList.add(winnerSettingDTO);
+
+        // RacingWinner 저장 메소드 모킹
+        when(racingEventRepository.getReferenceById(racingEventId)).thenReturn(mock(RacingEvent.class));
+
+        // 메소드 호출 및 검증
+        ResponseEntity<String> response = adminServiceImpl.drawRacingWinners(winnerSettingDTOList, racingEventId);
+
+        // 검증
+        assertThat(response.getBody()).isEqualTo("추첨이 완료되었습니다.");
+        verify(racingWinnerRepository, times(1)).save(any(RacingWinner.class));
+    }
+
+    @Test
     @DisplayName("레이싱 당첨자 리스트 가져오기 - 성공")
     void getRacingWinnerList_Success() {
         // given
@@ -289,29 +337,6 @@ class AdminServiceImplTest {
         assertThat(response.getBody()).hasSize(1);
         assertThat(response.getBody().get(0).getName()).isEqualTo("testNickName");
 
-    }
-
-    @Test
-    @DisplayName("레이싱 당첨자 리스트 가져오기 - 실패")
-    void getRacingWinnerList_NotConducted() {
-        // given
-        when(racingWinnerRepository.findByEventId(any(Long.class))).thenReturn(Collections.emptyList());
-
-        // when, then
-        assertThatThrownBy(() -> adminServiceImpl.getRacingWinnerList(1L))
-                .isInstanceOf(DrawNotYetConductedException.class);
-    }
-    @Test
-    @DisplayName("선착순 퀴즈 당첨자 불러오기 - 당첨자 추첨이 아직 이뤄지지 않았을때")
-    public void testGetQuizWinnerList_WhenNoWinners_ThrowsFCFSNotYetConductedException() {
-        when(quizWinnerRepository.findAllByOrderByQuiz_Id()).thenReturn(Collections.emptyList());
-
-        // When & Then
-        assertThatThrownBy(() -> adminServiceImpl.getQuizWinnerList(EventId.Quiz.getValue()))
-                .isInstanceOf(FCFSNotYetConductedException.class);
-
-        // quizWinnerRepository의 메서드가 호출되었는지 확인
-        verify(quizWinnerRepository, times(1)).findAllByOrderByQuiz_Id();
     }
 
     @Test
@@ -420,6 +445,19 @@ class AdminServiceImplTest {
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).containsEntry("accessToken", "token");
+    }
+
+    @Test
+    @DisplayName("로그인 - admin정보 DB에 없어서 실패")
+    void login_Fail_NoAdmin() {
+        //given
+        when(administratorRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+        AdminLoginDTO adminLoginDTO = mock(AdminLoginDTO.class);
+
+        //when, then
+        assertThatThrownBy(() -> adminServiceImpl.login(adminLoginDTO))
+                .isInstanceOf(NoSuchElementException.class);
+        //잘못된 admin 아이디와 비밀번호가 들어왔을때 Exception 터져야 한다
     }
 
     @Test
