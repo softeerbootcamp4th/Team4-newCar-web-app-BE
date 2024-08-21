@@ -391,7 +391,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private String encryptedId(Long id){
-
         // XOR 연산
         long encrypted = id ^ key;
 
