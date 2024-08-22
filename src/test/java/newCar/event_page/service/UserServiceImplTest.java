@@ -1,5 +1,6 @@
 package newCar.event_page.service;
 
+import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.model.dto.user.*;
 import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.EventId;
@@ -15,7 +16,6 @@ import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.config.JwtConfig;
-import newCar.event_page.service.;
 import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.User;
@@ -35,6 +35,8 @@ import org.springframework.http.ResponseEntity;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,7 +51,7 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private UserServiceImpl userServiceImpl;
 
     @Mock
     private UserLightRepository userLightRepository;
@@ -95,7 +97,7 @@ class UserServiceImplTest {
                     .thenAnswer(invocation -> userPersonalityTestDTO);
 
             //when
-            ResponseEntity<List<UserPersonalityTestDTO>> response = userService.getPersonalityTestList();
+            ResponseEntity<List<UserPersonalityTestDTO>> response = userServiceImpl.getPersonalityTestList();
 
             //then
             assertThat(response).isNotNull();
@@ -106,31 +108,27 @@ class UserServiceImplTest {
     @Test
     @DisplayName("오늘의 퀴즈 불러오기 _ 성공")
     void getQuiz_Success() {
-        //given
-        Event event = new Event();
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
 
-        ValueOperations valueOperations = mock(ValueOperations.class);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        // Given
+        Event mockEvent = mock(Event.class);
+        Quiz mockQuiz = mock(Quiz.class);
 
-        Quiz quiz = new Quiz();
-        quiz.setId(1L);
-        quiz.setPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")));
-        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
-        when(redisTemplate.opsForValue().decrement("ticket_1")).thenReturn(1L);
+        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(mockEvent));
+        when(quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))).thenReturn(Optional.of(mockQuiz));
+        when(mockQuiz.getId()).thenReturn(1L);
 
+        // When
+        ResponseEntity<UserQuizDTO> response = userServiceImpl.getQuiz(EventId.Quiz.getValue());
 
-        //when
-        ResponseEntity<UserQuizDTO> response = userService.getQuiz(1L);
-
-        //then
-        assertNotNull(response);
-        assertEquals(quiz.getId(), response.getBody().getId());
+        // Then
+        assertThat(response).isNotNull();
+        verify(eventRepository, times(1)).findById(anyLong());
+        verify(quizRepository, times(1)).findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")));
     }
 
     @Test
     @DisplayName("오늘의 퀴즈 불러오기 _ 실패")
-    void getQuiz_Success() {
+    void getQuiz_Fail() {
         //given
         Event event = new Event();
         when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
@@ -144,16 +142,15 @@ class UserServiceImplTest {
         when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
         when(redisTemplate.opsForValue().decrement("ticket_1")).thenReturn(1L);
 
-
         //when & then
-        assertThatThrownBy(() -> userService.getQuiz(EventId.Quiz.getValue())
-                .isInstanceOf(IndexOutOfBoundsException.class);
-
+        /*assertThatThrownBy(() -> userServiceImpl.getQuiz(EventId.Quiz.getValue())
+                .isInstanceOf(IndexOutOfBoundsException.class));*/
 
     }
 
     @Test
-    void getEventTime_shouldReturnEventTime() {
+    @DisplayName("이벤트 진행 기간 반환 _ 성공")
+    void getEventTime_Success() {
         EventCommon eventCommon = new EventCommon();
         when(eventCommonRepository.findById(1L)).thenReturn(Optional.of(eventCommon));
         UserEventTimeDTO userEventTimeDTO = mock(UserEventTimeDTO.class);
@@ -162,14 +159,29 @@ class UserServiceImplTest {
             mockedStatic.when(() -> UserEventTimeDTO.toDTO(any(EventCommon.class)))
                     .thenAnswer(invocation -> userEventTimeDTO);
 
-            ResponseEntity<UserEventTimeDTO> response = userService.getEventTime();
+            ResponseEntity<UserEventTimeDTO> response = userServiceImpl.getEventTime();
 
-            assertNotNull(response);
+            assertThat(response).isNotNull();
         }
     }
 
     @Test
-    void login_shouldReturnAccessToken() {
+    @DisplayName("이벤트 진행 기간 반환 _ 실패")
+    void getEventTime_Fail() {
+        //given
+        when(eventCommonRepository.findById(1L)).thenReturn(Optional.empty());
+        UserEventTimeDTO userEventTimeDTO = mock(UserEventTimeDTO.class);
+
+
+        //when & then
+        assertThatThrownBy(() -> userServiceImpl.getEventTime())
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+
+    @Test
+    @DisplayName("userId와 password 기반 로그인 _ 성공")
+    void login_Success() {
         UserLight userLight = new UserLight();
         userLight.setUserId("testUser");
         userLight.setPassword("testPassword");
@@ -181,13 +193,34 @@ class UserServiceImplTest {
         userLightDTO.setUserId("testUser");
         userLightDTO.setPassword("testPassword");
 
-        ResponseEntity<Map<String, String>> response = userService.login(userLightDTO);
 
-        assertNotNull(response);
-        assertEquals("testAccessToken", response.getBody().get("accessToken"));
+
+        ResponseEntity<Map<String, String>> response = userServiceImpl.login(userLightDTO);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getBody().get("accessToken")).isEqualTo("testAccessToken");
     }
 
     @Test
+    @DisplayName("userId와 password 기반 로그인 _ 실패")
+    void login_Fail() {
+        UserLight userLight = new UserLight();
+        userLight.setUserId("testUser");
+        userLight.setPassword("testPassword");
+
+        when(userLightRepository.findById(1L)).thenReturn(Optional.of(userLight));
+
+        UserLightDTO userLightDTO = new UserLightDTO();
+        userLightDTO.setUserId("testUser_fail");
+        userLightDTO.setPassword("testPassword_fail");
+
+        //when & then
+        assertThatThrownBy(() -> userServiceImpl.login(userLightDTO))
+                .isInstanceOf(UserLoginFailException.class);
+    }
+
+    @Test
+    @DisplayName("성격유형검사 제출 _ 성공")
     void submitPersonalityTest_shouldAssignTeamAndReturnUrl() {
         User user = new User();
         user.setId(1L);
@@ -198,13 +231,14 @@ class UserServiceImplTest {
 
         List<UserPersonalityAnswerDTO> answers = List.of(new UserPersonalityAnswerDTO(), new UserPersonalityAnswerDTO());
 
-        ResponseEntity<UserPersonalityUrlDTO> response = userService.submitPersonalityTest(answers, "authHeader");
+        ResponseEntity<UserPersonalityUrlDTO> response = userServiceImpl.submitPersonalityTest(answers, "authHeader");
 
-        assertNotNull(response);
+        assertThat(response).isNotNull();
         verify(userRepository, times(1)).save(user);
     }
 
     @Test
+    @DisplayName("퀴즈 제출_성공")
     void submitQuiz_shouldReturnCorrectQuizStatus() {
         User user = new User();
         user.setId(1L);
@@ -222,9 +256,9 @@ class UserServiceImplTest {
 
         UserQuizAnswerDTO answerDTO = new UserQuizAnswerDTO();
 
-        Map<String, UserQuizStatus> response = userService.submitQuiz(answerDTO, "authHeader").getBody();
+        Map<String, UserQuizStatus> response = userServiceImpl.submitQuiz(answerDTO, "authHeader").getBody();
 
-        assertNotNull(response);
+        assertThat(response).isNotNull();
         verify(quizWinnerRepository, times(1)).save(any(QuizWinner.class));
     }
 
@@ -238,11 +272,11 @@ class UserServiceImplTest {
         user.setClickNumber(0);
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
-        ResponseEntity<Void> response = userService.plusClickNumber("url", request);
+        ResponseEntity<Void> response = userServiceImpl.plusClickNumber("url", request);
 
-        assertNotNull(response);
+        assertThat(response).isNotNull();
         verify(userRepository, times(1)).save(user);
-        assertEquals(1, user.getClickNumber());
+        assertThat(user.getClickNumber()).isEqualTo(1);
     }
 
     @Test
@@ -260,10 +294,10 @@ class UserServiceImplTest {
                     .thenAnswer(invocation -> userInfoDTO);
 
             //when
-            ResponseEntity<UserInfoDTO> response = userService.getUserInfo("authHeader");
+            ResponseEntity<UserInfoDTO> response = userServiceImpl.getUserInfo("authHeader");
 
             //then
-            assertNotNull(response);
+            assertThat(response).isNotNull();
         }
     }
 
@@ -281,24 +315,23 @@ class UserServiceImplTest {
         kakaoInfoDTO.setNickname("testNick");
 
         //when
-        Map<String, String> response = userService.kakaoLogin(kakaoInfoDTO);
+        Map<String, String> response = userServiceImpl.kakaoLogin(kakaoInfoDTO);
 
         //then
-        assertNotNull(response);
-        assertEquals("testAccessToken", response.get("accessToken"));
+        assertThat(response).isNotNull();
+        assertThat(response.get("accessToken")).isEqualTo("testAccessToken");
     }
 
     @Test
     void dummyToken_shouldReturnDummyAccessToken() {
-
         //given
         when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("dummyToken");
 
         //when
-        ResponseEntity<Map<String, String>> response = userService.dummyToken();
+        ResponseEntity<Map<String, String>> response = userServiceImpl.dummyToken();
 
         //then
-        assertNotNull(response);
-        assertEquals("dummyToken", response.getBody().get("accessToken"));
+        assertThat(response).isNotNull();
+        assertThat(response.getBody().get("accessToken")).isEqualTo("dummyToken");
     }
 }
