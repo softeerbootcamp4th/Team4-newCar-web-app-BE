@@ -6,22 +6,32 @@ import newCar.event_page.exception.UserAlreadyHasTeamException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
+import newCar.event_page.model.entity.TeamScore;
 import newCar.event_page.model.entity.User;
 import newCar.event_page.model.entity.UserLight;
+import newCar.event_page.model.entity.event.Event;
 import newCar.event_page.model.entity.event.EventCommon;
+import newCar.event_page.model.entity.event.EventId;
+import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.Quiz;
+import newCar.event_page.model.entity.event.racing.PersonalityTest;
+import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
+import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +42,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -60,55 +71,50 @@ public class UserServiceImplTest {
     @Mock
     private JwtTokenProvider jwtTokenProvider;
 
+    @Mock
+    private PersonalityTestRepository personalityTestRepository;
+
+    @Mock
+    private EventRepository eventRepository;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
-
-        EventCommon eventCommon = new EventCommon();
-        eventCommon.setId(1L);
-        LocalDateTime startTime = LocalDateTime.parse("2024-08-02T18:30:00");
-        LocalDateTime endTime = LocalDateTime.parse("2024-08-31T18:30:00");
-        eventCommon.setStartTime(startTime);
-        eventCommon.setEndTime(endTime);
-
-        Quiz quiz1 = new Quiz();
-        quiz1.setId(1L);
-        quiz1.setWinnerCount(100);
-        quiz1.setPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")));
-        quiz1.setCorrectAnswer(1);
-
-        Quiz quiz2 = new Quiz();
-        quiz2.setId(2L);
-        quiz2.setWinnerCount(50);
-        quiz2.setPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1));
-        quiz2.setCorrectAnswer(2);
-
-        User user = new User();
-        user.setUserName("testUser");
-        user.setNickName("Test");
-        user.setClickNumber(0);
-
-        // Mocking repository method behavior
-        when(eventCommonRepository.save(any(EventCommon.class))).thenReturn(eventCommon);
-        when(quizRepository.save(any(Quiz.class))).thenReturn(quiz1, quiz2);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
-
-        // 초기화
-        userService.Init();
     }
 
     @Test
-    @DisplayName("성격 유형 검사 리스트 가져오기_성공")
+    @DisplayName("성격 유형 검사 빈 리스트 가져오기_성공")
     public void getPersonalityTest_Success() {
+        //when
         ResponseEntity<List<UserPersonalityTestDTO>> response = userService.getPersonalityTestList();
-        assertThat(response.getBody()).isNull();
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).isEmpty();
     }
 
     @Test
-    public void testGetQuizSuccess() {
-        ResponseEntity<UserQuizDTO> response = userService.getQuiz(1L);
-        assertThat(response.getBody()).isNotNull();
+    @DisplayName("오늘의 퀴즈 가져오기_퀴즈 이벤트 자체가 존재하지 않음")
+    public void getQuiz_Fail_Event() {
+        assertThatThrownBy(() -> userService.getQuiz(EventId.Quiz.getValue()))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("오늘의 퀴즈 가져오기_실패_오늘 날짜에 퀴즈 없음")
+    public void getQuiz_Fail_Date() {
+        //given
+        Event event = mock(Event.class);
+        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
+
+        // Mocking quizRepository to throw NoSuchElementException for today's date
+        when(quizRepository.findByPostDate(any(LocalDate.class)))
+                .thenThrow(new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
+
+        //when & then
+        assertThatThrownBy(() -> userService.getQuiz(EventId.Quiz.getValue()))
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
@@ -137,6 +143,7 @@ public class UserServiceImplTest {
         userLight.setPassword("password");
 
         when(userLightRepository.save(any(UserLight.class))).thenReturn(userLight);
+        when(userLightRepository.findById(any(Long.class))).thenReturn(Optional.of(userLight));
         when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("dummyToken");
 
         ResponseEntity<Map<String, String>> response = userService.login(userLightDTO);

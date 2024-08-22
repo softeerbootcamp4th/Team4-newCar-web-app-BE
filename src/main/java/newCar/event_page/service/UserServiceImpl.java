@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     private long key ;
 
     @PostConstruct
-    void Init(){
+    private void Init(){
         EventCommon eventCommon = eventCommonRepository.findById(1L).get();
         long count = eventCommon.getDuration();
         for(int i = 0; i < count; i++){
