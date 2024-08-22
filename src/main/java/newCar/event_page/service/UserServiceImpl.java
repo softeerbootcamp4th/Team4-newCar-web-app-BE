@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
             throw new FCFSFinishedException("선착순 퀴즈가 마감되었습니다");
         }//오늘 퀴즈가 마감되었다면
 
-        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(15, 15))){
+        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(10, 15))){
             throw new FCFSNotStartedYet("퀴즈가 아직 시작되지 않았습니다");
         }//퀴즈가 아직 시작 안되었다면
 
