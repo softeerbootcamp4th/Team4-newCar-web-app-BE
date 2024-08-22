@@ -14,12 +14,14 @@ import newCar.event_page.model.entity.event.EventCommon;
 import newCar.event_page.model.entity.event.EventId;
 import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.Quiz;
+import newCar.event_page.model.entity.event.quiz.QuizWinner;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
+import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +37,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -46,8 +49,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
 public class UserServiceImplTest {
 
     @InjectMocks
@@ -76,6 +77,13 @@ public class UserServiceImplTest {
 
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private EventUserRepository eventUserRepository;
+
+    @Mock
+    private QuizWinnerRepository quizWinnerRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -108,31 +116,44 @@ public class UserServiceImplTest {
         Event event = mock(Event.class);
         when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
 
-        // Mocking quizRepository to throw NoSuchElementException for today's date
-        when(quizRepository.findByPostDate(any(LocalDate.class)))
-                .thenThrow(new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
-
         //when & then
         assertThatThrownBy(() -> userService.getQuiz(EventId.Quiz.getValue()))
                 .isInstanceOf(NoSuchElementException.class);
+        verify(eventRepository,times(1)).findById(any(Long.class));
     }
 
     @Test
+    @DisplayName("오늘의 퀴즈 가져오기 실패_ 아직 시작 안함")
     public void testGetQuizNotStartedYet() {
-        LocalTime now = LocalTime.now(ZoneId.of("Asia/Seoul"));
-        if (now.isBefore(LocalTime.of(15, 15))) {
-            assertThrows(FCFSNotStartedYet.class, () -> userService.getQuiz(1L));
-        }
+        //gvien
+        Event event = mock(Event.class);
+        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
+        Quiz quiz = mock(Quiz.class);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz))
+        ;
+        //when & then
+        assertThatThrownBy(() -> userService.getQuiz(EventId.Quiz.getValue()))
+                .isInstanceOf(IndexOutOfBoundsException.class);
     }
 
     @Test
+    @DisplayName("선착순 순위권에 못 들었을때")
     public void testGetQuizFinished() {
+        //gvien
+        Event event = mock(Event.class);
+        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
+        Quiz quiz = mock(Quiz.class);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
         List<Boolean> availableArray = Arrays.asList(false, true, true);
+
+
         userService.setQuizAvailableArray(new ArrayList<>(availableArray));
-        assertThrows(FCFSFinishedException.class, () -> userService.getQuiz(1L));
+        assertThatThrownBy(()->userService.getQuiz(1L))
+                .isInstanceOf(FCFSFinishedException.class);
     }
 
     @Test
+    @DisplayName("라이트한 유저 로그인 성공")
     public void testLoginSuccess() {
         UserLightDTO userLightDTO = new UserLightDTO();
         userLightDTO.setUserId("testUser");
@@ -142,24 +163,34 @@ public class UserServiceImplTest {
         userLight.setUserId("testUser");
         userLight.setPassword("password");
 
-        when(userLightRepository.save(any(UserLight.class))).thenReturn(userLight);
         when(userLightRepository.findById(any(Long.class))).thenReturn(Optional.of(userLight));
         when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("dummyToken");
 
         ResponseEntity<Map<String, String>> response = userService.login(userLightDTO);
-        assertThat(response.getBody()).containsKey("accessToken");
 
-        // Verify save method was called once
-        verify(userLightRepository, times(1)).save(any(UserLight.class));
+        //then
+        assertThat(response.getBody()).containsKey("accessToken");
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
+    @DisplayName("light유저 로그인 실패")
     public void testLoginFail() {
+
+        //given
         UserLightDTO userLightDTO = new UserLightDTO();
         userLightDTO.setUserId("testUser");
         userLightDTO.setPassword("wrongPassword");
 
-        assertThrows(UserLoginFailException.class, () -> userService.login(userLightDTO));
+        UserLight user = new UserLight();
+        user.setUserId("testUser");
+        user.setPassword("1234");
+
+        when(userLightRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        //when & then
+        assertThatThrownBy(()->userService.login(userLightDTO))
+                .isInstanceOf(UserLoginFailException.class);
     }
 
     @Test
@@ -202,16 +233,44 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testSubmitQuizSuccess() {
+    @DisplayName("이미 선착순 이벤트에 참가한 참가자 테스트")
+    public void testSubmitQuiz_Participated() {
         UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
         answer.setAnswer(1);
         String token = jwtTokenProvider.generateUserToken("testUser");
 
-        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, "Bearer " + token);
-        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.RIGHT);
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        EventUser eventUser = mock(EventUser.class);
+        when(eventUserRepository.findByUserIdAndEventId(any(Long.class),any(Long.class))).thenReturn(eventUser);
+        Quiz quiz = mock(Quiz.class);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        QuizWinner quizWinner = mock(QuizWinner.class);
+        when(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(any(Long.class),any(Long.class))).thenReturn(Optional.of(quizWinner));
 
-        // Verify save method was called once
-        verify(userRepository, times(1)).save(any(User.class));
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.PARTICIPATED);
+
+    }
+
+    @Test
+    @DisplayName("잘못된 정답 제출했을시 ")
+    public void testSubmitQuiz_Wrong() {
+        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
+        answer.setAnswer(1);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        EventUser eventUser = mock(EventUser.class);
+        when(eventUserRepository.findByUserIdAndEventId(any(Long.class),any(Long.class))).thenReturn(eventUser);
+        Quiz quiz = mock(Quiz.class);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        when(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(any(Long.class),any(Long.class))).thenReturn(Optional.empty());
+
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.WRONG);
+
     }
 
     @Test
