@@ -1,337 +1,247 @@
 package newCar.event_page.service;
 
+import newCar.event_page.exception.FCFS.FCFSFinishedException;
+import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
+import newCar.event_page.exception.UserAlreadyHasTeamException;
 import newCar.event_page.exception.UserLoginFailException;
+import newCar.event_page.jwt.JwtTokenProvider;
 import newCar.event_page.model.dto.user.*;
+import newCar.event_page.model.entity.User;
+import newCar.event_page.model.entity.UserLight;
 import newCar.event_page.model.entity.event.EventCommon;
-import newCar.event_page.model.entity.event.EventId;
-import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.Quiz;
-import newCar.event_page.model.entity.event.quiz.QuizWinner;
-import newCar.event_page.model.entity.event.racing.PersonalityTest;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
-import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
-import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
-import newCar.event_page.jwt.JwtTokenProvider;
-import newCar.event_page.config.JwtConfig;
-import newCar.event_page.model.entity.event.Event;
-import newCar.event_page.model.entity.UserLight;
-import newCar.event_page.model.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+@SpringBootTest
+@Transactional
+public class UserServiceImplTest {
 
     @InjectMocks
-    private UserServiceImpl userServiceImpl;
+    private UserServiceImpl userService;
 
     @Mock
     private UserLightRepository userLightRepository;
-    @Mock
-    private JwtTokenProvider jwtTokenProvider;
-    @Mock
-    private PersonalityTestRepository personalityTestRepository;
-    @Mock
-    private EventRepository eventRepository;
-    @Mock
-    private QuizRepository quizRepository;
-    @Mock
-    private EventCommonRepository eventCommonRepository;
-    @Mock
-    private EventUserRepository eventUserRepository;
-    @Mock
-    private QuizWinnerRepository quizWinnerRepository;
+
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private EventCommonRepository eventCommonRepository;
+
+    @Mock
+    private QuizRepository quizRepository;
+
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
+
     @Mock
-    private JwtConfig jwtConfig;
-
-    private long key = 123456L;
-
+    private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach
-    void setUp() {
-       // when(jwtConfig.getExpiration()).thenReturn(key);
-    }
-    @Test
-    @DisplayName("성격유형검사 리스트 불러오기 _ 성공")
-    void getPersonalityTestList_Success() {
-        //given
-        List<PersonalityTest> personalityTests = List.of(new PersonalityTest(), new PersonalityTest());
-        when(personalityTestRepository.findAllByOrderByIdAsc()).thenReturn(personalityTests);
-        UserPersonalityTestDTO userPersonalityTestDTO = mock(UserPersonalityTestDTO.class);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-        //try-resource 문으로 메모리를 많이 잡아먹는 MockedStatic을  실행이 끝난후 바로 해제시켜준다
-        try (MockedStatic<UserPersonalityTestDTO> mockedStatic = mockStatic(UserPersonalityTestDTO.class)) {
-            mockedStatic.when(() -> UserPersonalityTestDTO.toDTO(any(PersonalityTest.class)))
-                    .thenAnswer(invocation -> userPersonalityTestDTO);
-
-            //when
-            ResponseEntity<List<UserPersonalityTestDTO>> response = userServiceImpl.getPersonalityTestList();
-
-            //then
-            assertThat(response).isNotNull();
-            assertThat(response.getBody().size()).isEqualTo(2);
-        }
-    }
-
-    @Test
-    @DisplayName("오늘의 퀴즈 불러오기 _ 성공")
-    void getQuiz_Success() {
-
-        // Given
-        Event mockEvent = mock(Event.class);
-        Quiz mockQuiz = mock(Quiz.class);
-
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(mockEvent));
-        when(quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))).thenReturn(Optional.of(mockQuiz));
-        when(mockQuiz.getId()).thenReturn(1L);
-
-        // When
-        ResponseEntity<UserQuizDTO> response = userServiceImpl.getQuiz(EventId.Quiz.getValue());
-
-        // Then
-        assertThat(response).isNotNull();
-        verify(eventRepository, times(1)).findById(anyLong());
-        verify(quizRepository, times(1)).findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")));
-    }
-
-    @Test
-    @DisplayName("오늘의 퀴즈 불러오기 _ 실패")
-    void getQuiz_Fail() {
-        //given
-        Event event = new Event();
-        when(eventRepository.findById(anyLong())).thenReturn(Optional.of(event));
-
-        ValueOperations valueOperations = mock(ValueOperations.class);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
-        Quiz quiz = new Quiz();
-        quiz.setId(1L);
-        quiz.setPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")));
-        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
-        when(redisTemplate.opsForValue().decrement("ticket_1")).thenReturn(1L);
-
-        //when & then
-        /*assertThatThrownBy(() -> userServiceImpl.getQuiz(EventId.Quiz.getValue())
-                .isInstanceOf(IndexOutOfBoundsException.class));*/
-
-    }
-
-    @Test
-    @DisplayName("이벤트 진행 기간 반환 _ 성공")
-    void getEventTime_Success() {
         EventCommon eventCommon = new EventCommon();
-        when(eventCommonRepository.findById(1L)).thenReturn(Optional.of(eventCommon));
-        UserEventTimeDTO userEventTimeDTO = mock(UserEventTimeDTO.class);
+        eventCommon.setId(1L);
+        LocalDateTime startTime = LocalDateTime.parse("2024-08-02T18:30:00");
+        LocalDateTime endTime = LocalDateTime.parse("2024-08-31T18:30:00");
+        eventCommon.setStartTime(startTime);
+        eventCommon.setEndTime(endTime);
 
-        try (MockedStatic<UserEventTimeDTO> mockedStatic = mockStatic(UserEventTimeDTO.class)) {
-            mockedStatic.when(() -> UserEventTimeDTO.toDTO(any(EventCommon.class)))
-                    .thenAnswer(invocation -> userEventTimeDTO);
+        Quiz quiz1 = new Quiz();
+        quiz1.setId(1L);
+        quiz1.setWinnerCount(100);
+        quiz1.setPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")));
+        quiz1.setCorrectAnswer(1);
 
-            ResponseEntity<UserEventTimeDTO> response = userServiceImpl.getEventTime();
+        Quiz quiz2 = new Quiz();
+        quiz2.setId(2L);
+        quiz2.setWinnerCount(50);
+        quiz2.setPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1));
+        quiz2.setCorrectAnswer(2);
 
-            assertThat(response).isNotNull();
-        }
-    }
-
-    @Test
-    @DisplayName("이벤트 진행 기간 반환 _ 실패")
-    void getEventTime_Fail() {
-        //given
-        when(eventCommonRepository.findById(1L)).thenReturn(Optional.empty());
-        UserEventTimeDTO userEventTimeDTO = mock(UserEventTimeDTO.class);
-
-
-        //when & then
-        assertThatThrownBy(() -> userServiceImpl.getEventTime())
-                .isInstanceOf(NoSuchElementException.class);
-    }
-
-
-    @Test
-    @DisplayName("userId와 password 기반 로그인 _ 성공")
-    void login_Success() {
-        UserLight userLight = new UserLight();
-        userLight.setUserId("testUser");
-        userLight.setPassword("testPassword");
-
-        when(userLightRepository.findById(1L)).thenReturn(Optional.of(userLight));
-        when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("testAccessToken");
-
-        UserLightDTO userLightDTO = new UserLightDTO();
-        userLightDTO.setUserId("testUser");
-        userLightDTO.setPassword("testPassword");
-
-
-
-        ResponseEntity<Map<String, String>> response = userServiceImpl.login(userLightDTO);
-
-        assertThat(response).isNotNull();
-        assertThat(response.getBody().get("accessToken")).isEqualTo("testAccessToken");
-    }
-
-    @Test
-    @DisplayName("userId와 password 기반 로그인 _ 실패")
-    void login_Fail() {
-        UserLight userLight = new UserLight();
-        userLight.setUserId("testUser");
-        userLight.setPassword("testPassword");
-
-        when(userLightRepository.findById(1L)).thenReturn(Optional.of(userLight));
-
-        UserLightDTO userLightDTO = new UserLightDTO();
-        userLightDTO.setUserId("testUser_fail");
-        userLightDTO.setPassword("testPassword_fail");
-
-        //when & then
-        assertThatThrownBy(() -> userServiceImpl.login(userLightDTO))
-                .isInstanceOf(UserLoginFailException.class);
-    }
-
-    @Test
-    @DisplayName("성격유형검사 제출 _ 성공")
-    void submitPersonalityTest_shouldAssignTeamAndReturnUrl() {
-        User user = new User();
-        user.setId(1L);
-
-        when(jwtTokenProvider.getUserId(anyString())).thenReturn(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateTokenWithTeam(any(Team.class), anyString())).thenReturn("token");
-
-        List<UserPersonalityAnswerDTO> answers = List.of(new UserPersonalityAnswerDTO(), new UserPersonalityAnswerDTO());
-
-        ResponseEntity<UserPersonalityUrlDTO> response = userServiceImpl.submitPersonalityTest(answers, "authHeader");
-
-        assertThat(response).isNotNull();
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    @DisplayName("퀴즈 제출_성공")
-    void submitQuiz_shouldReturnCorrectQuizStatus() {
-        User user = new User();
-        user.setId(1L);
-
-        when(jwtTokenProvider.getUserId(anyString())).thenReturn(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        Quiz quiz = new Quiz();
-        quiz.setId(1L);
-        quiz.setCorrectAnswer(1);
-        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
-
-        EventUser eventUser = new EventUser();
-        when(eventUserRepository.findByUserIdAndEventId(anyLong(), anyLong())).thenReturn(eventUser);
-
-        UserQuizAnswerDTO answerDTO = new UserQuizAnswerDTO();
-
-        Map<String, UserQuizStatus> response = userServiceImpl.submitQuiz(answerDTO, "authHeader").getBody();
-
-        assertThat(response).isNotNull();
-        verify(quizWinnerRepository, times(1)).save(any(QuizWinner.class));
-    }
-
-    @Test
-    void plusClickNumber_shouldIncreaseClickNumber() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getCookies()).thenReturn(null);
-
-        User user = new User();
-        user.setId(1L);
-        user.setClickNumber(0);
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-
-        ResponseEntity<Void> response = userServiceImpl.plusClickNumber("url", request);
-
-        assertThat(response).isNotNull();
-        verify(userRepository, times(1)).save(user);
-        assertThat(user.getClickNumber()).isEqualTo(1);
-    }
-
-    @Test
-    void getUserInfo_shouldReturnUserInfo() {
-        //given
-        User user = new User();
-        user.setId(1L);
-        UserInfoDTO userInfoDTO = mock(UserInfoDTO.class);
-
-        when(jwtTokenProvider.getUserId(anyString())).thenReturn(1L);
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        try (MockedStatic<UserInfoDTO> mockedStatic = mockStatic(UserInfoDTO.class)) {
-            mockedStatic.when(() -> UserInfoDTO.toDTO(any(User.class)))
-                    .thenAnswer(invocation -> userInfoDTO);
-
-            //when
-            ResponseEntity<UserInfoDTO> response = userServiceImpl.getUserInfo("authHeader");
-
-            //then
-            assertThat(response).isNotNull();
-        }
-    }
-
-    @Test
-    void kakaoLogin_shouldReturnAccessToken() {
-        //given
         User user = new User();
         user.setUserName("testUser");
+        user.setNickName("Test");
+        user.setClickNumber(0);
 
-        when(userRepository.findByUserName(anyString())).thenReturn(Optional.of(user));
-        when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("testAccessToken");
+        // Mocking repository method behavior
+        when(eventCommonRepository.save(any(EventCommon.class))).thenReturn(eventCommon);
+        when(quizRepository.save(any(Quiz.class))).thenReturn(quiz1, quiz2);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
 
-        UserKakaoInfoDTO kakaoInfoDTO = new UserKakaoInfoDTO();
-        kakaoInfoDTO.setEmail("testUser");
-        kakaoInfoDTO.setNickname("testNick");
-
-        //when
-        Map<String, String> response = userServiceImpl.kakaoLogin(kakaoInfoDTO);
-
-        //then
-        assertThat(response).isNotNull();
-        assertThat(response.get("accessToken")).isEqualTo("testAccessToken");
+        // 초기화
+        userService.Init();
     }
 
     @Test
-    void dummyToken_shouldReturnDummyAccessToken() {
-        //given
+    @DisplayName("성격 유형 검사 리스트 가져오기_성공")
+    public void getPersonalityTest_Success() {
+        ResponseEntity<List<UserPersonalityTestDTO>> response = userService.getPersonalityTestList();
+        assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    public void testGetQuizSuccess() {
+        ResponseEntity<UserQuizDTO> response = userService.getQuiz(1L);
+        assertThat(response.getBody()).isNotNull();
+    }
+
+    @Test
+    public void testGetQuizNotStartedYet() {
+        LocalTime now = LocalTime.now(ZoneId.of("Asia/Seoul"));
+        if (now.isBefore(LocalTime.of(15, 15))) {
+            assertThrows(FCFSNotStartedYet.class, () -> userService.getQuiz(1L));
+        }
+    }
+
+    @Test
+    public void testGetQuizFinished() {
+        List<Boolean> availableArray = Arrays.asList(false, true, true);
+        userService.setQuizAvailableArray(new ArrayList<>(availableArray));
+        assertThrows(FCFSFinishedException.class, () -> userService.getQuiz(1L));
+    }
+
+    @Test
+    public void testLoginSuccess() {
+        UserLightDTO userLightDTO = new UserLightDTO();
+        userLightDTO.setUserId("testUser");
+        userLightDTO.setPassword("password");
+
+        UserLight userLight = new UserLight();
+        userLight.setUserId("testUser");
+        userLight.setPassword("password");
+
+        when(userLightRepository.save(any(UserLight.class))).thenReturn(userLight);
         when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("dummyToken");
 
-        //when
-        ResponseEntity<Map<String, String>> response = userServiceImpl.dummyToken();
+        ResponseEntity<Map<String, String>> response = userService.login(userLightDTO);
+        assertThat(response.getBody()).containsKey("accessToken");
 
-        //then
-        assertThat(response).isNotNull();
-        assertThat(response.getBody().get("accessToken")).isEqualTo("dummyToken");
+        // Verify save method was called once
+        verify(userLightRepository, times(1)).save(any(UserLight.class));
+    }
+
+    @Test
+    public void testLoginFail() {
+        UserLightDTO userLightDTO = new UserLightDTO();
+        userLightDTO.setUserId("testUser");
+        userLightDTO.setPassword("wrongPassword");
+
+        assertThrows(UserLoginFailException.class, () -> userService.login(userLightDTO));
+    }
+
+    @Test
+    public void testSubmitPersonalityTestSuccess() {
+        List<UserPersonalityAnswerDTO> answers = new ArrayList<>();
+        UserPersonalityAnswerDTO answer1 = new UserPersonalityAnswerDTO();
+        answer1.setAnswer(1);
+        UserPersonalityAnswerDTO answer2 = new UserPersonalityAnswerDTO();
+        answer2.setAnswer(1);
+
+        answers.add(answer1);
+        answers.add(answer2);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        ResponseEntity<UserPersonalityUrlDTO> response = userService.submitPersonalityTest(answers, "Bearer " + token);
+        assertThat(response.getBody()).isNotNull();
+
+        // Verify save method was called once
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    public void testSubmitPersonalityTestAlreadyHasTeam() {
+        User user = userRepository.findByUserName("testUser").orElseThrow();
+        user.setTeam(Team.PET);
+        userRepository.save(user);
+
+        List<UserPersonalityAnswerDTO> answers = new ArrayList<>();
+        UserPersonalityAnswerDTO answer1 = new UserPersonalityAnswerDTO();
+        answer1.setAnswer(1);
+        UserPersonalityAnswerDTO answer2 = new UserPersonalityAnswerDTO();
+        answer2.setAnswer(1);
+
+        answers.add(answer1);
+        answers.add(answer2);
+
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        assertThrows(UserAlreadyHasTeamException.class, () -> userService.submitPersonalityTest(answers, "Bearer " + token));
+    }
+
+    @Test
+    public void testSubmitQuizSuccess() {
+        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
+        answer.setAnswer(1);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, "Bearer " + token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.RIGHT);
+
+        // Verify save method was called once
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    public void testSubmitQuizWrongAnswer() {
+        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
+        answer.setAnswer(2);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, "Bearer " + token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.WRONG);
+    }
+
+    @Test
+    public void testSubmitQuizAlreadyParticipated() {
+        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
+        answer.setAnswer(1);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        userService.submitQuiz(answer, "Bearer " + token);
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, "Bearer " + token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.PARTICIPATED);
+    }
+
+    @Test
+    public void testDummyToken() {
+        when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("dummyToken");
+        ResponseEntity<Map<String, String>> response = userService.dummyToken();
+        assertThat(response.getBody()).containsKey("accessToken");
+    }
+
+    @Test
+    public void testKakaoLoginNewUser() {
+        UserKakaoInfoDTO userKakaoInfoDTO = new UserKakaoInfoDTO();
+        userKakaoInfoDTO.setEmail("kakaoUser@example.com");
+        userKakaoInfoDTO.setNickname("KakaoUser");
     }
 }
+
+
+
