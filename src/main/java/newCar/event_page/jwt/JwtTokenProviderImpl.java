@@ -140,7 +140,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider{
                 .getBody();
     }
 
-    private byte[] secretKey(){
+    byte[] secretKey(){
         return Decoders.BASE64.decode(jwtConfig.getSecret());
     }//원래는 secret key 값을 바로 바꿔 줄 수 있었으나 그 메소드는 deprecated 되어서
     //디코딩을 해주어야 합니다

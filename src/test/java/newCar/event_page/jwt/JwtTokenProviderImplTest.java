@@ -16,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -48,10 +46,13 @@ class JwtTokenProviderImplTest {
         when(jwtConfig.getSecret()).thenReturn(secretKey);
         when(jwtConfig.getExpiration()).thenReturn(3600000L); // 1 hour in milliseconds
 
+        // Generate a signing key from the secret key
+        key = Keys.hmacShaKeyFor(jwtTokenProvider.secretKey());
     }
 
     @Test
-    void generateAdminToken_shouldReturnToken() {
+    @DisplayName("adminToken 발급_성공")
+    void generateAdminToken_Success() {
         // When
         String token = jwtTokenProvider.generateAdminToken();
 
@@ -59,12 +60,13 @@ class JwtTokenProviderImplTest {
         assertThat(token).isNotNull();
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         assertThat(claims.get("role")).isEqualTo("admin");
-        assertThat(claims.get("userId")).isEqualTo(1L);
+        assertThat(claims.get("userId")).isEqualTo(1);
         assertThat(claims.get("team")).isNull();
     }
 
     @Test
-    void generateUserToken_shouldReturnToken() {
+    @DisplayName("유저 토큰 발급_성공")
+    void generateUserToken_Success() {
         // Given
         User user = mock(User.class);
         when(user.getId()).thenReturn(1L);
@@ -78,12 +80,13 @@ class JwtTokenProviderImplTest {
         assertThat(token).isNotNull();
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
         assertThat(claims.get("role")).isEqualTo("user");
-        assertThat(claims.get("userId")).isEqualTo(1L);
+        assertThat(claims.get("userId")).isEqualTo(1);
         assertThat(claims.get("team")).isEqualTo("PET");
     }
 
     @Test
-    void generateUserToken_shouldThrowException_whenUserNotFound() {
+    @DisplayName("유저 토큰 발급_실패")
+    void generateUserToken_Fail() {
         // Given
         when(userRepository.findByUserName("testUser")).thenReturn(Optional.empty());
 
@@ -93,7 +96,8 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
-    void generateTokenWithTeam_shouldReturnToken() {
+    @DisplayName("성격유형검사 시 팀이 들어있는 토큰을 유저에 발급_성공")
+    void generateTokenWithTeam_Success() {
         // Given
         String token = jwtTokenProvider.generateAdminToken(); // Generate an admin token to get userId
         Team team = Team.TRAVEL;
@@ -105,12 +109,24 @@ class JwtTokenProviderImplTest {
         assertThat(newToken).isNotNull();
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(newToken).getBody();
         assertThat(claims.get("role")).isEqualTo("user");
-        assertThat(claims.get("userId")).isEqualTo(1L);
+        assertThat(claims.get("userId")).isEqualTo(1);
         assertThat(claims.get("team")).isEqualTo("TRAVEL");
     }
 
     @Test
-    void getUserId_shouldReturnUserId() {
+    @DisplayName("성격유형검사 시 팀이 들어있는 토큰을 유저에 발급_실패")
+    void generateTokenWithTeam_Fail() {
+
+        Team team = Team.TRAVEL;
+
+        // Then
+        assertThatThrownBy(()->jwtTokenProvider.generateTokenWithTeam(team,"adsldaslf"))
+                .isInstanceOf(UnverifiedTokenException.class);
+    }
+
+    @Test
+    @DisplayName("토큰에서 userId Get_성공")
+    void getUserId_Success() {
         // Given
         String token = jwtTokenProvider.generateAdminToken();
 
@@ -122,7 +138,8 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
-    void getUserId_shouldThrowException_whenTokenInvalid() {
+    @DisplayName("토큰에서 userId Get _실패")
+    void getUserId_Fail() {
         // Given
         String invalidToken = "invalidToken";
 
@@ -197,7 +214,25 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
-    void getTeam_shouldThrowException_whenTokenInvalid() {
+    @DisplayName("Team default 반환")
+    void getTeam_Null() {
+        // Given
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(1L);
+        when(user.getTeam()).thenReturn(null);
+        when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        // When
+        Team team = jwtTokenProvider.getTeam(token);
+
+        // Then
+        assertThat(team).isEqualTo(Team.PET);
+    }
+
+    @Test
+    @DisplayName("토큰에서 team get_실패")
+    void getTeam_Fail() {
         // Given
         String invalidToken = "invalidToken";
 
@@ -207,6 +242,7 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
+    @DisplayName("토큰 유효성 검사_성공")
     void validateToken_shouldReturnTrue_whenTokenIsValid() {
         // Given
         String token = jwtTokenProvider.generateAdminToken();
@@ -219,6 +255,7 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
+    @DisplayName("토큰 유효성 검사_실패")
     void validateToken_shouldReturnFalse_whenTokenIsInvalid() {
         // Given
         String invalidToken = "invalidToken";
@@ -231,7 +268,8 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
-    void validateAdminToken_shouldReturnTrue_whenTokenIsAdmin() {
+    @DisplayName("admin토큰인지 확인_성공")
+    void validateAdminToken_Success() {
         // Given
         String token = jwtTokenProvider.generateAdminToken();
 
@@ -243,7 +281,8 @@ class JwtTokenProviderImplTest {
     }
 
     @Test
-    void validateAdminToken_shouldReturnFalse_whenTokenIsNotAdmin() {
+    @DisplayName("admin토큰인지 확인_실패")
+    void validateAdminToken_Fail() {
         // Given
         User user = mock(User.class);
         when(user.getId()).thenReturn(1L);
