@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(UserPersonalityTestDTO::toDTO)
                 .toList());
-    }
+    }//실패는 따로 없다. 왜냐하면 없다고 해도 그냥 빈 배열을 돌려주기 때문이다
 
     @Override
     @Transactional(readOnly = true)
