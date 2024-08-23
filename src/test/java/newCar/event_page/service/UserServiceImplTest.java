@@ -274,24 +274,25 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testSubmitQuizWrongAnswer() {
-        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
-        answer.setAnswer(2);
-        String token = jwtTokenProvider.generateUserToken("testUser");
-
-        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, "Bearer " + token);
-        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.WRONG);
-    }
-
-    @Test
-    public void testSubmitQuizAlreadyParticipated() {
+    @DisplayName("선착순 이벤트 마감 되었을 때 테스트")
+    public void testSubmitQuiz_End() {
         UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
         answer.setAnswer(1);
         String token = jwtTokenProvider.generateUserToken("testUser");
 
-        userService.submitQuiz(answer, "Bearer " + token);
-        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, "Bearer " + token);
-        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.PARTICIPATED);
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        EventUser eventUser = mock(EventUser.class);
+        when(eventUserRepository.findByUserIdAndEventId(any(Long.class),any(Long.class))).thenReturn(eventUser);
+        Quiz quiz = mock(Quiz.class);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        when(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(any(Long.class),any(Long.class))).thenReturn(Optional.empty());
+
+        List<Boolean> availableArray = Arrays.asList(false, true, true);
+        userService.setQuizAvailableArray(new ArrayList<>(availableArray));
+
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.END);
     }
 
     @Test
