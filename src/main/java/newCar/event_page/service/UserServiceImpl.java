@@ -362,6 +362,7 @@ public class UserServiceImpl implements UserService {
 
         int quizId = Integer.parseInt(todayQuiz.getId().toString());
 
+        System.out.println("quizId :" + quizId);
         if(!isQuizAvailable.get(quizId-1)){
             map.put("status", UserQuizStatus.END);
             return;
