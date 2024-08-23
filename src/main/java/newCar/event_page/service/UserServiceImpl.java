@@ -5,7 +5,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
-import newCar.event_page.exception.FCFS.FCFSFinishedException;
 import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
 import newCar.event_page.exception.UserAlreadyHasTeamException;
 import newCar.event_page.exception.UserLoginFailException;
@@ -110,9 +109,6 @@ public class UserServiceImpl implements UserService {
             throw new IndexOutOfBoundsException("이벤트 기간이 지났습니다");
         }
 
-        if(!isQuizAvailable.get(todayQuiz.getId().intValue()-1)){
-            throw new FCFSFinishedException("선착순 퀴즈가 마감되었습니다");
-        }//오늘 퀴즈가 마감되었다면
 
         if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(10, 15))){
             throw new FCFSNotStartedYet("퀴즈가 아직 시작되지 않았습니다");
