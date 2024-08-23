@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
         }
 
 
-        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(10, 15))){
+        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(11, 58))){
             throw new FCFSNotStartedYet("퀴즈가 아직 시작되지 않았습니다");
         }//퀴즈가 아직 시작 안되었다면
 
