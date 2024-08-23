@@ -105,9 +105,8 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        if(isQuizAvailable.size()<todayQuiz.getId().intValue()){
-            System.out.println("isQuizAvailable size : " + isQuizAvailable.size());
-            System.out.println("todayQuiz.getId().intValue() : " + todayQuiz.getId().intValue());
+        if(LocalDateTime.now(ZoneId.of("Asia/Seoul"))
+                .isAfter(eventCommonRepository.findById(1L).get().getEndTime())){
             throw new IndexOutOfBoundsException("이벤트 기간이 지났습니다");
         }
 
@@ -363,7 +362,7 @@ public class UserServiceImpl implements UserService {
 
         int quizId = Integer.parseInt(todayQuiz.getId().toString());
 
-        if(!isQuizAvailable.get(quizId)){
+        if(!isQuizAvailable.get(quizId-1)){
             map.put("status", UserQuizStatus.END);
             return;
         }//이미 마감되어 있다면
