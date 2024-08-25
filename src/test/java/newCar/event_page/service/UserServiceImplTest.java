@@ -48,6 +48,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -125,8 +126,8 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("오늘의 퀴즈 가져오기 실패_ 아직 시작 안함")
-    public void testGetQuizNotStartedYet() {
+    @DisplayName("오늘의 퀴즈 가져오기 실패_ 이벤트 기간 지남")
+    public void getQuiz_Fail_IndexOutOfBounds() {
         //gvien
         Event event = mock(Event.class);
         when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
@@ -140,7 +141,7 @@ public class UserServiceImplTest {
 
     @Test
     @DisplayName("선착순 순위권에 못 들었을때")
-    public void testGetQuizFinished() {
+    public void getQuiz_Fail_FCFSFinished() {
         //gvien
         Event event = mock(Event.class);
         when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
@@ -148,10 +149,28 @@ public class UserServiceImplTest {
         when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
         List<Boolean> availableArray = Arrays.asList(false, true, true);
 
-
+        //when & then
         userService.setQuizAvailableArray(new ArrayList<>(availableArray));
         assertThatThrownBy(()->userService.getQuiz(1L))
                 .isInstanceOf(FCFSFinishedException.class);
+    }
+    @Test
+    @DisplayName("오늘의 퀴즈 가져오기 성공")
+    public void getQuiz_Fail_NotStartedYet() {
+
+        //gvien
+        Event event = mock(Event.class);
+        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
+        Quiz quiz = mock(Quiz.class);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        List<Boolean> availableArray = Arrays.asList(true, true, true);
+        userService.setQuizAvailableArray(new ArrayList<>(availableArray));
+
+        //when
+        ResponseEntity<UserQuizDTO> response = userService.getQuiz(EventId.Quiz.getValue());
+
+        //then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -223,15 +242,29 @@ public class UserServiceImplTest {
         answer2.setId(2L);
         answer2.setAnswer(1);
 
-        PersonalityTest personalityTest = mock(PersonalityTest.class);
+        //personalityTest 객체 생성
+        TeamScore choice1Scores = new TeamScore(10, 20, 30, 40);
+        TeamScore choice2Scores = new TeamScore(15, 25, 35, 45);
+
+        PersonalityTest personalityTest = new PersonalityTest();
+        personalityTest.setQuestion("What is your favorite activity?");
+        personalityTest.setChoice1("Walking in the park");
+        personalityTest.setChoice2("Watching a movie");
+        personalityTest.setChoice1Scores(choice1Scores);
+        personalityTest.setChoice2Scores(choice2Scores);
         when(personalityTestRepository.findById(any(Long.class))).thenReturn(Optional.of(personalityTest));
 
         answers.add(answer1);
         answers.add(answer2);
         String token = jwtTokenProvider.generateUserToken("testUser");
 
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        Event event = mock(Event.class);
+        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
+
         //when
-        ResponseEntity<UserPersonalityUrlDTO> response = userService.submitPersonalityTest(answers, "Bearer " + token);
+        ResponseEntity<UserPersonalityUrlDTO> response = userService.submitPersonalityTest(answers, token);
 
         //then
         assertThat(response.getBody()).isNotNull();
@@ -240,23 +273,42 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("유저가 이미 팀이 존재할 때")
     public void testSubmitPersonalityTestAlreadyHasTeam() {
-        User user = userRepository.findByUserName("testUser").orElseThrow();
-        user.setTeam(Team.PET);
-        userRepository.save(user);
 
+        //given
         List<UserPersonalityAnswerDTO> answers = new ArrayList<>();
         UserPersonalityAnswerDTO answer1 = new UserPersonalityAnswerDTO();
+        answer1.setId(1L);
         answer1.setAnswer(1);
         UserPersonalityAnswerDTO answer2 = new UserPersonalityAnswerDTO();
+        answer2.setId(2L);
         answer2.setAnswer(1);
+
+        //personalityTest 객체 생성
+        TeamScore choice1Scores = new TeamScore(10, 20, 30, 40);
+        TeamScore choice2Scores = new TeamScore(15, 25, 35, 45);
+
+        PersonalityTest personalityTest = new PersonalityTest();
+        personalityTest.setQuestion("What is your favorite activity?");
+        personalityTest.setChoice1("Walking in the park");
+        personalityTest.setChoice2("Watching a movie");
+        personalityTest.setChoice1Scores(choice1Scores);
+        personalityTest.setChoice2Scores(choice2Scores);
+        when(personalityTestRepository.findById(any(Long.class))).thenReturn(Optional.of(personalityTest));
 
         answers.add(answer1);
         answers.add(answer2);
-
         String token = jwtTokenProvider.generateUserToken("testUser");
 
-        assertThrows(UserAlreadyHasTeamException.class, () -> userService.submitPersonalityTest(answers, "Bearer " + token));
+        User user = new User();
+        user.setTeam(Team.PET);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        //when & then
+        assertThatThrownBy(()->userService.submitPersonalityTest(answers,token))
+                .isInstanceOf(UserAlreadyHasTeamException.class);
+
     }
 
     @Test
@@ -416,6 +468,7 @@ public class UserServiceImplTest {
     }
 
     @Test
+    @DisplayName("소켓 테스트를 위한 더미토큰 생성")
     public void testDummyToken() {
         when(jwtTokenProvider.generateUserToken(anyString())).thenReturn("dummyToken");
         ResponseEntity<Map<String, String>> response = userService.dummyToken();
@@ -423,11 +476,38 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testKakaoLoginNewUser() {
-        UserKakaoInfoDTO userKakaoInfoDTO = new UserKakaoInfoDTO();
-        userKakaoInfoDTO.setEmail("kakaoUser@example.com");
-        userKakaoInfoDTO.setNickname("KakaoUser");
+    @DisplayName("카카오 로그인 테스트")
+    public void testKakaoLogin(){
+
+        //given
+        User user = mock(User.class);
+        UserKakaoInfoDTO userKakaoInfoDTO = mock(UserKakaoInfoDTO.class);
+
+        //when
+        when(jwtTokenProvider.generateUserToken(any(String.class))).thenReturn("1234");
+        Map<String,String> map = userService.kakaoLogin(userKakaoInfoDTO);
+
+        //then
+        verify(userRepository,times(1)).save(any(User.class));
     }
+
+    @Test
+    @DisplayName("getUserInfo 테스트_성공")
+    public void getUserInfo_Success(){
+        //given
+        when(jwtTokenProvider.getUserId(any(String.class))).thenReturn(1L);
+
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+        //when
+        ResponseEntity<UserInfoDTO> response = userService.getUserInfo("");
+
+        //then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+    }
+
 }
 
 
