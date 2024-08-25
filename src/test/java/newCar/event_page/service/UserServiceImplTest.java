@@ -195,20 +195,45 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testSubmitPersonalityTestSuccess() {
+    @DisplayName("getEventTime()_성공")
+    public void getEventTime_Success(){
+        //given
+        EventCommon eventCommon = mock(EventCommon.class);
+        when(eventCommonRepository.findById(any(Long.class))).thenReturn(Optional.of(eventCommon));
+
+        //when
+        ResponseEntity<UserEventTimeDTO> response = userService.getEventTime();
+
+        //then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("성격유형검사 제출 _성공")
+    public void testSubmitPersonalityTest_Success() {
+
+        //given
         List<UserPersonalityAnswerDTO> answers = new ArrayList<>();
         UserPersonalityAnswerDTO answer1 = new UserPersonalityAnswerDTO();
+        answer1.setId(1L);
         answer1.setAnswer(1);
         UserPersonalityAnswerDTO answer2 = new UserPersonalityAnswerDTO();
+        answer2.setId(2L);
         answer2.setAnswer(1);
+
+        PersonalityTest personalityTest = mock(PersonalityTest.class);
+        when(personalityTestRepository.findById(any(Long.class))).thenReturn(Optional.of(personalityTest));
 
         answers.add(answer1);
         answers.add(answer2);
         String token = jwtTokenProvider.generateUserToken("testUser");
 
+        //when
         ResponseEntity<UserPersonalityUrlDTO> response = userService.submitPersonalityTest(answers, "Bearer " + token);
-        assertThat(response.getBody()).isNotNull();
 
+        //then
+        assertThat(response.getBody()).isNotNull();
         // Verify save method was called once
         verify(userRepository, times(1)).save(any(User.class));
     }
@@ -354,6 +379,24 @@ public class UserServiceImplTest {
         //then
         ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
         assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.RIGHT);
+    }
+
+    @Test
+    @DisplayName("공유링크 클릭수 Get_성공")
+    public void getClickNumber_Success(){
+        //given
+        User user = mock(User.class);
+        when(jwtTokenProvider.getUserId(any(String.class))).thenReturn(1L);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+
+
+        //when
+        ResponseEntity<UserClickNumberDTO> response = userService.getClickNumber("abc");
+
+        //then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+
     }
 
     @Test
