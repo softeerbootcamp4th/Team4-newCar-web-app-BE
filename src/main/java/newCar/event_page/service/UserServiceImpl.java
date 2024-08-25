@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
                 .stream()
                 .map(UserPersonalityTestDTO::toDTO)
                 .toList());
-    }
+    }//실패는 따로 없다. 왜냐하면 없다고 해도 그냥 빈 배열을 돌려주기 때문이다
 
     @Override
     @Transactional(readOnly = true)
@@ -356,7 +356,9 @@ public class UserServiceImpl implements UserService {
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
+
         int quizId = Integer.parseInt(todayQuiz.getId().toString()) -1;
+
 
         if(!isQuizAvailable.get(quizId)){
             map.put("status", UserQuizStatus.END);

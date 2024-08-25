@@ -3,11 +3,13 @@ package newCar.event_page.model.entity.event.racing;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.Setter;
 import newCar.event_page.model.dto.admin.AdminPersonalityTestDTO;
 import newCar.event_page.model.entity.TeamScore;
 
 @Entity
 @Getter
+@Setter
 public class PersonalityTest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
