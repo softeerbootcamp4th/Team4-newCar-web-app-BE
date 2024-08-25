@@ -5,7 +5,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newCar.event_page.config.JwtConfig;
-import newCar.event_page.exception.FCFS.FCFSFinishedException;
 import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
 import newCar.event_page.exception.UserAlreadyHasTeamException;
 import newCar.event_page.exception.UserLoginFailException;
@@ -105,15 +104,13 @@ public class UserServiceImpl implements UserService {
         Quiz todayQuiz = quizRepository.findByPostDate(LocalDate.now(ZoneId.of("Asia/Seoul")))
                 .orElseThrow(() -> new NoSuchElementException("오늘 날짜에 해당하는 퀴즈 이벤트가 존재하지 않습니다."));
 
-        if(isQuizAvailable.size()<=todayQuiz.getId().intValue()){
+        if(LocalDateTime.now(ZoneId.of("Asia/Seoul"))
+                .isAfter(eventCommonRepository.findById(1L).get().getEndTime())){
             throw new IndexOutOfBoundsException("이벤트 기간이 지났습니다");
         }
 
-        if(!isQuizAvailable.get(todayQuiz.getId().intValue())){
-            throw new FCFSFinishedException("선착순 퀴즈가 마감되었습니다");
-        }//오늘 퀴즈가 마감되었다면
 
-        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(15, 15))){
+        if(LocalDateTime.now(ZoneId.of("Asia/Seoul")).toLocalTime().isBefore(LocalTime.of(3, 15))){
             throw new FCFSNotStartedYet("퀴즈가 아직 시작되지 않았습니다");
         }//퀴즈가 아직 시작 안되었다면
 
@@ -359,7 +356,9 @@ public class UserServiceImpl implements UserService {
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
-        int quizId = Integer.parseInt(todayQuiz.getId().toString())-1;
+
+        int quizId = Integer.parseInt(todayQuiz.getId().toString()) -1;
+
 
         if(!isQuizAvailable.get(quizId)){
             map.put("status", UserQuizStatus.END);
