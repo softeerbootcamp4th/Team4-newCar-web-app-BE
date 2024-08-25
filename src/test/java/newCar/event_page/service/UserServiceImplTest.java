@@ -1,8 +1,6 @@
 package newCar.event_page.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import newCar.event_page.exception.FCFS.FCFSFinishedException;
-import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
 import newCar.event_page.exception.UserAlreadyHasTeamException;
 import newCar.event_page.exception.UserLoginFailException;
 import newCar.event_page.jwt.JwtTokenProvider;
@@ -17,39 +15,28 @@ import newCar.event_page.model.entity.event.EventUser;
 import newCar.event_page.model.entity.event.quiz.Quiz;
 import newCar.event_page.model.entity.event.quiz.QuizWinner;
 import newCar.event_page.model.entity.event.racing.PersonalityTest;
-import newCar.event_page.model.entity.event.racing.RacingWinner;
 import newCar.event_page.model.enums.Team;
 import newCar.event_page.model.enums.UserQuizStatus;
 import newCar.event_page.repository.jpa.*;
 import newCar.event_page.repository.jpa.quiz.QuizRepository;
 import newCar.event_page.repository.jpa.quiz.QuizWinnerRepository;
 import newCar.event_page.repository.jpa.racing.PersonalityTestRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class UserServiceImplTest {
@@ -132,31 +119,19 @@ public class UserServiceImplTest {
         Event event = mock(Event.class);
         when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
         Quiz quiz = mock(Quiz.class);
-        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz))
-        ;
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        EventCommon eventCommon = new EventCommon();
+        LocalDateTime dateTime = LocalDateTime.of(2024, 1, 1, 15, 15);
+        eventCommon.setEndTime(dateTime);
+        when(eventCommonRepository.findById(any(Long.class))).thenReturn(Optional.of(eventCommon));
         //when & then
         assertThatThrownBy(() -> userService.getQuiz(EventId.Quiz.getValue()))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
 
     @Test
-    @DisplayName("선착순 순위권에 못 들었을때")
-    public void getQuiz_Fail_FCFSFinished() {
-        //gvien
-        Event event = mock(Event.class);
-        when(eventRepository.findById(any(Long.class))).thenReturn(Optional.of(event));
-        Quiz quiz = mock(Quiz.class);
-        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
-        List<Boolean> availableArray = Arrays.asList(false, true, true);
-
-        //when & then
-        userService.setQuizAvailableArray(new ArrayList<>(availableArray));
-        assertThatThrownBy(()->userService.getQuiz(1L))
-                .isInstanceOf(FCFSFinishedException.class);
-    }
-    @Test
     @DisplayName("오늘의 퀴즈 가져오기 성공")
-    public void getQuiz_Fail_NotStartedYet() {
+    public void getQuiz_Success() {
 
         //gvien
         Event event = mock(Event.class);
@@ -165,6 +140,11 @@ public class UserServiceImplTest {
         when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
         List<Boolean> availableArray = Arrays.asList(true, true, true);
         userService.setQuizAvailableArray(new ArrayList<>(availableArray));
+
+        EventCommon eventCommon = new EventCommon();
+        LocalDateTime dateTime = LocalDateTime.of(2025, 1, 1, 15, 15);
+        eventCommon.setEndTime(dateTime);
+        when(eventCommonRepository.findById(any(Long.class))).thenReturn(Optional.of(eventCommon));
 
         //when
         ResponseEntity<UserQuizDTO> response = userService.getQuiz(EventId.Quiz.getValue());
