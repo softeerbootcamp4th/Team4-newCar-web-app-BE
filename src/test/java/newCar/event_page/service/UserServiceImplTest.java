@@ -33,6 +33,7 @@ import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -284,7 +285,9 @@ public class UserServiceImplTest {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
         EventUser eventUser = mock(EventUser.class);
         when(eventUserRepository.findByUserIdAndEventId(any(Long.class),any(Long.class))).thenReturn(eventUser);
-        Quiz quiz = mock(Quiz.class);
+        Quiz quiz = new Quiz();
+        quiz.setCorrectAnswer(1);
+        quiz.setId(1L);
         when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
         when(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(any(Long.class),any(Long.class))).thenReturn(Optional.empty());
 
@@ -293,6 +296,64 @@ public class UserServiceImplTest {
 
         ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
         assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.END);
+    }
+
+    @Test
+    @DisplayName("선착순 이벤트 해당 유저가 티켓 수 0에 접근할 때")
+    public void testSubmitQuiz_End_Zero() {
+        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
+        answer.setAnswer(1);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        EventUser eventUser = mock(EventUser.class);
+        when(eventUserRepository.findByUserIdAndEventId(any(Long.class),any(Long.class))).thenReturn(eventUser);
+        Quiz quiz = new Quiz();
+        quiz.setCorrectAnswer(1);
+        quiz.setId(1L);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        when(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(any(Long.class),any(Long.class))).thenReturn(Optional.empty());
+
+        List<Boolean> availableArray = Arrays.asList(true, true, true);
+        userService.setQuizAvailableArray(new ArrayList<>(availableArray));
+
+        ValueOperations valueOperations = mock(ValueOperations.class);  // ValueOperations mock 생성
+        // RedisTemplate의 opsForValue() 메서드가 ValueOperations 객체를 반환하도록 설정
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(redisTemplate.opsForValue().decrement(any(String.class))).thenReturn(-1L);
+
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.END);
+    }
+
+    @Test
+    @DisplayName("선착순 퀴즈 풀기 성공")
+    public void testSubmitQuiz_Right() {
+        UserQuizAnswerDTO answer = new UserQuizAnswerDTO();
+        answer.setAnswer(1);
+        String token = jwtTokenProvider.generateUserToken("testUser");
+
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        EventUser eventUser = mock(EventUser.class);
+        when(eventUserRepository.findByUserIdAndEventId(any(Long.class),any(Long.class))).thenReturn(eventUser);
+        Quiz quiz = new Quiz();
+        quiz.setCorrectAnswer(1);
+        quiz.setId(1L);
+        when(quizRepository.findByPostDate(any(LocalDate.class))).thenReturn(Optional.of(quiz));
+        when(quizWinnerRepository.findByQuiz_IdAndEventUser_Id(any(Long.class),any(Long.class))).thenReturn(Optional.empty());
+
+        List<Boolean> availableArray = Arrays.asList(true, true, true);
+        userService.setQuizAvailableArray(new ArrayList<>(availableArray));
+
+        ValueOperations valueOperations = mock(ValueOperations.class);  // ValueOperations mock 생성
+        // RedisTemplate의 opsForValue() 메서드가 ValueOperations 객체를 반환하도록 설정
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+        //then
+        ResponseEntity<Map<String, UserQuizStatus>> response = userService.submitQuiz(answer, token);
+        assertThat(response.getBody().get("status")).isEqualTo(UserQuizStatus.RIGHT);
     }
 
     @Test

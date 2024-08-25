@@ -359,7 +359,7 @@ public class UserServiceImpl implements UserService {
             return;
         }//유저의 답변이 퀴즈 정답과 일치하지 않을 시
 
-        int quizId = Integer.parseInt(todayQuiz.getId().toString());
+        int quizId = Integer.parseInt(todayQuiz.getId().toString())-1;
 
         if(!isQuizAvailable.get(quizId)){
             map.put("status", UserQuizStatus.END);
