@@ -1,5 +1,6 @@
 package newCar.event_page.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import newCar.event_page.exception.FCFS.FCFSFinishedException;
 import newCar.event_page.exception.FCFS.FCFSNotStartedYet;
 import newCar.event_page.exception.UserAlreadyHasTeamException;
@@ -397,6 +398,21 @@ public class UserServiceImplTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
 
+    }
+
+    @Test
+    @DisplayName("plusClikcNumber_성공")
+    public void plusClickNumber_Success(){
+
+        //given
+        User user = mock(User.class);
+        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        //when
+        ResponseEntity<Void> response = userService.plusClickNumber("df", request);
+
+        //then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
